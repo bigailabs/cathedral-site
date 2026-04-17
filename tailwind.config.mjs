@@ -4,16 +4,16 @@ export default {
   theme: {
     extend: {
       colors: {
-        bg: '#0a0a0a',
-        surface: '#0f0f10',
-        border: '#1a1a1c',
-        fg: '#e4e4e7',
-        muted: '#8a8a93',
-        dim: '#52525b',
-        accent: '#0A84FF',
-        accentDim: '#0A84FF33',
-        warn: '#f59e0b',
-        err: '#ef4444',
+        bg: 'var(--bg)',
+        surface: 'var(--surface)',
+        border: 'var(--border)',
+        fg: 'var(--fg)',
+        muted: 'var(--muted)',
+        dim: 'var(--dim)',
+        accent: 'var(--accent)',
+        accentDim: 'var(--accent-dim)',
+        warn: 'var(--warn)',
+        err: 'var(--err)',
       },
       fontFamily: {
         mono: ['JetBrains Mono', 'IBM Plex Mono', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'monospace'],
