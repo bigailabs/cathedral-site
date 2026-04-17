@@ -70,13 +70,23 @@ const openCount = issues.filter((i) => i.state === 'open').length
 <Base title="roadmap · cathedral">
   <div class="max-w-[820px] w-full mx-auto space-y-10 py-4">
     <section>
-      <h1 class="text-[15px] text-fg mb-1">roadmap</h1>
+      <div class="flex items-baseline gap-3 mb-1">
+        <h1 class="text-[15px] text-fg">roadmap</h1>
+        <span class="text-[9px] uppercase tracking-[0.15em] text-warn border border-warn/40 px-1.5 py-0.5">
+          speculative · early draft
+        </span>
+      </div>
       <p class="text-[12px] text-muted leading-relaxed">
         live from <a href="https://github.com/bigailabs/cathedral/issues" class="text-accent hover:underline underline-offset-2">github issues</a>.
         three acts, in order. no private backlog.
       </p>
+      <p class="text-[11.5px] text-dim leading-relaxed mt-2">
+        this is a working draft, not a commitment. scope, sequencing, and priorities
+        will change as we learn. items can be dropped, split, or rewritten without notice.
+        treat dates as aspirational and the act structure as the current best guess.
+      </p>
       {total > 0 && (
-        <p class="text-[11px] text-dim mt-2 tabular-nums">
+        <p class="text-[11px] text-dim mt-3 tabular-nums">
           {openCount} open · {total - openCount} closed · {total} total
         </p>
       )}
