@@ -114,7 +114,8 @@ import RoseWindow from '../components/RoseWindow.astro'
     </section>
   </div>
 
-  <script define:vars={{ API_BASE: 'https://api.polaris.computer' }}>
+  <script is:inline>
+    const API_BASE = 'https://api.polaris.computer'
     const POLL_MS = 10000
 
     function abbrev(s) {
