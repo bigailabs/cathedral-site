@@ -1,0 +1,57 @@
+---
+interface Props {
+  title?: string
+}
+
+const { title = 'cathedral' } = Astro.props
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <title>{title}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  </head>
+  <body class="bg-bg text-fg font-mono text-[13px] leading-[1.6] selection:bg-accent/30 antialiased">
+    <div class="mx-auto max-w-[1180px] min-h-screen flex flex-col px-5 py-5">
+      <header class="flex items-center gap-6 text-[11px] text-muted mb-5">
+        <a href="/" class="text-fg hover:text-accent transition-colors tracking-[0.1em] uppercase">cathedral</a>
+        <span class="text-dim">·</span>
+        <a href="/mine" class="hover:text-fg transition-colors">mine</a>
+        <a href="https://github.com/bigailabs/cathedral" class="hover:text-fg transition-colors">github</a>
+        <span class="flex-1"></span>
+        <span class="text-dim">sn39 · finney</span>
+      </header>
+      <main class="flex-1 flex flex-col">
+        <slot />
+      </main>
+      <footer class="mt-8 pt-3 text-[10px] text-dim flex items-center gap-3">
+        <span>cathedral.computer</span>
+        <span class="text-border">·</span>
+        <a href="https://github.com/bigailabs/cathedral" class="hover:text-muted transition-colors">source</a>
+        <a href="https://github.com/bigailabs/cathedral/blob/main/docs/policy.md" class="hover:text-muted transition-colors">policy</a>
+        <span class="flex-1"></span>
+        <span>operated by <a href="https://polaris.computer" class="hover:text-muted transition-colors underline decoration-dim underline-offset-2 decoration-[0.5px]">polaris</a></span>
+      </footer>
+    </div>
+    <style is:global>
+      :root { color-scheme: dark; }
+      html, body { background: #0a0a0a; }
+      * { box-sizing: border-box; }
+      a { text-decoration: none; }
+      /* Font-feature tuning for mono */
+      body { font-feature-settings: 'calt' 1, 'ss02' 1, 'zero' 1; }
+      /* Thin scrollbars that blend */
+      ::-webkit-scrollbar { width: 6px; height: 6px; }
+      ::-webkit-scrollbar-track { background: transparent; }
+      ::-webkit-scrollbar-thumb { background: #1a1a1c; border-radius: 3px; }
+      ::-webkit-scrollbar-thumb:hover { background: #2a2a2c; }
+    </style>
+  </body>
+</html>

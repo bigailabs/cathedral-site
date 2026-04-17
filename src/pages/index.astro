@@ -1,0 +1,292 @@
+---
+import Base from '../layouts/Base.astro'
+import LogStream from '../components/LogStream.astro'
+---
+
+<Base title="cathedral">
+  <!-- status strip -->
+  <div class="flex flex-wrap items-center gap-x-6 gap-y-1 text-[11px] text-muted mb-4">
+    <span>
+      <span class="text-dim">validator</span>
+      <span class="ml-1.5 text-fg" data-val="validator-hotkey">5DnvAg…ThWPb</span>
+      <span class="ml-2 text-dim">uid</span>
+      <span class="ml-1 text-fg" data-val="validator-uid">123</span>
+    </span>
+    <span>
+      <span class="text-dim">miner</span>
+      <span class="ml-1.5 text-fg" data-val="miner-hotkey">5FvW8n…Ub9k</span>
+      <span class="ml-2 text-dim">uid</span>
+      <span class="ml-1 text-fg" data-val="miner-uid">115</span>
+    </span>
+    <span>
+      <span class="text-dim">block</span>
+      <span class="ml-1.5 text-fg tabular-nums" data-val="block">—</span>
+    </span>
+    <span>
+      <span class="text-dim">stake</span>
+      <span class="ml-1.5 text-fg tabular-nums" data-val="stake">131.82α</span>
+    </span>
+    <span class="text-dim" data-val="permit-note">permit pending · top 14 by α</span>
+  </div>
+
+  <!-- the two log panes, side-by-side on md+ -->
+  <div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-3 min-h-0">
+    <LogStream id="validator" label="validator" host="65.109.75.36" />
+    <LogStream id="miner" label="miner" host="65.109.75.36" />
+  </div>
+</Base>
+
+<script>
+  // ---------------------------------------------------------------------------
+  // Config
+  // ---------------------------------------------------------------------------
+  const API_BASE = 'https://api.polaris.computer'
+  const ENDPOINTS = {
+    validator: `${API_BASE}/api/substrate/validator/logs`,
+    miner: `${API_BASE}/api/substrate/miner/logs`,
+    state: `${API_BASE}/api/substrate/state`,
+  }
+  const POLL_MS = 4000
+  const STATE_POLL_MS = 10000
+  const MAX_LINES_PER_PANE = 500
+  const PAIR_WINDOW_SEC = 8
+
+  // ---------------------------------------------------------------------------
+  // Pairing — which log events correlate across streams
+  // ---------------------------------------------------------------------------
+  const EVENT_PATTERNS = [
+    { id: 'registration', side: 'validator', re: /Accepted miner registration via RegisterBid/ },
+    { id: 'registration', side: 'miner', re: /Successfully registered with validator/ },
+    { id: 'verification', side: 'validator', re: /\[EVAL_FLOW\] SSH connection test successful/ },
+    { id: 'verification', side: 'validator', re: /SSH GPU discovery completed/ },
+    { id: 'verification', side: 'validator', re: /Node verification result successfully stored/ },
+    { id: 'health', side: 'miner', re: /Starting lifecycle loop|health_check/ },
+    { id: 'ssh-deploy', side: 'miner', re: /Successfully set exclusive access for validator|Deployed SSH keys for validator/ },
+    { id: 'ssh-deploy', side: 'validator', re: /SSH (?:key|connection).*registered/i },
+    { id: 'weight-parked', side: 'validator', re: /Invalid Transaction \(1010\)/ },
+  ]
+
+  type Line = {
+    ts: string | null
+    tsEpoch: number | null
+    level: string
+    target: string
+    message: string
+    eventId?: string
+    key: string
+  }
+
+  function classify(side: 'validator' | 'miner', message: string): string | undefined {
+    for (const p of EVENT_PATTERNS) {
+      if (p.side === side && p.re.test(message)) return p.id
+    }
+    return undefined
+  }
+
+  function parseTsEpoch(ts: string | null): number | null {
+    if (!ts) return null
+    // Incoming format e.g. 2026-04-17T03:47:15.123Z
+    const d = new Date(ts)
+    return isFinite(d.getTime()) ? d.getTime() / 1000 : null
+  }
+
+  function lineKey(ts: string | null, target: string, message: string): string {
+    return `${ts ?? ''}|${target}|${message}`.slice(0, 200)
+  }
+
+  // ---------------------------------------------------------------------------
+  // Render
+  // ---------------------------------------------------------------------------
+  const state = {
+    validator: { lines: [] as Line[], el: null as HTMLElement | null },
+    miner: { lines: [] as Line[], el: null as HTMLElement | null },
+    pairs: new Map<string, number>(), // lineKey -> timestamp pair was made
+  }
+
+  function levelClass(level: string): string {
+    switch (level) {
+      case 'ERROR': return 'text-err'
+      case 'WARN': return 'text-warn'
+      case 'DEBUG':
+      case 'TRACE': return 'text-dim'
+      default: return 'text-muted'
+    }
+  }
+
+  function renderLine(line: Line): HTMLElement {
+    const row = document.createElement('div')
+    row.className = 'group flex gap-2 px-1 -mx-1 rounded-sm transition-colors duration-500'
+    row.dataset.lineKey = line.key
+    if (line.eventId) row.dataset.eventId = line.eventId
+
+    const timeShort = line.ts ? line.ts.slice(11, 19) : '        '
+    const targetShort = line.target ? line.target.split('::').slice(-1)[0].slice(0, 18) : ''
+
+    const ts = document.createElement('span')
+    ts.className = 'text-dim shrink-0 tabular-nums'
+    ts.textContent = timeShort
+    row.appendChild(ts)
+
+    const lvl = document.createElement('span')
+    lvl.className = `shrink-0 w-10 ${levelClass(line.level)}`
+    lvl.textContent = line.level
+    row.appendChild(lvl)
+
+    const tgt = document.createElement('span')
+    tgt.className = 'text-dim shrink-0 w-[140px] truncate hidden sm:inline'
+    tgt.textContent = targetShort
+    tgt.title = line.target
+    row.appendChild(tgt)
+
+    const msg = document.createElement('span')
+    msg.className = 'text-fg break-words flex-1 min-w-0'
+    msg.textContent = line.message
+    row.appendChild(msg)
+
+    return row
+  }
+
+  function renderAll(side: 'validator' | 'miner') {
+    const s = state[side]
+    if (!s.el) return
+    const body = s.el.querySelector<HTMLElement>('[data-log-body]')
+    if (!body) return
+    const empty = body.querySelector<HTMLElement>('[data-empty]')
+    if (empty) empty.remove()
+
+    // Remember whether user was scrolled to bottom before we append
+    const atBottom = Math.abs(body.scrollHeight - body.scrollTop - body.clientHeight) < 40
+
+    // Diff: append only lines not already rendered
+    const existingKeys = new Set(
+      Array.from(body.querySelectorAll<HTMLElement>('[data-line-key]')).map(el => el.dataset.lineKey!),
+    )
+    for (const line of s.lines) {
+      if (existingKeys.has(line.key)) continue
+      const el = renderLine(line)
+      body.appendChild(el)
+    }
+
+    // Trim oldest if over cap
+    while (body.children.length > MAX_LINES_PER_PANE) {
+      body.firstElementChild?.remove()
+    }
+
+    if (atBottom) body.scrollTop = body.scrollHeight
+  }
+
+  function applyPairHighlights() {
+    // Build index by eventId for each side
+    const byEvent: Record<string, { validator: Line[]; miner: Line[] }> = {}
+    for (const side of ['validator', 'miner'] as const) {
+      for (const line of state[side].lines) {
+        if (!line.eventId || line.tsEpoch == null) continue
+        if (!byEvent[line.eventId]) byEvent[line.eventId] = { validator: [], miner: [] }
+        byEvent[line.eventId][side].push(line)
+      }
+    }
+    // For each event, find pairs within PAIR_WINDOW_SEC
+    const pairedKeys = new Set<string>()
+    for (const { validator, miner } of Object.values(byEvent)) {
+      for (const v of validator) {
+        for (const m of miner) {
+          if (Math.abs((v.tsEpoch ?? 0) - (m.tsEpoch ?? 0)) <= PAIR_WINDOW_SEC) {
+            pairedKeys.add(v.key)
+            pairedKeys.add(m.key)
+          }
+        }
+      }
+    }
+    // Apply DOM class to paired rows; un-apply where not paired
+    for (const side of ['validator', 'miner'] as const) {
+      const s = state[side]
+      if (!s.el) continue
+      const body = s.el.querySelector<HTMLElement>('[data-log-body]')
+      if (!body) continue
+      for (const row of body.querySelectorAll<HTMLElement>('[data-line-key]')) {
+        if (pairedKeys.has(row.dataset.lineKey!)) {
+          if (!row.classList.contains('bg-accentDim')) {
+            row.classList.add('bg-accent/10', 'border-l-2', 'border-accent', 'pl-2', '-ml-2')
+          }
+        }
+      }
+    }
+  }
+
+  async function fetchLogs(side: 'validator' | 'miner') {
+    try {
+      const r = await fetch(ENDPOINTS[side], { cache: 'no-store' })
+      if (!r.ok) throw new Error(`HTTP ${r.status}`)
+      const data = await r.json()
+      const lines: any[] = Array.isArray(data?.lines) ? data.lines : []
+      state[side].lines = lines.map((l) => {
+        const message = typeof l?.message === 'string' ? l.message : ''
+        const ts = typeof l?.timestamp === 'string' ? l.timestamp : null
+        const target = typeof l?.target === 'string' ? l.target : ''
+        const level = typeof l?.level === 'string' ? l.level : 'INFO'
+        return {
+          ts,
+          tsEpoch: parseTsEpoch(ts),
+          level,
+          target,
+          message,
+          eventId: classify(side, message),
+          key: lineKey(ts, target, message),
+        } as Line
+      })
+      renderAll(side)
+      setLive(side, true)
+    } catch (e) {
+      setLive(side, false, e instanceof Error ? e.message : String(e))
+    }
+  }
+
+  function setLive(side: 'validator' | 'miner', live: boolean, err?: string) {
+    const root = state[side].el
+    if (!root) return
+    const indicator = root.querySelector<HTMLElement>('[data-live-indicator]')
+    const status = root.querySelector<HTMLElement>('[data-status]')
+    if (indicator) {
+      const dot = indicator.querySelector<HTMLElement>('span:last-child')
+      if (dot) dot.className = `relative inline-flex rounded-full h-1.5 w-1.5 ${live ? 'bg-accent' : 'bg-err'}`
+    }
+    if (status) status.textContent = live ? 'live' : (err ? `offline · ${err.slice(0, 40)}` : 'offline')
+  }
+
+  async function fetchState() {
+    try {
+      const r = await fetch(ENDPOINTS.state, { cache: 'no-store' })
+      if (!r.ok) return
+      const data = await r.json()
+      const blockEl = document.querySelector<HTMLElement>('[data-val="block"]')
+      if (blockEl) {
+        const block = data?.summary?.block
+        if (typeof block === 'number') blockEl.textContent = block.toLocaleString()
+      }
+    } catch { /* noop */ }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Boot
+  // ---------------------------------------------------------------------------
+  function init() {
+    state.validator.el = document.querySelector<HTMLElement>('[data-stream="validator"]')
+    state.miner.el = document.querySelector<HTMLElement>('[data-stream="miner"]')
+
+    const tick = async () => {
+      await Promise.all([fetchLogs('validator'), fetchLogs('miner')])
+      applyPairHighlights()
+    }
+    tick()
+    setInterval(tick, POLL_MS)
+
+    fetchState()
+    setInterval(fetchState, STATE_POLL_MS)
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init)
+  } else {
+    init()
+  }
+</script>

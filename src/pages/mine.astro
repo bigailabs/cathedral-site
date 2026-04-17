@@ -1,0 +1,107 @@
+---
+import Base from '../layouts/Base.astro'
+
+const minerToml = `bid_grpc_port = 50052
+
+[bittensor]
+wallet_name    = "your_wallet"
+hotkey_name    = "your_hotkey"
+network        = "finney"
+netuid         = 39
+chain_endpoint = "wss://entrypoint-finney.opentensor.ai:443"
+axon_port      = 50051
+
+[database]
+url = "sqlite:/opt/cathedral/data/miner.db?mode=rwc"
+
+[node_management]
+nodes = [
+  { host = "<your.gpu.ip>", port = 22, username = "root", gpu_category = "A100", gpu_count = 1 },
+]
+
+[ssh_session]
+miner_node_key_path   = "/root/.ssh/miner_key"
+default_node_username = "root"
+
+[validator_assignment]
+strategy               = "fixed_assignment"
+validator_hotkey       = "5DnvAgAVykQFmgTSwLXTHpzfmi6W32VtV8L1D9yxSmtThWPb"
+grpc_endpoint_override = "http://65.109.75.36:50052"
+
+[bidding.strategy.static.static_prices]
+A100 = 0.50
+`
+---
+
+<Base title="mine · cathedral">
+  <div class="max-w-[720px] w-full mx-auto space-y-8 py-4">
+    <section>
+      <h1 class="text-[15px] text-fg mb-1">mine</h1>
+      <p class="text-[12px] text-muted leading-relaxed">
+        Run a GPU node. Our validator verifies it via SSH. Emissions accrue proportional
+        to verified uptime and rental revenue.
+      </p>
+    </section>
+
+    <section>
+      <h2 class="text-[12px] text-dim uppercase tracking-[0.15em] mb-2">prerequisites</h2>
+      <ul class="text-[12px] text-fg space-y-1.5 list-none">
+        <li><span class="text-accent mr-2">—</span>bittensor hotkey registered on netuid 39</li>
+        <li><span class="text-accent mr-2">—</span>a100 or h100 gpu node, linux, cuda 12.x, docker with nvidia runtime, ssh reachable</li>
+        <li><span class="text-accent mr-2">—</span>a separate cpu-only host for the miner process (any cheap vps)</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2 class="text-[12px] text-dim uppercase tracking-[0.15em] mb-2">validator endpoint</h2>
+      <pre class="bg-surface border border-border p-3 text-[11.5px] overflow-x-auto leading-relaxed"><code class="text-fg">hotkey    5DnvAgAVykQFmgTSwLXTHpzfmi6W32VtV8L1D9yxSmtThWPb
+grpc      http://65.109.75.36:50052
+axon      65.109.75.36:8080</code></pre>
+    </section>
+
+    <section>
+      <h2 class="text-[12px] text-dim uppercase tracking-[0.15em] mb-2">miner.toml</h2>
+      <pre class="bg-surface border border-border p-3 text-[11px] overflow-x-auto leading-[1.6]"><code class="text-fg">{minerToml}</code></pre>
+    </section>
+
+    <section>
+      <h2 class="text-[12px] text-dim uppercase tracking-[0.15em] mb-2">build &amp; run</h2>
+      <pre class="bg-surface border border-border p-3 text-[11.5px] overflow-x-auto leading-relaxed"><code class="text-fg"># on an x86_64 linux box
+apt-get install -y protobuf-compiler pkg-config libssl-dev build-essential
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+source ~/.cargo/env
+
+git clone https://github.com/bigailabs/cathedral.git
+cd cathedral
+cargo build --release --package basilica-miner
+
+./target/release/cathedral-miner --config /path/to/miner.toml</code></pre>
+    </section>
+
+    <section>
+      <h2 class="text-[12px] text-dim uppercase tracking-[0.15em] mb-2">expected logs</h2>
+      <pre class="bg-surface border border-border p-3 text-[11.5px] overflow-x-auto leading-relaxed"><code class="text-muted">INFO  registering nodes with validator   miner_hotkey=5... node_count=1
+INFO  successfully registered             registration_id=reg-... has_ssh_key=true
+INFO  deploying validator ssh key to nodes
+INFO  deployed ssh keys for validator     nodes=1
+INFO  starting lifecycle loop             health_check=60s</code></pre>
+    </section>
+
+    <section>
+      <h2 class="text-[12px] text-dim uppercase tracking-[0.15em] mb-2">verify</h2>
+      <ul class="text-[12px] text-fg space-y-1.5 list-none">
+        <li><span class="text-accent mr-2">—</span>watch the validator side on <a href="/" class="text-accent hover:underline underline-offset-2">the dashboard</a> — next verification cycle runs every ~10 min</li>
+        <li><span class="text-accent mr-2">—</span>your uid appears in the miners table once scored</li>
+        <li><span class="text-accent mr-2">—</span>see <a href="https://github.com/bigailabs/cathedral/blob/main/docs/miner.md" class="text-accent hover:underline underline-offset-2">docs/miner.md</a> for the long form</li>
+      </ul>
+    </section>
+
+    <section class="pt-4 border-t border-border">
+      <p class="text-[11px] text-dim leading-relaxed">
+        weight-setting is paused while we're below the permit stake threshold on sn39.
+        cus accumulate in the ledger now; emissions flow when weights unlock.
+        see <a href="https://github.com/bigailabs/cathedral/blob/main/docs/policy.md" class="text-muted hover:text-fg underline underline-offset-2 decoration-dim">the policy</a>.
+      </p>
+    </section>
+  </div>
+</Base>
