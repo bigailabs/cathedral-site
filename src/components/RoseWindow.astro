@@ -1,0 +1,69 @@
+---
+interface Props {
+  size?: number
+  class?: string
+  /** When true, renders a more open / airy variant. Default: false (denser). */
+  airy?: boolean
+}
+
+const { size = 16, class: className = '', airy = false } = Astro.props
+
+const stroke = airy ? 0.7 : 0.9
+const petals = 8
+const petalR = airy ? 16 : 18
+const innerR = 7
+const outerR = 26
+const cx = 32
+const cy = 32
+
+// Precompute petal circle centers
+const petalCircles: { x: number; y: number }[] = []
+for (let i = 0; i < petals; i++) {
+  const a = (i / petals) * Math.PI * 2 - Math.PI / 2
+  petalCircles.push({
+    x: cx + Math.cos(a) * petalR,
+    y: cy + Math.sin(a) * petalR,
+  })
+}
+
+// Spokes (thin lines from inner ring to outer ring)
+const spokes: { x1: number; y1: number; x2: number; y2: number }[] = []
+for (let i = 0; i < petals * 2; i++) {
+  const a = (i / (petals * 2)) * Math.PI * 2
+  spokes.push({
+    x1: cx + Math.cos(a) * (innerR + 0.5),
+    y1: cy + Math.sin(a) * (innerR + 0.5),
+    x2: cx + Math.cos(a) * (outerR - 0.5),
+    y2: cy + Math.sin(a) * (outerR - 0.5),
+  })
+}
+---
+
+<svg
+  width={size}
+  height={size}
+  viewBox="0 0 64 64"
+  xmlns="http://www.w3.org/2000/svg"
+  fill="none"
+  stroke="currentColor"
+  stroke-width={stroke}
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+  class={className}
+>
+  {/* outer ring */}
+  <circle cx={cx} cy={cy} r={outerR} />
+  {/* inner ring */}
+  <circle cx={cx} cy={cy} r={innerR} />
+  {/* petals arranged around inner ring */}
+  {petalCircles.map((p) => (
+    <circle cx={p.x} cy={p.y} r={petalR / 2.2} opacity={airy ? 0.55 : 0.8} />
+  ))}
+  {/* thin spokes */}
+  {spokes.map((s) => (
+    <line x1={s.x1} y1={s.y1} x2={s.x2} y2={s.y2} opacity={airy ? 0.3 : 0.45} />
+  ))}
+  {/* tiny center dot */}
+  <circle cx={cx} cy={cy} r="1.2" fill="currentColor" stroke="none" />
+</svg>

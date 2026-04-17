@@ -1,5 +1,6 @@
 ---
 import Base from '../layouts/Base.astro'
+import RoseWindow from '../components/RoseWindow.astro'
 
 type Issue = {
   number: number
@@ -95,10 +96,15 @@ const openCount = issues.filter((i) => i.state === 'open').length
       </section>
     )}
 
-    {ACTS.map((act) => {
+    {ACTS.map((act, i) => {
       const items = forAct(act.id)
       return (
         <section>
+          {i > 0 && (
+            <div class="flex justify-center py-2 -mt-4 mb-6 text-dim opacity-40">
+              <RoseWindow size={18} airy={true} />
+            </div>
+          )}
           <h2 class="text-[13px] text-fg mb-2">{act.title}</h2>
           <p class="text-[11.5px] text-muted mb-5 leading-relaxed">{act.blurb}</p>
 

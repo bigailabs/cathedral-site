@@ -1,0 +1,219 @@
+---
+import Base from '../layouts/Base.astro'
+import RoseWindow from '../components/RoseWindow.astro'
+---
+
+<Base title="ledger · cathedral">
+  <div class="max-w-[900px] w-full mx-auto space-y-10 py-4">
+    <section>
+      <div class="flex items-baseline gap-3 mb-1">
+        <h1 class="text-[15px] text-fg">ledger</h1>
+        <span class="text-dim">·</span>
+        <span class="text-[11px] text-dim">a glance, not the logs</span>
+      </div>
+      <p class="text-[12px] text-muted leading-relaxed max-w-[64ch]">
+        what the validator sees right now — block height, permit progress, miners seen,
+        weights state. numbers update live.
+      </p>
+      <p class="text-[11.5px] text-dim mt-2">
+        want the raw tape? <a href="/" class="text-muted hover:text-fg underline underline-offset-2 decoration-dim">see live logs →</a>
+      </p>
+    </section>
+
+    {/* core numbers */}
+    <section class="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div class="border border-border bg-surface p-3">
+        <div class="text-[10px] text-dim uppercase tracking-[0.15em]">block</div>
+        <div class="text-[18px] text-fg tabular-nums mt-1" data-stat="block">—</div>
+        <div class="text-[10px] text-dim mt-0.5">sn39 · finney</div>
+      </div>
+      <div class="border border-border bg-surface p-3">
+        <div class="text-[10px] text-dim uppercase tracking-[0.15em]">miners active</div>
+        <div class="text-[18px] text-fg tabular-nums mt-1" data-stat="active">—</div>
+        <div class="text-[10px] text-dim mt-0.5"><span data-stat="total">—</span> total on subnet</div>
+      </div>
+      <div class="border border-border bg-surface p-3">
+        <div class="text-[10px] text-dim uppercase tracking-[0.15em]">weights</div>
+        <div class="text-[14px] text-warn mt-1" data-stat="weights">parked</div>
+        <div class="text-[10px] text-dim mt-0.5">awaiting permit</div>
+      </div>
+      <div class="border border-border bg-surface p-3">
+        <div class="text-[10px] text-dim uppercase tracking-[0.15em]">our validator</div>
+        <div class="text-[18px] text-fg tabular-nums mt-1">uid <span data-stat="val-uid">123</span></div>
+        <div class="text-[10px] text-dim mt-0.5" data-stat="val-status">online</div>
+      </div>
+    </section>
+
+    {/* permit progress */}
+    <section>
+      <div class="flex items-baseline justify-between gap-4 mb-2">
+        <h2 class="text-[11px] text-dim uppercase tracking-[0.15em]">permit progress</h2>
+        <span class="text-[11px] text-dim tabular-nums" data-stat="permit-pct">—</span>
+      </div>
+      <div class="h-[3px] bg-border overflow-hidden">
+        <div class="h-full bg-warn transition-all duration-700" data-stat="permit-bar" style="width:0%"></div>
+      </div>
+      <p class="text-[11.5px] text-muted mt-2 leading-relaxed">
+        our stake <span class="text-fg tabular-nums" data-stat="our-stake">—</span>α ·
+        threshold <span class="text-fg tabular-nums" data-stat="permit-threshold">—</span>α
+        <span class="text-dim">(14th-highest stake on sn39)</span>
+      </p>
+      <p class="text-[11px] text-dim mt-1 leading-relaxed">
+        once our stake crosses the threshold, the validator's next weight-submission
+        lands on chain and miners we've scored start receiving emissions.
+      </p>
+    </section>
+
+    {/* our miner */}
+    <section>
+      <div class="flex items-baseline justify-between gap-4 mb-3">
+        <h2 class="text-[11px] text-dim uppercase tracking-[0.15em]">our miner</h2>
+        <span class="text-[11px] text-dim">uid 115</span>
+      </div>
+      <div class="border border-border bg-surface p-4 space-y-2">
+        <div class="flex flex-wrap gap-x-8 gap-y-2 text-[12px]">
+          <div>
+            <span class="text-dim">hotkey</span>
+            <span class="text-fg ml-2 tabular-nums" data-stat="miner-hotkey">5FvW8n…Ub9k</span>
+          </div>
+          <div>
+            <span class="text-dim">status</span>
+            <span class="text-accent ml-2" data-stat="miner-status">active</span>
+          </div>
+          <div>
+            <span class="text-dim">last score</span>
+            <span class="text-fg ml-2 tabular-nums" data-stat="miner-score">1.00</span>
+          </div>
+          <div>
+            <span class="text-dim">gpu</span>
+            <span class="text-fg ml-2">A100 · 1×</span>
+          </div>
+        </div>
+        <p class="text-[11px] text-dim leading-relaxed pt-1">
+          scored 1.0 by our validator. cus accrue in the local ledger; emissions flow
+          once the permit unlocks.
+        </p>
+      </div>
+    </section>
+
+    {/* top permit holders — context for where we sit */}
+    <section>
+      <h2 class="text-[11px] text-dim uppercase tracking-[0.15em] mb-3">permit holders on sn39 (top by stake)</h2>
+      <div class="border border-border bg-surface" data-stat="permit-table">
+        <div class="px-4 py-3 text-[11.5px] text-dim">loading…</div>
+      </div>
+      <p class="text-[11px] text-dim mt-2 leading-relaxed">
+        the top 14 by stake receive validator permits and therefore set weights. the
+        bar above tracks our position relative to the lowest-ranked permit holder.
+      </p>
+    </section>
+
+    {/* cathedral mark at the bottom, quiet */}
+    <section class="pt-6 flex justify-center text-dim">
+      <RoseWindow size={32} airy={true} class="opacity-50" />
+    </section>
+  </div>
+
+  <script define:vars={{ API_BASE: 'https://api.polaris.computer' }}>
+    const POLL_MS = 10000
+
+    function abbrev(s) {
+      if (!s || s.length < 10) return s || ''
+      return s.slice(0, 6) + '…' + s.slice(-4)
+    }
+
+    function fmtStake(n) {
+      if (n == null || !isFinite(n)) return '—'
+      if (n >= 1000) return n.toLocaleString(undefined, { maximumFractionDigits: 0 })
+      if (n >= 10) return n.toFixed(1)
+      return n.toFixed(2)
+    }
+
+    async function refresh() {
+      try {
+        const r = await fetch(`${API_BASE}/api/substrate/state`, { cache: 'no-store' })
+        if (!r.ok) return
+        const data = await r.json()
+        const miners = data.miners || []
+        const summary = data.summary || {}
+
+        const byUid = new Map(miners.map((m) => [m.uid, m]))
+        const us = byUid.get(123)
+        const ourMiner = byUid.get(115)
+
+        // Derive permit threshold = 14th-highest stake (a permit "floor").
+        const stakes = miners.map((m) => m.stake || 0).sort((a, b) => b - a)
+        const permitThreshold = stakes[13] || 0
+        const ourStake = us?.stake || 0
+        const pct = permitThreshold > 0
+          ? Math.min(100, (ourStake / permitThreshold) * 100)
+          : 0
+
+        document.querySelector('[data-stat="block"]').textContent =
+          summary.block?.toLocaleString() ?? '—'
+        document.querySelector('[data-stat="active"]').textContent =
+          summary.active_miners?.toLocaleString() ?? '—'
+        document.querySelector('[data-stat="total"]').textContent =
+          summary.total_miners?.toLocaleString() ?? '—'
+        document.querySelector('[data-stat="val-status"]').textContent =
+          us?.status ? us.status.toLowerCase() : 'unknown'
+        document.querySelector('[data-stat="our-stake"]').textContent =
+          fmtStake(ourStake)
+        document.querySelector('[data-stat="permit-threshold"]').textContent =
+          fmtStake(permitThreshold)
+        document.querySelector('[data-stat="permit-pct"]').textContent =
+          pct.toFixed(2) + '%'
+        document.querySelector('[data-stat="permit-bar"]').style.width = pct + '%'
+
+        if (ourMiner) {
+          document.querySelector('[data-stat="miner-hotkey"]').textContent =
+            abbrev(ourMiner.hotkey)
+          document.querySelector('[data-stat="miner-status"]').textContent =
+            ourMiner.status?.toLowerCase() ?? 'unknown'
+          const scoreEl = document.querySelector('[data-stat="miner-score"]')
+          if (scoreEl && (ourMiner.incentive > 0 || ourMiner.trust > 0)) {
+            scoreEl.textContent = (ourMiner.incentive || ourMiner.trust).toFixed(2)
+          }
+        }
+
+        // Permit holders table — top 14 by stake
+        const top = miners
+          .slice()
+          .sort((a, b) => (b.stake || 0) - (a.stake || 0))
+          .slice(0, 14)
+        const tableEl = document.querySelector('[data-stat="permit-table"]')
+        if (tableEl) {
+          const rows = top
+            .map((m, i) => {
+              const isUs = m.uid === 123
+              const pos = (i + 1).toString().padStart(2, '0')
+              const cls = isUs ? 'text-accent' : 'text-fg'
+              return `<div class="flex items-center gap-3 px-4 py-1.5 border-t border-border text-[11.5px] ${isUs ? 'bg-accentDim' : ''}">
+                <span class="text-dim tabular-nums w-6">${pos}</span>
+                <span class="${cls} tabular-nums w-10">uid ${m.uid}</span>
+                <span class="text-muted flex-1 truncate">${abbrev(m.hotkey)}</span>
+                <span class="${cls} tabular-nums">${fmtStake(m.stake)}α</span>
+              </div>`
+            })
+            .join('')
+          // Also show where WE sit if we're not in the top 14
+          const ourRank = stakes.indexOf(ourStake) + 1
+          const ourRow = ourRank > 14
+            ? `<div class="flex items-center gap-3 px-4 py-1.5 border-t border-accent bg-accentDim text-[11.5px]">
+                <span class="text-dim tabular-nums w-6">${ourRank.toString().padStart(2, '0')}</span>
+                <span class="text-accent tabular-nums w-10">uid 123</span>
+                <span class="text-accent flex-1 truncate">${abbrev(us?.hotkey || '')}</span>
+                <span class="text-accent tabular-nums">${fmtStake(ourStake)}α</span>
+              </div>`
+            : ''
+          tableEl.innerHTML = rows + ourRow
+        }
+      } catch (e) {
+        console.warn('ledger refresh failed', e)
+      }
+    }
+
+    refresh()
+    setInterval(refresh, POLL_MS)
+  </script>
+</Base>
