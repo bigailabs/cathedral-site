@@ -36,10 +36,19 @@ A100 = 0.50
 <Base title="mine · cathedral">
   <div class="max-w-[720px] w-full mx-auto space-y-8 py-4">
     <section>
-      <h1 class="text-[15px] text-fg mb-1">mine</h1>
+      <div class="flex items-baseline gap-3 mb-1">
+        <h1 class="text-[15px] text-fg">mine</h1>
+        <span class="text-[9px] uppercase tracking-[0.15em] text-warn border border-warn/40 px-1.5 py-0.5">
+          beta
+        </span>
+      </div>
       <p class="text-[12px] text-muted leading-relaxed">
-        Run a GPU node. Our validator verifies it via SSH. Emissions accrue proportional
-        to verified uptime and rental revenue.
+        run a gpu node. our validator verifies it via ssh. cus accrue in the ledger now;
+        emissions flow once weights unlock.
+      </p>
+      <p class="text-[11.5px] text-dim leading-relaxed mt-2">
+        this is beta software on a live subnet. expect edges. looking to rent compute instead?
+        <a href="https://polaris.computer" class="text-muted hover:text-fg underline underline-offset-2 decoration-dim ml-0.5">polaris.computer</a>.
       </p>
     </section>
 
@@ -102,7 +111,7 @@ INFO  starting lifecycle loop             health_check=60s</code></pre>
         <li><span class="text-warn mr-2">—</span>weights are <span class="text-warn">parked</span> while we're below the sn39 permit stake threshold (~14k α). cus accrue; emissions flow once validator weights unlock</li>
         <li><span class="text-warn mr-2">—</span>binary gpu attestation is <span class="text-warn">disabled</span>. verification runs over ssh via <code class="text-muted">nvidia-smi</code>. spoofable, honor-system for now — will swap in the prover binary when ready</li>
         <li><span class="text-warn mr-2">—</span>only <code class="text-muted">A100</code> and <code class="text-muted">H100</code> are priced today. other gpus can register but bids go untaken</li>
-        <li><span class="text-warn mr-2">—</span>rental marketplace isn't open yet. you can mine, but no paying tenants are routed to your node until act 2 lands</li>
+        <li><span class="text-warn mr-2">—</span>act 2 is about making mining here economically coherent. until it lands, the incentive is pre-emission cus plus the fact that you're helping bootstrap the subnet</li>
       </ul>
     </section>
 
