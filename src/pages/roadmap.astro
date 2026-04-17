@@ -13,42 +13,42 @@ type Issue = {
 const ACTS = [
   {
     id: 'act-1',
-    title: 'act 1 · baseline stability',
-    blurb: 'validator + miner run reliably. stake unlocks weights. security hardening on the rest api.',
+    title: 'act 1 · baseline',
+    blurb: 'get the validator and miner reliable. unlock weights with stake. harden the rest api.',
   },
   {
     id: 'act-2',
-    title: 'act 2 · profitability',
-    blurb: 'close the loop: rented gpus mine other subnets, revenue flows back. agent-safe rentals.',
+    title: 'act 2 · loops',
+    blurb: 'rented gpus start mining other subnets. revenue flows back. rentals become agent-safe.',
   },
   {
     id: 'act-3',
-    title: 'act 3 · ecosystem + flywheel',
-    blurb: 'external miners. subnet scouting. treasury dashboard. compute in, mining out, p&l in the open.',
+    title: 'act 3 · ecosystem',
+    blurb: 'external miners onboard. subnet scouting. a treasury view that shows compute in, mining out.',
   },
 ] as const
 
-async function fetchIssues(): Promise<Issue[]> {
+async function fetchIssues(): Promise<{ issues: Issue[]; ok: boolean }> {
   try {
     const headers: Record<string, string> = {
       'Accept': 'application/vnd.github+json',
       'User-Agent': 'cathedral-site',
     }
-    const token = import.meta.env.GITHUB_TOKEN
+    const token = import.meta.env.GITHUB_TOKEN || process.env.GITHUB_TOKEN
     if (token) headers.Authorization = `Bearer ${token}`
     const r = await fetch(
       'https://api.github.com/repos/bigailabs/cathedral/issues?state=all&per_page=100',
       { headers },
     )
-    if (!r.ok) return []
+    if (!r.ok) return { issues: [], ok: false }
     const data = (await r.json()) as Issue[]
-    return data.filter((i) => !i.pull_request)
+    return { issues: data.filter((i) => !i.pull_request), ok: true }
   } catch {
-    return []
+    return { issues: [], ok: false }
   }
 }
 
-const issues = await fetchIssues()
+const { issues, ok: fetchOk } = await fetchIssues()
 
 function forAct(actId: string): Issue[] {
   return issues
@@ -72,9 +72,8 @@ const openCount = issues.filter((i) => i.state === 'open').length
     <section>
       <h1 class="text-[15px] text-fg mb-1">roadmap</h1>
       <p class="text-[12px] text-muted leading-relaxed">
-        the commitment is the three acts, in order. individual issues are a
-        speculative early draft — scope, sequencing, and priorities will change
-        as we learn. items can be dropped, split, or rewritten.
+        three acts, in rough order. not dated, not promised — just the arc we
+        think the work wants to take. scope and sequencing change as we learn.
       </p>
       <p class="text-[11.5px] text-dim leading-relaxed mt-2">
         live from <a href="https://github.com/bigailabs/cathedral/issues" class="text-muted hover:text-fg underline underline-offset-2 decoration-dim">github issues</a> · no private backlog
@@ -86,11 +85,12 @@ const openCount = issues.filter((i) => i.state === 'open').length
       )}
     </section>
 
-    {total === 0 && (
-      <section>
-        <p class="text-[12px] text-muted">
-          couldn't reach github at build time. see the
-          <a href="https://github.com/bigailabs/cathedral/issues" class="text-accent hover:underline underline-offset-2 ml-1">issue tracker</a>.
+    {!fetchOk && (
+      <section class="border border-border bg-surface px-4 py-3">
+        <p class="text-[12px] text-muted leading-relaxed">
+          github's api rate-limited our build. the list below may be empty or stale.
+          the real source of truth is
+          <a href="https://github.com/bigailabs/cathedral/issues" class="text-fg hover:text-accent underline underline-offset-2 decoration-dim ml-1">the issue tracker</a>.
         </p>
       </section>
     )}
@@ -99,22 +99,21 @@ const openCount = issues.filter((i) => i.state === 'open').length
       const items = forAct(act.id)
       return (
         <section>
-          <div class="flex items-baseline justify-between gap-4 mb-2">
-            <h2 class="text-[13px] text-fg">{act.title}</h2>
-            <span class="text-[9px] uppercase tracking-[0.15em] text-accent border border-accent/40 px-1.5 py-0.5 shrink-0">
-              commitment
-            </span>
-          </div>
-          <p class="text-[11.5px] text-muted mb-4 leading-relaxed">{act.blurb}</p>
+          <h2 class="text-[13px] text-fg mb-2">{act.title}</h2>
+          <p class="text-[11.5px] text-muted mb-5 leading-relaxed">{act.blurb}</p>
 
           <div class="flex items-baseline justify-between gap-4 mb-2">
-            <h3 class="text-[11px] text-dim uppercase tracking-[0.15em]">current slice · draft</h3>
-            <span class="text-[11px] text-dim tabular-nums shrink-0">
-              {items.filter((i) => i.state === 'open').length} open / {items.length}
-            </span>
+            <h3 class="text-[10px] text-dim uppercase tracking-[0.15em]">in the issue tracker</h3>
+            {items.length > 0 && (
+              <span class="text-[11px] text-dim tabular-nums shrink-0">
+                {items.filter((i) => i.state === 'open').length} open · {items.length} total
+              </span>
+            )}
           </div>
           {items.length === 0 ? (
-            <p class="text-[11.5px] text-dim italic">nothing filed yet</p>
+            <p class="text-[11.5px] text-dim italic">
+              {fetchOk ? 'nothing filed yet' : 'see github'}
+            </p>
           ) : (
             <ul class="space-y-0 divide-y divide-border border-t border-b border-border">
               {items.map((i) => {
