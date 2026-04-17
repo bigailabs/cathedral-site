@@ -5,15 +5,19 @@ import LogStream from '../components/LogStream.astro'
 
 <Base title="cathedral" fullHeight={true}>
   <!-- stanza -->
-  <div class="text-[11.5px] text-muted leading-[1.75] mb-4 shrink-0 max-w-[62ch]">
-    <p>a cathedral is a commons —</p>
-    <p>walls you didn't build, kept by hands you'll never meet.</p>
-    <p>the masons who laid the first stones knew they wouldn't see the spire.</p>
-    <p class="mt-2 text-dim">we're building compute the same way. in public, over time, for whoever needs it.</p>
+  <div class="mb-5 pb-4 border-b border-border shrink-0 max-w-[64ch]">
+    <div class="text-[12.5px] text-fg leading-[1.85] space-y-0.5">
+      <p>a cathedral is a commons <span class="text-dim">—</span></p>
+      <p>walls you didn't build, kept by hands you'll never meet.</p>
+      <p>the masons who laid the first stones knew they wouldn't see the spire.</p>
+    </div>
+    <p class="text-[12px] text-muted leading-[1.75] mt-3">
+      we're building compute the same way. in public, over time, for whoever needs it.
+    </p>
   </div>
 
   <!-- status strip -->
-  <div class="flex flex-wrap items-center gap-x-6 gap-y-1 text-[11px] text-muted mb-3 shrink-0">
+  <div class="flex flex-wrap items-center gap-x-6 gap-y-1 text-[11px] text-dim mb-3 shrink-0">
     <span>
       <span class="text-dim">validator</span>
       <span class="ml-1.5 text-fg" data-val="validator-hotkey">5DnvAg…ThWPb</span>
