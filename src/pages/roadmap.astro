@@ -70,20 +70,14 @@ const openCount = issues.filter((i) => i.state === 'open').length
 <Base title="roadmap · cathedral">
   <div class="max-w-[820px] w-full mx-auto space-y-10 py-4">
     <section>
-      <div class="flex items-baseline gap-3 mb-1">
-        <h1 class="text-[15px] text-fg">roadmap</h1>
-        <span class="text-[9px] uppercase tracking-[0.15em] text-warn border border-warn/40 px-1.5 py-0.5">
-          speculative · early draft
-        </span>
-      </div>
+      <h1 class="text-[15px] text-fg mb-1">roadmap</h1>
       <p class="text-[12px] text-muted leading-relaxed">
-        live from <a href="https://github.com/bigailabs/cathedral/issues" class="text-accent hover:underline underline-offset-2">github issues</a>.
-        three acts, in order. no private backlog.
+        the commitment is the three acts, in order. individual issues are a
+        speculative early draft — scope, sequencing, and priorities will change
+        as we learn. items can be dropped, split, or rewritten.
       </p>
       <p class="text-[11.5px] text-dim leading-relaxed mt-2">
-        this is a working draft, not a commitment. scope, sequencing, and priorities
-        will change as we learn. items can be dropped, split, or rewritten without notice.
-        treat dates as aspirational and the act structure as the current best guess.
+        live from <a href="https://github.com/bigailabs/cathedral/issues" class="text-muted hover:text-fg underline underline-offset-2 decoration-dim">github issues</a> · no private backlog
       </p>
       {total > 0 && (
         <p class="text-[11px] text-dim mt-3 tabular-nums">
@@ -105,13 +99,20 @@ const openCount = issues.filter((i) => i.state === 'open').length
       const items = forAct(act.id)
       return (
         <section>
-          <div class="flex items-baseline justify-between gap-4 mb-3">
+          <div class="flex items-baseline justify-between gap-4 mb-2">
             <h2 class="text-[13px] text-fg">{act.title}</h2>
+            <span class="text-[9px] uppercase tracking-[0.15em] text-accent border border-accent/40 px-1.5 py-0.5 shrink-0">
+              commitment
+            </span>
+          </div>
+          <p class="text-[11.5px] text-muted mb-4 leading-relaxed">{act.blurb}</p>
+
+          <div class="flex items-baseline justify-between gap-4 mb-2">
+            <h3 class="text-[11px] text-dim uppercase tracking-[0.15em]">current slice · draft</h3>
             <span class="text-[11px] text-dim tabular-nums shrink-0">
               {items.filter((i) => i.state === 'open').length} open / {items.length}
             </span>
           </div>
-          <p class="text-[11.5px] text-muted mb-3 leading-relaxed">{act.blurb}</p>
           {items.length === 0 ? (
             <p class="text-[11.5px] text-dim italic">nothing filed yet</p>
           ) : (
