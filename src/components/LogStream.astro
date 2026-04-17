@@ -12,16 +12,16 @@ const { id, label, host } = Astro.props
 ---
 
 <section
-  class="flex flex-col min-h-0 flex-1 border border-border bg-surface"
+  class="flex flex-col min-h-0 border border-border bg-surface overflow-hidden"
   data-stream={id}
 >
-  <header class="flex items-center justify-between px-3 py-2 border-b border-border text-[11px]">
+  <header class="flex items-center justify-between px-3 py-2 border-b border-border text-[11px] shrink-0">
     <div class="flex items-center gap-2 min-w-0">
       <span class="text-muted">{label}</span>
       <span class="text-dim">·</span>
       <span class="text-dim font-[500] truncate">{host}</span>
     </div>
-    <div class="flex items-center gap-2 text-dim">
+    <div class="flex items-center gap-2 text-dim shrink-0">
       <span class="relative flex h-1.5 w-1.5" data-live-indicator>
         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-60"></span>
         <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-accent"></span>
@@ -30,7 +30,7 @@ const { id, label, host } = Astro.props
     </div>
   </header>
   <div
-    class="flex-1 overflow-y-auto px-3 py-2 text-[11.5px] leading-[1.5] min-h-[360px]"
+    class="flex-1 min-h-0 overflow-y-auto px-3 py-2 text-[11.5px] leading-[1.5]"
     data-log-body
   >
     <div class="text-dim" data-empty>connecting…</div>

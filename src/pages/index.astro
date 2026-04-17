@@ -3,9 +3,9 @@ import Base from '../layouts/Base.astro'
 import LogStream from '../components/LogStream.astro'
 ---
 
-<Base title="cathedral">
+<Base title="cathedral" fullHeight={true}>
   <!-- status strip -->
-  <div class="flex flex-wrap items-center gap-x-6 gap-y-1 text-[11px] text-muted mb-4">
+  <div class="flex flex-wrap items-center gap-x-6 gap-y-1 text-[11px] text-muted mb-3 shrink-0">
     <span>
       <span class="text-dim">validator</span>
       <span class="ml-1.5 text-fg" data-val="validator-hotkey">5DnvAg…ThWPb</span>
@@ -29,8 +29,8 @@ import LogStream from '../components/LogStream.astro'
     <span class="text-dim" data-val="permit-note">permit pending · top 14 by α</span>
   </div>
 
-  <!-- the two log panes, side-by-side on md+ -->
-  <div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-3 min-h-0">
+  <!-- the two log panes, side-by-side on md+, each pane scrolls internally -->
+  <div class="flex-1 min-h-0 grid grid-cols-1 md:grid-cols-2 gap-3">
     <LogStream id="validator" label="validator" host="65.109.75.36" />
     <LogStream id="miner" label="miner" host="65.109.75.36" />
   </div>
