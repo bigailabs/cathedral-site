@@ -46,7 +46,8 @@ import LogStream from '../components/LogStream.astro'
     <LogStream id="validator" label="validator" host="65.109.75.36" />
     <LogStream id="miner" label="miner" host="65.109.75.36" />
     {/* safelist for dynamic classes set by JS below:
-        bg-accentDim border-l-2 border-accent pl-2 -ml-2 */}
+        bg-accentDim border-l-2 border-accent pl-2 -ml-2
+        border-warn bg-warnDim text-warn bg-muted text-dim */}
   </div>
 </Base>
 
@@ -260,11 +261,84 @@ import LogStream from '../components/LogStream.astro'
     if (!root) return
     const indicator = root.querySelector<HTMLElement>('[data-live-indicator]')
     const status = root.querySelector<HTMLElement>('[data-status]')
+    if (!live) {
+      if (indicator) {
+        const dot = indicator.querySelector<HTMLElement>('span:last-child')
+        if (dot) dot.className = 'relative inline-flex rounded-full h-1.5 w-1.5 bg-err'
+        indicator.querySelectorAll<HTMLElement>('.animate-ping').forEach(el => el.classList.add('hidden'))
+      }
+      if (status) status.textContent = err ? `offline · ${err.slice(0, 40)}` : 'offline'
+      return
+    }
+    // live: compute freshness from newest log line
+    applyFreshness(side)
+  }
+
+  // Color-code dot + status by age of most-recent line:
+  //   <  2m : live (green ping)
+  //   < 10m : quiet (solid blue, no ping)
+  //   >=10m : stale (amber, no ping, caption shown)
+  function applyFreshness(side: 'validator' | 'miner') {
+    const root = state[side].el
+    if (!root) return
+    const indicator = root.querySelector<HTMLElement>('[data-live-indicator]')
+    const status = root.querySelector<HTMLElement>('[data-status]')
+    const fresh = root.querySelector<HTMLElement>('[data-freshness]')
+    const lines = state[side].lines
+    const newest = lines.reduce<number | null>((a, l) => {
+      if (l.tsEpoch == null) return a
+      return a == null || l.tsEpoch > a ? l.tsEpoch : a
+    }, null)
+    const nowSec = Date.now() / 1000
+    const ageSec = newest == null ? Infinity : nowSec - newest
+    const ageMin = ageSec / 60
+    let tier: 'live' | 'quiet' | 'stale' = 'live'
+    if (ageMin >= 10) tier = 'stale'
+    else if (ageMin >= 2) tier = 'quiet'
+
     if (indicator) {
       const dot = indicator.querySelector<HTMLElement>('span:last-child')
-      if (dot) dot.className = `relative inline-flex rounded-full h-1.5 w-1.5 ${live ? 'bg-accent' : 'bg-err'}`
+      const ping = indicator.querySelector<HTMLElement>('.animate-ping')
+      if (dot) {
+        dot.className = 'relative inline-flex rounded-full h-1.5 w-1.5 ' +
+          (tier === 'live' ? 'bg-accent' : tier === 'quiet' ? 'bg-muted' : 'bg-warn')
+      }
+      if (ping) ping.classList.toggle('hidden', tier !== 'live')
     }
-    if (status) status.textContent = live ? 'live' : (err ? `offline · ${err.slice(0, 40)}` : 'offline')
+    if (status) {
+      status.textContent = tier === 'live' ? 'live' : tier === 'quiet' ? 'quiet' : 'stale'
+      status.className = (tier === 'stale' ? 'text-warn' : 'text-dim')
+    }
+    if (fresh) {
+      fresh.textContent = newest == null ? '' : `updated ${formatAge(ageSec)} ago`
+      fresh.className = 'tabular-nums ' + (tier === 'stale' ? 'text-warn' : 'text-dim')
+    }
+
+    // Highlight the most-recent log row if the pane is stale — makes clear
+    // *which* line is the last thing that happened.
+    const body = root.querySelector<HTMLElement>('[data-log-body]')
+    if (body) {
+      body.querySelectorAll<HTMLElement>('[data-last-line]').forEach(el => {
+        el.removeAttribute('data-last-line')
+        el.classList.remove('border-l-2', 'border-warn', 'bg-warnDim', 'pl-2', '-ml-2')
+      })
+      if (tier === 'stale') {
+        const lastRow = body.querySelector<HTMLElement>('[data-line-key]:last-child')
+        if (lastRow) {
+          lastRow.setAttribute('data-last-line', '')
+          lastRow.classList.add('border-l-2', 'border-warn', 'bg-warnDim', 'pl-2', '-ml-2')
+        }
+      }
+    }
+  }
+
+  function formatAge(secs: number): string {
+    if (!isFinite(secs)) return '?'
+    if (secs < 60) return `${Math.floor(secs)}s`
+    const m = Math.floor(secs / 60)
+    if (m < 60) return `${m}m`
+    const h = Math.floor(m / 60)
+    return `${h}h ${m % 60}m`
   }
 
   async function fetchState() {
@@ -293,6 +367,13 @@ import LogStream from '../components/LogStream.astro'
     }
     tick()
     setInterval(tick, POLL_MS)
+
+    // Freshness counter updates independently of fetch cadence so the
+    // "updated Xs ago" caption ticks smoothly.
+    setInterval(() => {
+      applyFreshness('validator')
+      applyFreshness('miner')
+    }, 1000)
 
     fetchState()
     setInterval(fetchState, STATE_POLL_MS)
