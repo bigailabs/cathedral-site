@@ -1,0 +1,124 @@
+---
+import Base from '../layouts/Base.astro'
+import { marked } from 'marked'
+
+async function fetchChangelog(): Promise<{ md: string; ok: boolean }> {
+  try {
+    const headers: Record<string, string> = {
+      'Accept': 'application/vnd.github.v3.raw',
+      'User-Agent': 'cathedral-site',
+    }
+    const token = import.meta.env.GITHUB_TOKEN || process.env.GITHUB_TOKEN
+    if (token) headers.Authorization = `Bearer ${token}`
+    const r = await fetch(
+      'https://api.github.com/repos/bigailabs/cathedral/contents/CHANGELOG.md',
+      { headers },
+    )
+    if (!r.ok) return { md: '', ok: false }
+    const md = await r.text()
+    return { md, ok: true }
+  } catch {
+    return { md: '', ok: false }
+  }
+}
+
+const { md, ok } = await fetchChangelog()
+
+// Strip the top-level "# Changelog" heading since we render our own title.
+const cleaned = md.replace(/^#\s+Changelog\s*\n+/i, '')
+
+marked.setOptions({ gfm: true, breaks: false })
+const html = ok ? marked.parse(cleaned) : ''
+---
+
+<Base title="changelog · cathedral">
+  <div class="max-w-[820px] w-full mx-auto space-y-6 py-4">
+    <section>
+      <h1 class="text-[15px] text-fg mb-1">changelog</h1>
+      <p class="text-[12px] text-muted leading-relaxed">
+        what shipped, in date order. the canonical record lives in
+        <a href="https://github.com/bigailabs/cathedral/blob/main/CHANGELOG.md" class="text-muted hover:text-fg underline underline-offset-2 decoration-dim">CHANGELOG.md</a>
+        on the cathedral repo; releases are tagged
+        <a href="https://github.com/bigailabs/cathedral/releases" class="text-muted hover:text-fg underline underline-offset-2 decoration-dim">there</a>.
+      </p>
+    </section>
+
+    {!ok && (
+      <section class="border border-border bg-surface px-4 py-3">
+        <p class="text-[12px] text-muted leading-relaxed">
+          couldn't reach github at build time. read the canonical
+          <a href="https://github.com/bigailabs/cathedral/blob/main/CHANGELOG.md" class="text-fg hover:text-accent underline underline-offset-2 decoration-dim ml-1">CHANGELOG.md</a>.
+        </p>
+      </section>
+    )}
+
+    <article class="changelog-body" set:html={html}></article>
+  </div>
+</Base>
+
+<style is:global>
+  .changelog-body h2 {
+    font-size: 13px;
+    color: var(--fg);
+    margin-top: 2.5rem;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--border);
+    letter-spacing: 0.02em;
+  }
+  .changelog-body h2:first-child { margin-top: 0; }
+  .changelog-body h3 {
+    font-size: 10px;
+    color: var(--dim);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+  .changelog-body p {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.7;
+    margin-bottom: 0.6rem;
+    max-width: 72ch;
+  }
+  .changelog-body ul {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1rem;
+  }
+  .changelog-body li {
+    font-size: 12px;
+    color: var(--fg);
+    line-height: 1.7;
+    padding-left: 1rem;
+    position: relative;
+    margin-bottom: 0.35rem;
+    max-width: 72ch;
+  }
+  .changelog-body li::before {
+    content: '—';
+    color: var(--accent);
+    position: absolute;
+    left: 0;
+  }
+  .changelog-body li strong {
+    color: var(--fg);
+    font-weight: 500;
+  }
+  .changelog-body a {
+    color: var(--fg);
+    text-decoration: underline;
+    text-decoration-color: var(--dim);
+    text-underline-offset: 2px;
+  }
+  .changelog-body a:hover { color: var(--accent); text-decoration-color: var(--accent); }
+  .changelog-body code {
+    font-family: inherit;
+    color: var(--muted);
+    background: var(--surface);
+    padding: 0 0.25rem;
+    border-radius: 2px;
+    font-size: 11.5px;
+  }
+</style>
