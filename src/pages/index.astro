@@ -66,10 +66,16 @@ import RoseWindow from '../components/RoseWindow.astro'
     <span class="text-dim" data-val="permit-note">permit pending · top 14 by α</span>
   </div>
 
+  <!-- migration banner — the verda rental got terminated; validator moved home -->
+  <div class="text-[11px] text-warn border border-warn/40 bg-warnDim px-3 py-2 mb-3 shrink-0 leading-relaxed">
+    validator migrated off rented infra (2026-04-17) to self-hosted at home · reachable via
+    <code class="text-fg">polarisserver.tail02a2a.ts.net:443</code> · log streaming will reconnect shortly
+  </div>
+
   <!-- the two log panes, side-by-side on md+, each pane scrolls internally -->
   <div class="flex-1 min-h-0 grid grid-cols-1 md:grid-cols-2 gap-3">
-    <LogStream id="validator" label="validator" host="65.109.75.36" />
-    <LogStream id="miner" label="miner" host="65.109.75.36" />
+    <LogStream id="validator" label="validator" host="home · funnel" />
+    <LogStream id="miner" label="miner" host="home · funnel" />
     {/* safelist for dynamic classes set by JS below:
         bg-accentDim border-l-2 border-accent pl-2 -ml-2
         border-warn bg-warnDim text-warn bg-muted text-dim */}
