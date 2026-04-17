@@ -231,8 +231,8 @@ import RoseWindow from '../components/RoseWindow.astro'
   // Render
   // ---------------------------------------------------------------------------
   const state = {
-    validator: { lines: [] as Line[], el: null as HTMLElement | null },
-    miner: { lines: [] as Line[], el: null as HTMLElement | null },
+    validator: { lines: [] as Line[], el: null as HTMLElement | null, connected: false as boolean },
+    miner: { lines: [] as Line[], el: null as HTMLElement | null, connected: false as boolean },
     pairs: new Map<string, number>(), // lineKey -> timestamp pair was made
   }
 
@@ -406,6 +406,7 @@ import RoseWindow from '../components/RoseWindow.astro'
       if (!r.ok) throw new Error(`HTTP ${r.status}`)
       const data = await r.json()
       const lines: any[] = Array.isArray(data?.lines) ? data.lines : []
+      state[side].connected = !!data?.connected
       state[side].lines = lines.map((l) => {
         const message = typeof l?.message === 'string' ? l.message : ''
         const ts = typeof l?.timestamp === 'string' ? l.timestamp : null
@@ -424,6 +425,7 @@ import RoseWindow from '../components/RoseWindow.astro'
       renderAll(side)
       setLive(side, true)
     } catch (e) {
+      state[side].connected = false
       setLive(side, false, e instanceof Error ? e.message : String(e))
     }
   }
@@ -446,10 +448,16 @@ import RoseWindow from '../components/RoseWindow.astro'
     applyFreshness(side)
   }
 
-  // Color-code dot + status by age of most-recent line:
-  //   <  2m : live (green ping)
-  //   < 10m : quiet (solid blue, no ping)
-  //   >=10m : stale (amber, no ping, caption shown)
+  // Freshness tier, by age of most-recent log line + whether the backend
+  // tailer has an active SSH session to the box:
+  //   <  2m                     : live   (green ping)      — activity recent
+  //   < 10m                     : quiet  (muted, no ping)  — fine, just a lull
+  //   >=10m AND connected=true  : idle   (muted, no ping)  — healthy but silent
+  //                                                          (miner lifecycle loops don't
+  //                                                           log every tick; validator
+  //                                                           weight-retries every 10s.)
+  //   >=10m AND connected=false : stale  (amber alarm)     — we lost the SSH stream;
+  //                                                          this is the actual problem case.
   function applyFreshness(side: 'validator' | 'miner') {
     const root = state[side].el
     if (!root) return
@@ -457,6 +465,7 @@ import RoseWindow from '../components/RoseWindow.astro'
     const status = root.querySelector<HTMLElement>('[data-status]')
     const fresh = root.querySelector<HTMLElement>('[data-freshness]')
     const lines = state[side].lines
+    const connected = state[side].connected
     const newest = lines.reduce<number | null>((a, l) => {
       if (l.tsEpoch == null) return a
       return a == null || l.tsEpoch > a ? l.tsEpoch : a
@@ -464,8 +473,8 @@ import RoseWindow from '../components/RoseWindow.astro'
     const nowSec = Date.now() / 1000
     const ageSec = newest == null ? Infinity : nowSec - newest
     const ageMin = ageSec / 60
-    let tier: 'live' | 'quiet' | 'stale' = 'live'
-    if (ageMin >= 10) tier = 'stale'
+    let tier: 'live' | 'quiet' | 'idle' | 'stale' = 'live'
+    if (ageMin >= 10) tier = connected ? 'idle' : 'stale'
     else if (ageMin >= 2) tier = 'quiet'
 
     if (indicator) {
@@ -473,12 +482,19 @@ import RoseWindow from '../components/RoseWindow.astro'
       const ping = indicator.querySelector<HTMLElement>('.animate-ping')
       if (dot) {
         dot.className = 'relative inline-flex rounded-full h-1.5 w-1.5 ' +
-          (tier === 'live' ? 'bg-accent' : tier === 'quiet' ? 'bg-muted' : 'bg-warn')
+          (tier === 'live' ? 'bg-accent'
+          : tier === 'stale' ? 'bg-warn'
+          : 'bg-muted')
       }
       if (ping) ping.classList.toggle('hidden', tier !== 'live')
     }
+    const label =
+      tier === 'live' ? 'live'
+      : tier === 'quiet' ? 'quiet'
+      : tier === 'idle' ? 'idle · healthy'
+      : 'stale · stream lost'
     if (status) {
-      status.textContent = tier === 'live' ? 'live' : tier === 'quiet' ? 'quiet' : 'stale'
+      status.textContent = label
       status.className = (tier === 'stale' ? 'text-warn' : 'text-dim')
     }
     if (fresh) {
@@ -486,8 +502,9 @@ import RoseWindow from '../components/RoseWindow.astro'
       fresh.className = 'tabular-nums ' + (tier === 'stale' ? 'text-warn' : 'text-dim')
     }
 
-    // Highlight the most-recent log row if the pane is stale — makes clear
-    // *which* line is the last thing that happened.
+    // Highlight the most-recent log row ONLY when the stream is actually
+    // lost — not when the miner is just quiet. An idle-but-connected pane
+    // shouldn't shout "last thing that happened was at startup."
     const body = root.querySelector<HTMLElement>('[data-log-body]')
     if (body) {
       body.querySelectorAll<HTMLElement>('[data-last-line]').forEach(el => {
