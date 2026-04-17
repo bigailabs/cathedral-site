@@ -22,6 +22,7 @@ const { id, label, host } = Astro.props
       <span class="text-dim font-[500] truncate">{host}</span>
     </div>
     <div class="flex items-center gap-2 text-dim shrink-0">
+      <span data-freshness class="tabular-nums"></span>
       <span class="relative flex h-1.5 w-1.5" data-live-indicator>
         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-60"></span>
         <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-accent"></span>

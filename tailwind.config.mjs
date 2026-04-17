@@ -13,6 +13,7 @@ export default {
         accent: 'var(--accent)',
         accentDim: 'var(--accent-dim)',
         warn: 'var(--warn)',
+        warnDim: 'var(--warn-dim)',
         err: 'var(--err)',
       },
       fontFamily: {
