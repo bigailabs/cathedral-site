@@ -81,6 +81,99 @@ import LogStream from '../components/LogStream.astro'
     { id: 'weight-parked', side: 'validator', re: /Invalid Transaction \(1010\)/ },
   ]
 
+  // ---------------------------------------------------------------------------
+  // Error decoder — explain known log patterns in plain English.
+  // kind: 'parked' = expected-but-ugly (amber), 'info' = informational (blue),
+  //       'alarm' = genuinely broken (red).
+  // forceLevel: override the INFO/WARN/ERROR level the server reported,
+  //             so the scary-looking loops don't read as alarms.
+  // ---------------------------------------------------------------------------
+  type Decoded = {
+    kind: 'parked' | 'info' | 'alarm'
+    title: string
+    meaning: string
+    doing: string
+    forceLevel?: string
+  }
+
+  const DECODERS: { re: RegExp; d: Decoded }[] = [
+    {
+      re: /Invalid Transaction \(1010\)/,
+      d: {
+        kind: 'parked',
+        title: 'weight submission parked',
+        meaning: 'the chain rejected set_weights because we don\u2019t hold a validator permit on sn39. the (1010) code means no-permit / payment-refused. no fees were spent, no data was lost.',
+        doing: 'the validator will keep retrying every 10s. the moment we cross the permit stake threshold, the next retry lands and emissions start flowing. no restart needed.',
+        forceLevel: 'WARN',
+      },
+    },
+    {
+      re: /Retrying weight submission in \d+ seconds/,
+      d: {
+        kind: 'parked',
+        title: 'retry loop (parked)',
+        meaning: 'the self-heal side of the parked weight-submission. the validator expects this to fail until we have permit stake.',
+        doing: 'nothing to fix — this is the system working as designed. stake unlocks it.',
+        forceLevel: 'DEBUG',
+      },
+    },
+    {
+      re: /Failed to submit weights to chain/,
+      d: {
+        kind: 'parked',
+        title: 'weight submission parked',
+        meaning: 'same as (1010) — wraps the chain\u2019s rejection into a validator-level log. awaiting permit.',
+        doing: 'retry loop handles it; emissions start flowing the instant we clear the stake threshold.',
+        forceLevel: 'WARN',
+      },
+    },
+    {
+      re: /Validator \[redacted:[^\]]+\] not found on-chain; synthesizing placeholder/,
+      d: {
+        kind: 'info',
+        title: 'synthetic validator binding',
+        meaning: 'the miner was given a validator hotkey via config but that hotkey isn\u2019t visible on-chain yet from the miner\u2019s view. we override the grpc endpoint explicitly so the miner can still reach us.',
+        doing: 'expected while the miner and validator run in a shared hotkey setup. harmless.',
+        forceLevel: 'INFO',
+      },
+    },
+    {
+      re: /no axon endpoint; gRPC endpoint must be provided via override/,
+      d: {
+        kind: 'info',
+        title: 'grpc override in use',
+        meaning: 'the validator doesn\u2019t publish an axon endpoint on-chain, so the miner uses a static override from miner.toml to reach the bid-grpc port.',
+        doing: 'this is the current configuration, not a bug.',
+        forceLevel: 'INFO',
+      },
+    },
+    {
+      re: /SSH connection test failed|ssh.*timeout|could not connect to/i,
+      d: {
+        kind: 'alarm',
+        title: 'ssh reachability problem',
+        meaning: 'the validator could not open an ssh session to a registered miner node. verification will fail for that cycle.',
+        doing: 'the next cycle retries. if it keeps happening, the miner needs to check firewall, sshd, and that the validator\u2019s key was deployed.',
+      },
+    },
+    {
+      re: /health_check failed|health check failed/i,
+      d: {
+        kind: 'alarm',
+        title: 'miner health check failed',
+        meaning: 'the miner could not verify one of its own gpu nodes. the node will be dropped from the bid pool for this cycle.',
+        doing: 'miner retries on the next lifecycle tick. persistent failures need operator attention on the node.',
+      },
+    },
+  ]
+
+  function decode(message: string): Decoded | undefined {
+    for (const { re, d } of DECODERS) {
+      if (re.test(message)) return d
+    }
+    return undefined
+  }
+
   type Line = {
     ts: string | null
     tsEpoch: number | null
@@ -128,11 +221,27 @@ import LogStream from '../components/LogStream.astro'
     }
   }
 
+  function decoderKindClass(kind: Decoded['kind']): { dot: string; label: string; bar: string } {
+    switch (kind) {
+      case 'parked': return { dot: 'bg-warn', label: 'text-warn', bar: 'border-warn' }
+      case 'alarm': return { dot: 'bg-err', label: 'text-err', bar: 'border-err' }
+      default: return { dot: 'bg-accent', label: 'text-accent', bar: 'border-accent' }
+    }
+  }
+
   function renderLine(line: Line): HTMLElement {
+    // A "line" can render as either a single row or a row + annotation.
+    // We return a wrapper div containing one or two children so the main
+    // rendering loop stays simple (one top-level element per log line).
+    const wrapper = document.createElement('div')
+    wrapper.dataset.lineKey = line.key
+    if (line.eventId) wrapper.dataset.eventId = line.eventId
+
+    const dec = decode(line.message)
+    const displayLevel = dec?.forceLevel ?? line.level
+
     const row = document.createElement('div')
     row.className = 'group flex gap-2 px-1 -mx-1 rounded-sm transition-colors duration-500'
-    row.dataset.lineKey = line.key
-    if (line.eventId) row.dataset.eventId = line.eventId
 
     const timeShort = line.ts ? line.ts.slice(11, 19) : '        '
     const targetShort = line.target ? line.target.split('::').slice(-1)[0].slice(0, 18) : ''
@@ -143,8 +252,8 @@ import LogStream from '../components/LogStream.astro'
     row.appendChild(ts)
 
     const lvl = document.createElement('span')
-    lvl.className = `shrink-0 w-10 ${levelClass(line.level)}`
-    lvl.textContent = line.level
+    lvl.className = `shrink-0 w-10 ${levelClass(displayLevel)}`
+    lvl.textContent = displayLevel
     row.appendChild(lvl)
 
     const tgt = document.createElement('span')
@@ -158,7 +267,45 @@ import LogStream from '../components/LogStream.astro'
     msg.textContent = line.message
     row.appendChild(msg)
 
-    return row
+    wrapper.appendChild(row)
+
+    if (dec) {
+      const kc = decoderKindClass(dec.kind)
+      const annot = document.createElement('div')
+      annot.className = `ml-[72px] my-1 pl-3 border-l-2 ${kc.bar} text-[11px] leading-[1.55] text-muted space-y-1`
+      annot.dataset.annotation = dec.kind
+
+      const title = document.createElement('div')
+      title.className = `flex items-center gap-2 ${kc.label} font-[500] uppercase tracking-[0.08em] text-[10px]`
+      const dot = document.createElement('span')
+      dot.className = `inline-block h-1.5 w-1.5 rounded-full ${kc.dot}`
+      title.appendChild(dot)
+      const titleText = document.createElement('span')
+      titleText.textContent = dec.title
+      title.appendChild(titleText)
+      annot.appendChild(title)
+
+      const meaning = document.createElement('div')
+      meaning.innerHTML = `<span class="text-dim uppercase tracking-[0.08em] text-[9px] mr-2">means</span>${escapeHtml(dec.meaning)}`
+      annot.appendChild(meaning)
+
+      const doing = document.createElement('div')
+      doing.innerHTML = `<span class="text-dim uppercase tracking-[0.08em] text-[9px] mr-2">doing</span>${escapeHtml(dec.doing)}`
+      annot.appendChild(doing)
+
+      wrapper.appendChild(annot)
+    }
+
+    return wrapper
+  }
+
+  function escapeHtml(s: string): string {
+    return s
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;')
   }
 
   function renderAll(side: 'validator' | 'miner') {
