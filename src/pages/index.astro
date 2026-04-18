@@ -197,8 +197,11 @@ import RoseWindow from '../components/RoseWindow.astro'
               <td class="r">—</td>
             </tr>
             <tr>
-              <td class="label">Miners active on SN39</td>
-              <td class="status-ok">Discovering</td>
+              <td class="label">Miners declared on SN39</td>
+              <td class="status-ok">
+                Discovering
+                <span class="ml-2 text-[9px] text-dim uppercase tracking-[0.12em] cursor-help" title="Declared = has an axon endpoint on chain. Not the same as SSH-verified. Our validator is catching up.">· declared ≠ verified</span>
+              </td>
               <td class="r" data-val="miners-active">—</td>
               <td class="r">live</td>
             </tr>
@@ -760,12 +763,32 @@ import RoseWindow from '../components/RoseWindow.astro'
     return h.slice(0, 6) + '…' + h.slice(-4)
   }
 
-  function pillFor(m: MinerRow): { text: string; cls: string } {
-    if (m.rejected) return { text: 'rejected', cls: 'text-err border-err' }
-    if (m.uid === OUR_VALIDATOR_UID) return { text: 'ours · validator', cls: 'text-accent border-accent' }
-    if (m.uid === OUR_MINER_UID) return { text: 'ours · orphaned', cls: 'text-warn border-warn' }
-    if (m.status === 'Active') return { text: 'active', cls: 'text-muted border-border' }
-    return { text: 'inactive', cls: 'text-dim border-borderSoft' }
+  function pillFor(m: MinerRow): { text: string; cls: string; title: string } {
+    if (m.rejected) return {
+      text: 'rejected',
+      cls: 'text-err border-err',
+      title: 'Our validator SSH-verified this node and it failed a policy check (wrong GPU, timeout, etc.)',
+    }
+    if (m.uid === OUR_VALIDATOR_UID) return {
+      text: 'ours · validator',
+      cls: 'text-accent border-accent',
+      title: 'Our validator (UID 123) on SN39.',
+    }
+    if (m.uid === OUR_MINER_UID) return {
+      text: 'ours · orphaned',
+      cls: 'text-warn border-warn',
+      title: 'Our old miner (UID 115). Registered on chain but the GPU node is gone; pending re-host.',
+    }
+    if (m.status === 'Active') return {
+      text: 'declared',
+      cls: 'text-muted border-border',
+      title: 'Miner has declared an axon endpoint on chain. Not the same as verified — our validator has not yet SSH-confirmed GPU hardware. Could be live, could be a stub.',
+    }
+    return {
+      text: 'unverified',
+      cls: 'text-dim border-borderSoft',
+      title: 'No axon on chain and no verification record.',
+    }
   }
 
   function renderMinersRegister(): void {
@@ -824,8 +847,9 @@ import RoseWindow from '../components/RoseWindow.astro'
 
       const pill = pillFor(m)
       const pillEl = document.createElement('span')
-      pillEl.className = 'shrink-0 text-[9px] uppercase tracking-[0.12em] border px-1.5 py-[2px] ' + pill.cls
+      pillEl.className = 'shrink-0 text-[9px] uppercase tracking-[0.12em] border px-1.5 py-[2px] cursor-help ' + pill.cls
       pillEl.textContent = pill.text
+      pillEl.title = pill.title
       row.appendChild(pillEl)
 
       listEl.appendChild(row)
