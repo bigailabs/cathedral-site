@@ -1,6 +1,7 @@
 ---
 import Base from '../layouts/Base.astro'
 import LogStream from '../components/LogStream.astro'
+import MinersRegister from '../components/MinersRegister.astro'
 import RoseWindow from '../components/RoseWindow.astro'
 ---
 
@@ -27,17 +28,17 @@ import RoseWindow from '../components/RoseWindow.astro'
     }
   </style>
   <!-- stanza -->
-  <div class="stanza-fade relative mb-5 pb-4 border-b border-border shrink-0 max-w-[64ch]">
+  <div class="stanza-fade relative mb-5 pb-4 border-b border-borderSoft shrink-0 max-w-[72ch]">
     <div class="absolute right-0 top-1/2 -translate-y-1/2 text-dim opacity-25 pointer-events-none hidden md:block">
       <RoseWindow size={72} airy={true} />
     </div>
-    <div class="relative text-[12.5px] text-fg leading-[1.85] space-y-0.5">
+    <div class="relative font-serif text-[19px] text-fg leading-[1.4] space-y-0 font-[300]">
       <p>a cathedral is a commons <span class="text-dim">—</span></p>
       <p>walls you didn't build, kept by hands you'll never meet.</p>
-      <p>the masons who laid the first stones knew they wouldn't see the spire.</p>
+      <p><em class="text-muted">the masons who laid the first stones knew they wouldn't see the spire.</em></p>
     </div>
-    <p class="relative text-[12px] text-muted leading-[1.75] mt-3">
-      we're building compute the same way. in public, over time, for whoever needs it.
+    <p class="relative font-serif text-[14px] text-muted leading-[1.55] mt-3 italic font-[300]">
+      we're building compute the same way — in public, over time, for whoever needs it.
     </p>
   </div>
 
@@ -66,13 +67,14 @@ import RoseWindow from '../components/RoseWindow.astro'
     <span class="text-dim" data-val="permit-note">permit pending · top 14 by α</span>
   </div>
 
-  <!-- the two log panes, side-by-side on md+, each pane scrolls internally -->
-  <div class="flex-1 min-h-0 grid grid-cols-1 md:grid-cols-2 gap-3">
-    <LogStream id="validator" label="validator" host="vps · fin" />
-    <LogStream id="miner" label="miner" host="orphaned · pending re-host" />
+  <!-- validator terminal + miners register, side-by-side on md+ -->
+  <div class="flex-1 min-h-0 grid grid-cols-1 md:grid-cols-[1.5fr_1fr] gap-3">
+    <LogStream id="validator" label="validator" host="vps · fin" role="VERIFY" terminalIndex="T1" />
+    <MinersRegister />
     {/* safelist for dynamic classes set by JS below:
         bg-accentDim border-l-2 border-accent pl-2 -ml-2
-        border-warn bg-warnDim text-warn bg-muted text-dim */}
+        border-warn bg-warnDim text-warn bg-muted text-dim
+        bg-err/20 border-err text-err */}
   </div>
 </Base>
 
@@ -407,7 +409,8 @@ import RoseWindow from '../components/RoseWindow.astro'
       const data = await r.json()
       const lines: any[] = Array.isArray(data?.lines) ? data.lines : []
       state[side].connected = !!data?.connected
-      state[side].lines = lines.map((l) => {
+      const prevKeys = new Set(state[side].lines.map((l) => l.key))
+      const mapped: Line[] = lines.map((l) => {
         const message = typeof l?.message === 'string' ? l.message : ''
         const ts = typeof l?.timestamp === 'string' ? l.timestamp : null
         const target = typeof l?.target === 'string' ? l.target : ''
@@ -422,6 +425,17 @@ import RoseWindow from '../components/RoseWindow.astro'
           key: lineKey(ts, target, message),
         } as Line
       })
+      state[side].lines = mapped
+
+      // Validator side: scan any NEW lines for miner UID mentions and pulse
+      // the matching row in the miners register on the right.
+      if (side === 'validator') {
+        for (const ln of mapped) {
+          if (prevKeys.has(ln.key)) continue
+          scanLogLineForMinerMentions(ln.message)
+        }
+      }
+
       renderAll(side)
       setLive(side, true)
     } catch (e) {
@@ -530,6 +544,160 @@ import RoseWindow from '../components/RoseWindow.astro'
     return `${h}h ${m % 60}m`
   }
 
+  // ---------------------------------------------------------------------------
+  // Miners register (right-hand panel)
+  // ---------------------------------------------------------------------------
+  // We care about our identities specifically: validator (uid 123) and the
+  // old miner slot (uid 115). Everything else is anonymous neighbors on SN39.
+  const OUR_VALIDATOR_UID = 123
+  const OUR_MINER_UID = 115
+
+  type MinerRow = {
+    uid: number
+    hotkey: string
+    status: string      // Active | Inactive etc. from chain
+    stake: number
+    incentive: number
+    ip: string | null
+    port: number | null
+    // Client-only state:
+    rejected?: boolean   // flipped when validator log classifies it as bad
+    lastMentionedTs?: number  // unix ms — last time validator log named it
+  }
+
+  const registerState = {
+    miners: new Map<number, MinerRow>(),
+    order: [] as number[],   // render order; rejected floats to top of its section
+  }
+
+  function abbrevHotkey(h: string): string {
+    if (!h || h.length < 10) return h || ''
+    return h.slice(0, 6) + '…' + h.slice(-4)
+  }
+
+  function pillFor(m: MinerRow): { text: string; cls: string } {
+    if (m.rejected) return { text: 'rejected', cls: 'text-err border-err' }
+    if (m.uid === OUR_VALIDATOR_UID) return { text: 'ours · validator', cls: 'text-accent border-accent' }
+    if (m.uid === OUR_MINER_UID) return { text: 'ours · orphaned', cls: 'text-warn border-warn' }
+    if (m.status === 'Active') return { text: 'active', cls: 'text-muted border-border' }
+    return { text: 'inactive', cls: 'text-dim border-borderSoft' }
+  }
+
+  function renderMinersRegister(): void {
+    const listEl = document.querySelector<HTMLElement>('[data-miners-list]')
+    const countEl = document.querySelector<HTMLElement>('[data-miners-count]')
+    const activeEl = document.querySelector<HTMLElement>('[data-miners-active-count]')
+    const pendingEl = document.querySelector<HTMLElement>('[data-miners-pending]')
+    const updatedEl = document.querySelector<HTMLElement>('[data-miners-updated]')
+    if (!listEl) return
+
+    // Ordering: rejected first (most recent at top of that band),
+    // then "ours" pinned, then active (by stake desc), then inactive
+    const all = Array.from(registerState.miners.values())
+    const rejected = all.filter((m) => m.rejected)
+    const ours = all.filter((m) => !m.rejected && (m.uid === OUR_VALIDATOR_UID || m.uid === OUR_MINER_UID))
+    const active = all.filter((m) => !m.rejected && !ours.includes(m) && m.status === 'Active')
+    const inactive = all.filter((m) => !m.rejected && !ours.includes(m) && m.status !== 'Active')
+    active.sort((a, b) => (b.stake || 0) - (a.stake || 0))
+    inactive.sort((a, b) => a.uid - b.uid)
+
+    const ordered = [...rejected, ...ours, ...active, ...inactive]
+    registerState.order = ordered.map((m) => m.uid)
+
+    // Diff-render: only touch what changed
+    const existing = new Map<number, HTMLElement>()
+    for (const el of Array.from(listEl.querySelectorAll<HTMLElement>('[data-uid]'))) {
+      existing.set(Number(el.dataset.uid), el)
+    }
+
+    // Remove the 'loading…' placeholder
+    const placeholder = listEl.querySelector<HTMLElement>('.miners-placeholder')
+    if (placeholder) placeholder.remove()
+    const emptyText = listEl.querySelector<HTMLElement>('.text-dim:not([data-uid])')
+    if (emptyText && emptyText.textContent?.includes('loading')) emptyText.remove()
+
+    // Rebuild in order (cheap — ~256 rows max)
+    listEl.innerHTML = ''
+    for (const m of ordered) {
+      const row = document.createElement('div')
+      row.dataset.uid = String(m.uid)
+      row.className = [
+        'miner-row flex items-center gap-2 px-3 py-1.5 text-[11px] border-b border-borderSoft',
+        'transition-colors duration-500',
+        m.rejected ? 'bg-errDim' : '',
+      ].filter(Boolean).join(' ')
+
+      const uidCell = document.createElement('span')
+      uidCell.className = 'shrink-0 w-10 tabular-nums text-dim'
+      uidCell.textContent = 'uid ' + m.uid
+      row.appendChild(uidCell)
+
+      const keyCell = document.createElement('span')
+      keyCell.className = 'flex-1 min-w-0 truncate font-mono text-fg tabular-nums'
+      keyCell.textContent = abbrevHotkey(m.hotkey)
+      row.appendChild(keyCell)
+
+      const pill = pillFor(m)
+      const pillEl = document.createElement('span')
+      pillEl.className = 'shrink-0 text-[9px] uppercase tracking-[0.12em] border px-1.5 py-[2px] ' + pill.cls
+      pillEl.textContent = pill.text
+      row.appendChild(pillEl)
+
+      listEl.appendChild(row)
+    }
+
+    // Footer tallies
+    if (countEl) countEl.textContent = String(all.length) + ' uids'
+    if (activeEl) activeEl.textContent = active.length + ' active'
+    if (pendingEl) pendingEl.textContent = inactive.length + ' inactive · ' + rejected.length + ' rejected'
+    if (updatedEl) updatedEl.textContent = new Date().toLocaleTimeString()
+  }
+
+  /** Pulse a miner row when a validator log line names its UID. */
+  function pulseMinerRow(uid: number, kind: 'mention' | 'reject' = 'mention'): void {
+    const row = document.querySelector<HTMLElement>(`[data-miners-list] [data-uid="${uid}"]`)
+    if (!row) return
+    if (kind === 'reject') {
+      const m = registerState.miners.get(uid)
+      if (m && !m.rejected) {
+        m.rejected = true
+        renderMinersRegister()
+      }
+      return
+    }
+    row.classList.remove('bg-accentDim')
+    void row.offsetWidth   // restart animation
+    row.classList.add('bg-accentDim')
+    setTimeout(() => row.classList.remove('bg-accentDim'), 1200)
+  }
+
+  /** Call this from the validator log ingest path with every new line. */
+  function scanLogLineForMinerMentions(message: string): void {
+    // Match "miner UID" and "miner 123" and "miner_uid=123" (handles zero, two, three-digit UIDs)
+    const uidMatches: number[] = []
+    for (const re of [
+      /miner[_\s]+uid[=\s]+(\d+)/gi,
+      /\bminer\s+(\d+)\b/gi,
+      /\buid=(\d+)/gi,
+    ]) {
+      let m: RegExpExecArray | null
+      while ((m = re.exec(message)) !== null) {
+        const uid = Number(m[1])
+        if (Number.isFinite(uid) && uid >= 0 && uid < 300) uidMatches.push(uid)
+      }
+    }
+    // Reject-classifying lines — treat as flipping the row to rejected
+    const isReject =
+      /CONFIG REJECTED/i.test(message) ||
+      /rejected/i.test(message) && /miner/i.test(message) ||
+      /invalid axon/i.test(message) ||
+      /score=0\.00/i.test(message)
+
+    for (const uid of uidMatches) {
+      pulseMinerRow(uid, isReject ? 'reject' : 'mention')
+    }
+  }
+
   async function fetchState() {
     try {
       const r = await fetch(ENDPOINTS.state, { cache: 'no-store' })
@@ -540,6 +708,26 @@ import RoseWindow from '../components/RoseWindow.astro'
         const block = data?.summary?.block
         if (typeof block === 'number') blockEl.textContent = block.toLocaleString()
       }
+      // Populate miners register
+      const miners: any[] = Array.isArray(data?.miners) ? data.miners : []
+      for (const m of miners) {
+        const uid = Number(m?.uid)
+        if (!Number.isFinite(uid)) continue
+        const prev = registerState.miners.get(uid)
+        registerState.miners.set(uid, {
+          uid,
+          hotkey: String(m?.hotkey ?? ''),
+          status: String(m?.status ?? 'Inactive'),
+          stake: Number(m?.stake) || 0,
+          incentive: Number(m?.incentive) || 0,
+          ip: m?.ip ?? null,
+          port: m?.port ?? null,
+          // Preserve client-only state across refreshes
+          rejected: prev?.rejected,
+          lastMentionedTs: prev?.lastMentionedTs,
+        })
+      }
+      renderMinersRegister()
     } catch { /* noop */ }
   }
 
@@ -548,11 +736,11 @@ import RoseWindow from '../components/RoseWindow.astro'
   // ---------------------------------------------------------------------------
   function init() {
     state.validator.el = document.querySelector<HTMLElement>('[data-stream="validator"]')
-    state.miner.el = document.querySelector<HTMLElement>('[data-stream="miner"]')
+    // miner log pane removed from the home page — no element to wire.
 
     const tick = async () => {
-      await Promise.all([fetchLogs('validator'), fetchLogs('miner')])
-      applyPairHighlights()
+      await fetchLogs('validator')
+      // pair highlights kept off for now — we only stream validator on the page
     }
     tick()
     setInterval(tick, POLL_MS)
@@ -561,7 +749,6 @@ import RoseWindow from '../components/RoseWindow.astro'
     // "updated Xs ago" caption ticks smoothly.
     setInterval(() => {
       applyFreshness('validator')
-      applyFreshness('miner')
     }, 1000)
 
     fetchState()
