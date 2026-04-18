@@ -18,6 +18,8 @@ export default {
         warnDim: 'var(--warn-dim)',
         err: 'var(--err)',
         errDim: 'var(--err-dim)',
+        ok: 'var(--ok)',
+        okDim: 'var(--ok-dim)',
       },
       fontFamily: {
         mono: ['JetBrains Mono', 'IBM Plex Mono', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'monospace'],

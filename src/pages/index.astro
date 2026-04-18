@@ -760,6 +760,12 @@ import RoseWindow from '../components/RoseWindow.astro'
     incentive: number
     ip: string | null
     port: number | null
+    // Populated from /api/substrate/validator/registry — tells us whether
+    // the miner is actually registered + verified *with our validator*,
+    // which is a much stronger signal than the chain-declared status.
+    validatorStatus?: 'verified' | 'online' | 'offline' | 'unknown'
+    bidActive?: boolean
+    hasRental?: boolean
     // Client-only state:
     rejected?: boolean   // flipped when validator log classifies it as bad
     lastMentionedTs?: number  // unix ms — last time validator log named it
@@ -780,6 +786,16 @@ import RoseWindow from '../components/RoseWindow.astro'
       text: 'rejected',
       cls: 'text-err border-err',
       title: 'Our validator SSH-verified this node and it failed a policy check (wrong GPU, timeout, etc.)',
+    }
+    if (m.validatorStatus === 'verified') return {
+      text: 'verified',
+      cls: 'text-ok border-ok',
+      title: 'Our validator has SSH-confirmed this node and it passed checks. Eligible for weight + emissions.',
+    }
+    if (m.validatorStatus === 'online' || m.bidActive || m.hasRental) return {
+      text: 'registered',
+      cls: 'text-accent border-accent',
+      title: 'Miner has registered at least one node with our validator (RegisterBid). Verification pending.',
     }
     if (m.uid === OUR_VALIDATOR_UID) return {
       text: 'ours · validator',
@@ -811,17 +827,34 @@ import RoseWindow from '../components/RoseWindow.astro'
     const updatedEl = document.querySelector<HTMLElement>('[data-miners-updated]')
     if (!listEl) return
 
-    // Ordering: rejected first (most recent at top of that band),
-    // then "ours" pinned, then active (by stake desc), then inactive
+    // Ordering, top → bottom:
+    //   1. Verified — real live miners, stay sticky at the top
+    //   2. Registered with our validator (but not yet verified)
+    //   3. Rejected — surfaced so we can see what's been kicked
+    //   4. Ours — our validator + orphan miner slot, pinned for identity
+    //   5. Active on chain (declared) — chain signal, not our signal
+    //   6. Inactive / unseen — everyone else
     const all = Array.from(registerState.miners.values())
-    const rejected = all.filter((m) => m.rejected)
-    const ours = all.filter((m) => !m.rejected && (m.uid === OUR_VALIDATOR_UID || m.uid === OUR_MINER_UID))
-    const active = all.filter((m) => !m.rejected && !ours.includes(m) && m.status === 'Active')
-    const inactive = all.filter((m) => !m.rejected && !ours.includes(m) && m.status !== 'Active')
+    const taken = new Set<number>()
+    const pick = (pred: (m: MinerRow) => boolean): MinerRow[] => {
+      const out = all.filter((m) => !taken.has(m.uid) && pred(m))
+      for (const m of out) taken.add(m.uid)
+      return out
+    }
+
+    const verified = pick((m) => m.validatorStatus === 'verified')
+    const registered = pick((m) => m.validatorStatus === 'online' || m.bidActive || m.hasRental)
+    const rejected = pick((m) => !!m.rejected)
+    const ours = pick((m) => m.uid === OUR_VALIDATOR_UID || m.uid === OUR_MINER_UID)
+    const active = pick((m) => m.status === 'Active')
+    const inactive = pick(() => true)
+
+    verified.sort((a, b) => a.uid - b.uid)
+    registered.sort((a, b) => a.uid - b.uid)
     active.sort((a, b) => (b.stake || 0) - (a.stake || 0))
     inactive.sort((a, b) => a.uid - b.uid)
 
-    const ordered = [...rejected, ...ours, ...active, ...inactive]
+    const ordered = [...verified, ...registered, ...rejected, ...ours, ...active, ...inactive]
     registerState.order = ordered.map((m) => m.uid)
 
     // Diff-render: only touch what changed
@@ -1008,6 +1041,22 @@ import RoseWindow from '../components/RoseWindow.astro'
       if (verStatusEl) {
         verStatusEl.className = verified > 0 ? 'status-ok' : 'status-pending'
       }
+
+      // Per-miner status: tag each row so the Miners Register sorts
+      // verified to the top, then registered, then the rest.
+      const perMiner: Array<{ uid: number; status: string; bid_active: boolean; has_rental: boolean }> = Array.isArray(data.miners) ? data.miners : []
+      for (const m of perMiner) {
+        const row = registerState.miners.get(m.uid)
+        if (!row) continue
+        const validatorStatus =
+          m.status === 'verified' ? 'verified' :
+          m.status === 'online' ? 'online' :
+          m.status === 'offline' ? 'offline' : 'unknown'
+        row.validatorStatus = validatorStatus as MinerRow['validatorStatus']
+        row.bidActive = !!m.bid_active
+        row.hasRental = !!m.has_rental
+      }
+      renderMinersRegister()
     } catch { /* noop */ }
   }
 
