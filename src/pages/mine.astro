@@ -16,7 +16,7 @@ url = "sqlite:/opt/cathedral/data/miner.db?mode=rwc"
 
 [node_management]
 nodes = [
-  { host = "<your.gpu.ip>", port = 22, username = "root", gpu_category = "A100", gpu_count = 1 },
+  { host = "<your.gpu.ip>", port = 22, username = "root", gpu_category = "RTX3090", gpu_count = 1 },
 ]
 
 [ssh_session]
@@ -26,11 +26,25 @@ default_node_username = "root"
 [validator_assignment]
 strategy               = "fixed_assignment"
 validator_hotkey       = "5DnvAgAVykQFmgTSwLXTHpzfmi6W32VtV8L1D9yxSmtThWPb"
-grpc_endpoint_override = "https://polarisserver.tail02a2a.ts.net:443"
+grpc_endpoint_override = "http://135.181.8.214:50052"
 
 [bidding.strategy.static.static_prices]
-A100 = 0.50
+RTX3090 = 0.28
+RTX4090 = 0.45
+RTX5090 = 0.45
 `
+
+const GPU_TIERS = [
+  { name: 'entry-gaming',     examples: 'RTX 3060 12GB · 4060 · 5060',                vram: '8–12 GB',  price: '$0.08' },
+  { name: 'mid-gaming',       examples: 'RTX 3070 · 4070 · 5070 · 4070 Ti',           vram: '12–16 GB', price: '$0.14' },
+  { name: 'high-gaming',      examples: 'RTX 3080 · 3080 Ti · 4070 Ti Super',         vram: '12–16 GB', price: '$0.18' },
+  { name: 'flagship-gaming',  examples: 'RTX 3090 · 3090 Ti · 4080 · 5080',           vram: '16–24 GB', price: '$0.28' },
+  { name: 'flagship-plus',    examples: 'RTX 4090 · 5090',                            vram: '24–32 GB', price: '$0.45' },
+  { name: 'workstation',      examples: 'RTX 6000 Ada · W7900',                       vram: '48 GB',    price: '$0.75' },
+  { name: 'workstation-plus', examples: 'RTX Pro 6000 Blackwell',                     vram: '96 GB',    price: '$1.30' },
+  { name: 'apple-silicon',    examples: 'M2/M3/M4 Ultra · Studio · Mac Pro',          vram: 'unified',  price: 'by memory' },
+  { name: 'dgx-spark',        examples: 'DGX Spark · Blackwell Desktop',              vram: 'varies',   price: 'by vram' },
+] as const
 ---
 
 <Base title="mine · cathedral">
@@ -43,12 +57,35 @@ A100 = 0.50
         </span>
       </div>
       <p class="text-[12px] text-muted leading-relaxed">
-        run a gpu node. our validator verifies it via ssh. cus accrue in the ledger now;
-        emissions flow once weights unlock.
+        bring your gaming PC. we're a subnet for <span class="text-fg">home-ownable compute</span> —
+        consumer GPUs, workstations, Apple Silicon. no data-center rentals required.
+        our validator verifies the card over ssh and routes work.
       </p>
       <p class="text-[11.5px] text-dim leading-relaxed mt-2">
-        this is beta software on a live subnet. expect edges. looking to rent compute instead?
+        beta software on a live subnet. expect edges. looking to rent compute instead?
         <a href="https://polaris.computer" class="text-muted hover:text-fg underline underline-offset-2 decoration-dim ml-0.5">polaris.computer</a>.
+      </p>
+    </section>
+
+    <section>
+      <h2 class="text-[12px] text-dim uppercase tracking-[0.15em] mb-2">supported GPU classes</h2>
+      <div class="border-t border-b border-border">
+        {GPU_TIERS.map((t) => (
+          <div class="flex items-baseline gap-3 py-1.5 border-b border-border last:border-b-0 text-[11.5px]">
+            <span class="text-accent w-[130px] shrink-0 tabular-nums">{t.name}</span>
+            <span class="text-fg flex-1 min-w-0 truncate">{t.examples}</span>
+            <span class="text-dim w-[90px] text-right shrink-0 tabular-nums">{t.vram}</span>
+            <span class="text-fg w-[80px] text-right shrink-0 tabular-nums">{t.price}</span>
+          </div>
+        ))}
+      </div>
+      <p class="text-[11px] text-dim leading-relaxed mt-2">
+        data-center SKUs (A100, H100, MI300, etc.) are intentionally rejected at registration.
+        cathedral is for hardware you own, not hardware you resell. if you operate one at home
+        and want an exception, <a href="https://github.com/bigailabs/cathedral/issues" class="text-muted hover:text-fg underline underline-offset-2 decoration-dim">open an issue</a>.
+      </p>
+      <p class="text-[11px] text-warn leading-relaxed mt-2">
+        minimum vram floor: 7 GB. cards below that aren't useful for modern inference.
       </p>
     </section>
 
@@ -56,16 +93,17 @@ A100 = 0.50
       <h2 class="text-[12px] text-dim uppercase tracking-[0.15em] mb-2">prerequisites</h2>
       <ul class="text-[12px] text-fg space-y-1.5 list-none">
         <li><span class="text-accent mr-2">—</span>bittensor hotkey registered on netuid 39</li>
-        <li><span class="text-accent mr-2">—</span>a100 or h100 gpu node, linux, cuda 12.x, docker with nvidia runtime, ssh reachable</li>
-        <li><span class="text-accent mr-2">—</span>a separate cpu-only host for the miner process (any cheap vps)</li>
+        <li><span class="text-accent mr-2">—</span>a gpu node from the list above · linux or apple silicon · ssh reachable from the internet</li>
+        <li><span class="text-accent mr-2">—</span>for nvidia: cuda 12.x · docker with nvidia runtime</li>
+        <li><span class="text-accent mr-2">—</span>a separate cpu-only host for the miner process (any cheap vps, or the same box if it's idle)</li>
       </ul>
     </section>
 
     <section>
       <h2 class="text-[12px] text-dim uppercase tracking-[0.15em] mb-2">validator endpoint</h2>
       <pre class="bg-surface border border-border p-3 text-[11.5px] overflow-x-auto leading-relaxed"><code class="text-fg">hotkey    5DnvAgAVykQFmgTSwLXTHpzfmi6W32VtV8L1D9yxSmtThWPb
-grpc      tcp://polarisserver.tail02a2a.ts.net:443
-axon      (not registered while on home infra)</code></pre>
+grpc      http://135.181.8.214:50052
+axon      135.181.8.214:8080</code></pre>
     </section>
 
     <section>
@@ -110,7 +148,8 @@ INFO  starting lifecycle loop             health_check=60s</code></pre>
       <ul class="text-[12px] text-fg space-y-1.5 list-none">
         <li><span class="text-warn mr-2">—</span>weights are <span class="text-warn">parked</span> while we're below the sn39 permit stake threshold (~14k α). cus accrue; emissions flow once validator weights unlock</li>
         <li><span class="text-warn mr-2">—</span>binary gpu attestation is <span class="text-warn">disabled</span>. verification runs over ssh via <code class="text-muted">nvidia-smi</code>. spoofable, honor-system for now — will swap in the prover binary when ready</li>
-        <li><span class="text-warn mr-2">—</span>only <code class="text-muted">A100</code> and <code class="text-muted">H100</code> are priced today. other gpus can register but bids go untaken</li>
+        <li><span class="text-warn mr-2">—</span>gpu allow-list is a string match on <code class="text-muted">nvidia-smi</code> output. a determined miner can lie. we accept this tradeoff for now while onboarding real home miners is the priority — audit tracked in <a href="https://github.com/bigailabs/cathedral/issues/24" class="text-muted hover:text-fg underline underline-offset-2 decoration-dim">#24</a></li>
+        <li><span class="text-warn mr-2">—</span>apple silicon verification path isn't wired yet — nvidia cards work today, apple support lands in act 2</li>
         <li><span class="text-warn mr-2">—</span>act 2 is about making mining here economically coherent. until it lands, the incentive is pre-emission cus plus the fact that you're helping bootstrap the subnet</li>
       </ul>
     </section>
