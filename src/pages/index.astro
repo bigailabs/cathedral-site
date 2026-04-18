@@ -5,77 +5,262 @@ import MinersRegister from '../components/MinersRegister.astro'
 import RoseWindow from '../components/RoseWindow.astro'
 ---
 
-<Base title="cathedral" fullHeight={true}>
+<Base title="cathedral">
   <style>
-    .stanza-fade {
-      animation: stanza-in 900ms ease-out both;
+    /* Numbered eyebrow — structural spine */
+    .eyebrow {
+      font-size: 10px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--dim);
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
     }
-    .stanza-fade p { animation: line-in 700ms ease-out both; }
-    .stanza-fade div > p:nth-child(1) { animation-delay: 50ms; }
-    .stanza-fade div > p:nth-child(2) { animation-delay: 180ms; }
-    .stanza-fade div > p:nth-child(3) { animation-delay: 310ms; }
-    .stanza-fade > p { animation-delay: 520ms; }
-    @keyframes stanza-in {
-      from { opacity: 0; }
-      to   { opacity: 1; }
+    .eyebrow .num {
+      font-variant-numeric: tabular-nums;
+      color: var(--accent);
     }
-    @keyframes line-in {
-      from { opacity: 0; transform: translateY(4px); }
-      to   { opacity: 1; transform: translateY(0); }
+    .eyebrow .rule {
+      flex: 1;
+      height: 1px;
+      background: var(--border-soft);
     }
+    /* Section layout — generous vertical rhythm */
+    .sec { padding: 72px 0; border-bottom: 1px solid var(--border-soft); }
+    .sec:last-of-type { border-bottom: 0; }
+    .sec .wrap { display: grid; grid-template-columns: 160px 1fr; gap: 48px; }
+    @media (max-width: 900px) {
+      .sec { padding: 56px 0; }
+      .sec .wrap { grid-template-columns: 1fr; gap: 24px; }
+    }
+
+    /* Thesis band */
+    .thesis p {
+      font-family: var(--font-serif, 'Newsreader', ui-serif, Georgia, serif);
+      font-weight: 300;
+      font-size: 28px;
+      line-height: 1.35;
+      color: var(--fg);
+      margin: 0;
+      max-width: 32ch;
+    }
+    .thesis p + p { margin-top: 18px; color: var(--muted); font-size: 22px; }
+    .thesis p em { font-style: italic; color: var(--muted); }
+    .thesis p .accent { color: var(--accent); font-style: normal; }
+    @media (max-width: 900px) {
+      .thesis p { font-size: 22px; }
+      .thesis p + p { font-size: 18px; }
+    }
+
+    /* Fade in on first paint for the thesis only */
+    .thesis-fade { animation: fade-in 900ms ease-out both; }
+    .thesis-fade p:nth-child(1) { animation: fade-in 700ms 80ms ease-out both; }
+    .thesis-fade p:nth-child(2) { animation: fade-in 700ms 280ms ease-out both; }
+    @keyframes fade-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
     @media (prefers-reduced-motion: reduce) {
-      .stanza-fade, .stanza-fade p { animation: none !important; }
+      .thesis-fade, .thesis-fade p { animation: none !important; }
     }
+
+    /* State section — the two panes */
+    .state-grid {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 12px;
+      height: 540px;
+      min-height: 420px;
+    }
+    @media (max-width: 900px) {
+      .state-grid { grid-template-columns: 1fr; height: auto; }
+      .state-grid > * { min-height: 320px; }
+    }
+
+    /* Honest numbers register */
+    .register { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .register th {
+      text-align: left; padding: 10px 12px 10px 0;
+      font-weight: 400; font-size: 9px;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--dim);
+      border-bottom: 1px solid var(--border);
+    }
+    .register th.r { text-align: right; }
+    .register td { padding: 12px 12px 12px 0; border-bottom: 1px solid var(--border-soft); color: var(--fg); }
+    .register td.r { text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; }
+    .register td.label { color: var(--muted); }
+    .register .status-ok     { color: var(--accent); }
+    .register .status-pending{ color: var(--warn); }
+    .register .status-off    { color: var(--err); }
+
+    /* Two doors */
+    .doors { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border-soft); border: 1px solid var(--border-soft); }
+    @media (max-width: 700px) { .doors { grid-template-columns: 1fr; } }
+    .door {
+      background: var(--bg); padding: 28px; min-height: 180px;
+      display: flex; flex-direction: column; justify-content: space-between;
+      transition: background 120ms;
+    }
+    .door:hover { background: var(--surface); }
+    .door .k { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--dim); }
+    .door .t { font-family: var(--font-serif, 'Newsreader', ui-serif, Georgia, serif); font-size: 22px; font-weight: 300; color: var(--fg); margin-top: 8px; line-height: 1.3; }
+    .door .arrow { color: var(--accent); font-size: 16px; }
   </style>
-  <!-- stanza -->
-  <div class="stanza-fade relative mb-5 pb-4 border-b border-borderSoft shrink-0 max-w-[72ch]">
-    <div class="absolute right-0 top-1/2 -translate-y-1/2 text-dim opacity-25 pointer-events-none hidden md:block">
-      <RoseWindow size={72} airy={true} />
-    </div>
-    <div class="relative font-serif text-[19px] text-fg leading-[1.4] space-y-0 font-[300]">
-      <p>a cathedral is a commons <span class="text-dim">—</span></p>
-      <p>walls you didn't build, kept by hands you'll never meet.</p>
-      <p><em class="text-muted">the masons who laid the first stones knew they wouldn't see the spire.</em></p>
-    </div>
-    <p class="relative font-serif text-[14px] text-muted leading-[1.55] mt-3 italic font-[300]">
-      we're building compute the same way — in public, over time, for whoever needs it.
-    </p>
-  </div>
 
-  <!-- status strip -->
-  <div class="flex flex-wrap items-center gap-x-6 gap-y-1 text-[11px] text-dim mb-3 shrink-0">
-    <span>
-      <span class="text-dim">validator</span>
-      <span class="ml-1.5 text-fg" data-val="validator-hotkey">5DnvAg…ThWPb</span>
-      <span class="ml-2 text-dim">uid</span>
-      <span class="ml-1 text-fg" data-val="validator-uid">123</span>
-    </span>
-    <span>
-      <span class="text-dim">miner</span>
-      <span class="ml-1.5 text-fg" data-val="miner-hotkey">5FvW8n…Ub9k</span>
-      <span class="ml-2 text-dim">uid</span>
-      <span class="ml-1 text-fg" data-val="miner-uid">115</span>
-    </span>
-    <span>
-      <span class="text-dim">block</span>
-      <span class="ml-1.5 text-fg tabular-nums" data-val="block">—</span>
-    </span>
-    <span>
-      <span class="text-dim">stake</span>
-      <span class="ml-1.5 text-fg tabular-nums" data-val="stake">131.82α</span>
-    </span>
-    <span class="text-dim" data-val="permit-note">permit pending · top 14 by α</span>
-  </div>
+  <!-- ═══════════════ 00 Thesis ═══════════════ -->
+  <section class="sec">
+    <div class="wrap">
+      <div>
+        <div class="eyebrow"><span class="num">00</span><span>Thesis</span></div>
+      </div>
+      <div class="thesis thesis-fade">
+        <p>
+          A cathedral is a <span class="accent">commons</span> —<br/>
+          walls you didn't build,<br/>
+          kept by hands you'll never meet.<br/>
+          <em>The masons who laid the first stones<br/>knew they wouldn't see the spire.</em>
+        </p>
+        <p>
+          We're building compute the same way.<br/>
+          In public, over time, for whoever needs it.
+        </p>
+      </div>
+    </div>
+  </section>
 
-  <!-- validator terminal + miners register, side-by-side on md+ -->
-  <div class="flex-1 min-h-0 grid grid-cols-1 md:grid-cols-[1.5fr_1fr] gap-3">
-    <LogStream id="validator" label="validator" host="vps · fin" role="VERIFY" terminalIndex="T1" />
-    <MinersRegister />
-    {/* safelist for dynamic classes set by JS below:
-        bg-accentDim border-l-2 border-accent pl-2 -ml-2
-        border-warn bg-warnDim text-warn bg-muted text-dim
-        bg-err/20 border-err text-err */}
-  </div>
+  <!-- ═══════════════ 01 Live state ═══════════════ -->
+  <section class="sec">
+    <div class="wrap">
+      <div>
+        <div class="eyebrow"><span class="num">01</span><span>Live state</span></div>
+        <p class="mt-4 text-[12px] text-muted max-w-[28ch] leading-[1.55]">
+          The validator, verifying. Miners on chain, as we see them.
+        </p>
+        <p class="mt-3 text-[11px] text-dim tabular-nums leading-[1.6]">
+          <span class="block">sn39 · finney</span>
+          <span class="block">block <span data-val="block" class="text-fg">—</span></span>
+          <span class="block">stake <span class="text-fg">131.82α</span> / <span class="text-muted">~14k α permit</span></span>
+        </p>
+      </div>
+      <div class="state-grid">
+        <LogStream id="validator" label="validator" host="vps · fin" role="VERIFY" terminalIndex="T1" />
+        <MinersRegister />
+        {/* safelist for dynamic classes set by JS below:
+            bg-accentDim border-l-2 border-accent pl-2 -ml-2
+            border-warn bg-warnDim text-warn bg-muted text-dim
+            bg-errDim border-err text-err */}
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ 02 Honest numbers ═══════════════ -->
+  <section class="sec">
+    <div class="wrap">
+      <div>
+        <div class="eyebrow"><span class="num">02</span><span>Honest numbers</span></div>
+        <p class="mt-4 text-[12px] text-muted max-w-[28ch] leading-[1.55] font-serif italic font-[300] text-[14px]">
+          What's true today.<br/>Nothing more.
+        </p>
+      </div>
+      <div>
+        <table class="register">
+          <thead>
+            <tr>
+              <th style="width:34%">Register</th>
+              <th>State</th>
+              <th class="r" style="width:20%">Value</th>
+              <th class="r" style="width:16%">Updated</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="label">Subnet</td>
+              <td class="status-ok">Registered on finney</td>
+              <td class="r">SN39</td>
+              <td class="r">2026-04-02</td>
+            </tr>
+            <tr>
+              <td class="label">Validator process</td>
+              <td class="status-ok">Running</td>
+              <td class="r" data-val="val-status">—</td>
+              <td class="r">live</td>
+            </tr>
+            <tr>
+              <td class="label">Axon on chain</td>
+              <td class="status-ok">Published</td>
+              <td class="r">135.181.8.214:8080</td>
+              <td class="r">2026-04-18</td>
+            </tr>
+            <tr>
+              <td class="label">Weights on chain</td>
+              <td class="status-pending">Parked · below permit</td>
+              <td class="r">—</td>
+              <td class="r">—</td>
+            </tr>
+            <tr>
+              <td class="label">Miners active on SN39</td>
+              <td class="status-ok">Discovering</td>
+              <td class="r" data-val="miners-active">—</td>
+              <td class="r">live</td>
+            </tr>
+            <tr>
+              <td class="label">Verified GPU nodes</td>
+              <td class="status-pending">0 — awaiting first</td>
+              <td class="r">0</td>
+              <td class="r">—</td>
+            </tr>
+            <tr>
+              <td class="label">GPU categories live</td>
+              <td class="status-pending">
+                Draft
+                <span class="ml-2 text-[9px] text-dim uppercase tracking-[0.12em]" title="Allow-list is a string match on nvidia-smi. Spoofable. See issue #24.">· spoofable</span>
+              </td>
+              <td class="r">consumer + workstation</td>
+              <td class="r">2026-04-18</td>
+            </tr>
+            <tr>
+              <td class="label">Emissions</td>
+              <td class="status-pending">Accrue in ledger · no payouts yet</td>
+              <td class="r">0.00τ</td>
+              <td class="r">—</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ 03 Participate ═══════════════ -->
+  <section class="sec">
+    <div class="wrap">
+      <div>
+        <div class="eyebrow"><span class="num">03</span><span>Participate</span></div>
+      </div>
+      <div>
+        <div class="doors">
+          <a href="/mine" class="door">
+            <div>
+              <div class="k">For miners</div>
+              <div class="t">Run a node.<br/><em>Bring what you have.</em></div>
+            </div>
+            <div class="flex items-center justify-between text-[10px] text-dim tracking-[0.18em] uppercase">
+              <span>/mine</span>
+              <span class="arrow">→</span>
+            </div>
+          </a>
+          <a href="/roadmap" class="door">
+            <div>
+              <div class="k">For builders</div>
+              <div class="t">Read the arc.<br/><em>Three acts, in order.</em></div>
+            </div>
+            <div class="flex items-center justify-between text-[10px] text-dim tracking-[0.18em] uppercase">
+              <span>/roadmap</span>
+              <span class="arrow">→</span>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
 </Base>
 
 <script>
@@ -708,6 +893,22 @@ import RoseWindow from '../components/RoseWindow.astro'
         const block = data?.summary?.block
         if (typeof block === 'number') blockEl.textContent = block.toLocaleString()
       }
+      // Honest-numbers table data
+      const activeEl = document.querySelector<HTMLElement>('[data-val="miners-active"]')
+      if (activeEl) {
+        const active = data?.summary?.active_miners
+        const total = data?.summary?.total_miners
+        if (typeof active === 'number' && typeof total === 'number') {
+          activeEl.textContent = `${active} · ${total} uids`
+        }
+      }
+      const valStatusEl = document.querySelector<HTMLElement>('[data-val="val-status"]')
+      if (valStatusEl) {
+        // Our validator is uid 123. Show its on-chain status string directly.
+        const us = (data?.miners || []).find((m: any) => m?.uid === 123)
+        valStatusEl.textContent = us?.status ? String(us.status).toLowerCase() : 'unknown'
+      }
+
       // Populate miners register
       const miners: any[] = Array.isArray(data?.miners) ? data.miners : []
       for (const m of miners) {
