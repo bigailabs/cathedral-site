@@ -66,12 +66,6 @@ import RoseWindow from '../components/RoseWindow.astro'
     <span class="text-dim" data-val="permit-note">permit pending · top 14 by α</span>
   </div>
 
-  <!-- migration note — validator now lives on an operator-controlled vps -->
-  <div class="text-[11px] text-muted border border-border bg-surface px-3 py-2 mb-3 shrink-0 leading-relaxed">
-    validator re-hosted 2026-04-18 on operator-controlled infra · on-chain axon
-    <code class="text-fg">135.181.8.214:8080</code> · log streaming will reconnect shortly
-  </div>
-
   <!-- the two log panes, side-by-side on md+, each pane scrolls internally -->
   <div class="flex-1 min-h-0 grid grid-cols-1 md:grid-cols-2 gap-3">
     <LogStream id="validator" label="validator" host="vps · fin" />
