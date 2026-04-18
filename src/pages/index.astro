@@ -199,17 +199,28 @@ import RoseWindow from '../components/RoseWindow.astro'
             <tr>
               <td class="label">Miners declared on SN39</td>
               <td class="status-ok">
-                Discovering
-                <span class="ml-2 text-[9px] text-dim uppercase tracking-[0.12em] cursor-help" title="Declared = has an axon endpoint on chain. Not the same as SSH-verified. Our validator is catching up.">· declared ≠ verified</span>
+                On chain
+                <span class="ml-2 text-[9px] text-dim uppercase tracking-[0.12em] cursor-help" title="Declared = has an axon endpoint on chain. Cheap signal — doesn't mean the miner has ever contacted our validator.">· chain only</span>
               </td>
               <td class="r" data-val="miners-active">—</td>
               <td class="r">live</td>
             </tr>
             <tr>
+              <td class="label">Miners registered with us</td>
+              <td class="status-pending" data-val="miners-registered-status">
+                <span data-val="miners-registered-label">—</span>
+                <span class="ml-2 text-[9px] text-dim uppercase tracking-[0.12em] cursor-help" title="Miner has called RegisterBid on our validator with at least one node still active (bid_active=1 or under rental).">· registered</span>
+              </td>
+              <td class="r" data-val="miners-registered">—</td>
+              <td class="r">live</td>
+            </tr>
+            <tr>
               <td class="label">Verified GPU nodes</td>
-              <td class="status-pending">0 — awaiting first</td>
-              <td class="r">0</td>
-              <td class="r">—</td>
+              <td class="status-pending" data-val="nodes-verified-status">
+                <span data-val="nodes-verified-label">0 — awaiting first</span>
+              </td>
+              <td class="r" data-val="nodes-verified">0</td>
+              <td class="r">live</td>
             </tr>
             <tr>
               <td class="label">GPU categories live</td>
@@ -275,6 +286,7 @@ import RoseWindow from '../components/RoseWindow.astro'
     validator: `${API_BASE}/api/substrate/validator/logs`,
     miner: `${API_BASE}/api/substrate/miner/logs`,
     state: `${API_BASE}/api/substrate/state`,
+    registry: `${API_BASE}/api/substrate/validator/registry`,
   }
   const POLL_MS = 4000
   const STATE_POLL_MS = 10000
@@ -956,6 +968,49 @@ import RoseWindow from '../components/RoseWindow.astro'
     } catch { /* noop */ }
   }
 
+  async function fetchRegistry() {
+    // Three-tier funnel: declared on chain (above) → registered with us → verified.
+    // Backend caches this at 30s so hammering is cheap.
+    try {
+      const r = await fetch(ENDPOINTS.registry, { cache: 'no-store' })
+      if (!r.ok) return
+      const payload = await r.json()
+      const data = payload?.data
+      if (!data) return
+
+      const regCountEl = document.querySelector<HTMLElement>('[data-val="miners-registered"]')
+      const regLabelEl = document.querySelector<HTMLElement>('[data-val="miners-registered-label"]')
+      const regStatusEl = document.querySelector<HTMLElement>('[data-val="miners-registered-status"]')
+      const minersRegistered = Number(data.miners_with_nodes) || 0
+      const nodesRegistered = Number(data.nodes_registered) || 0
+      if (regCountEl) {
+        regCountEl.textContent = minersRegistered.toString()
+      }
+      if (regLabelEl) {
+        if (minersRegistered === 0) {
+          regLabelEl.textContent = 'None yet'
+        } else {
+          regLabelEl.textContent = `${nodesRegistered} node${nodesRegistered === 1 ? '' : 's'}`
+        }
+      }
+      if (regStatusEl) {
+        regStatusEl.className = minersRegistered > 0 ? 'status-ok' : 'status-pending'
+      }
+
+      const verCountEl = document.querySelector<HTMLElement>('[data-val="nodes-verified"]')
+      const verLabelEl = document.querySelector<HTMLElement>('[data-val="nodes-verified-label"]')
+      const verStatusEl = document.querySelector<HTMLElement>('[data-val="nodes-verified-status"]')
+      const verified = Number(data.nodes_verified) || 0
+      if (verCountEl) verCountEl.textContent = verified.toString()
+      if (verLabelEl) {
+        verLabelEl.textContent = verified === 0 ? '0 — awaiting first' : `${verified} live`
+      }
+      if (verStatusEl) {
+        verStatusEl.className = verified > 0 ? 'status-ok' : 'status-pending'
+      }
+    } catch { /* noop */ }
+  }
+
   // ---------------------------------------------------------------------------
   // Boot
   // ---------------------------------------------------------------------------
@@ -978,6 +1033,9 @@ import RoseWindow from '../components/RoseWindow.astro'
 
     fetchState()
     setInterval(fetchState, STATE_POLL_MS)
+
+    fetchRegistry()
+    setInterval(fetchRegistry, STATE_POLL_MS)
   }
 
   if (document.readyState === 'loading') {
