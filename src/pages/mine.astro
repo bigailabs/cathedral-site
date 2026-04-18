@@ -48,72 +48,130 @@ const GPU_TIERS = [
 ---
 
 <Base title="mine · cathedral">
-  <div class="max-w-[720px] w-full mx-auto space-y-8 py-4">
-    <section>
-      <div class="flex items-baseline gap-3 mb-1">
-        <h1 class="text-[15px] text-fg">mine</h1>
-        <span class="text-[9px] uppercase tracking-[0.15em] text-warn border border-warn/40 px-1.5 py-0.5">
-          beta
-        </span>
+  <style>
+    .eyebrow {
+      font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase;
+      color: var(--dim); display: flex; align-items: baseline; gap: 10px;
+    }
+    .eyebrow .num { font-variant-numeric: tabular-nums; color: var(--accent); }
+    .sec { padding: 56px 0; border-bottom: 1px solid var(--border-soft); }
+    .sec:last-of-type { border-bottom: 0; }
+    .sec .wrap { display: grid; grid-template-columns: 160px 1fr; gap: 48px; }
+    @media (max-width: 900px) {
+      .sec { padding: 44px 0; } .sec .wrap { grid-template-columns: 1fr; gap: 20px; }
+    }
+    .lede {
+      font-family: var(--font-serif, 'Newsreader', ui-serif, Georgia, serif);
+      font-size: 20px; font-weight: 300; line-height: 1.45; color: var(--fg);
+      max-width: 34ch; margin: 0;
+    }
+    .lede em { font-style: italic; color: var(--muted); }
+    .beta-tag {
+      display: inline-block; font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase;
+      color: var(--warn); border: 1px solid var(--warn); padding: 2px 6px;
+      margin-left: 10px; vertical-align: middle;
+    }
+    .tiers { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .tiers td { padding: 10px 12px 10px 0; border-bottom: 1px solid var(--border-soft); }
+    .tiers td.name  { color: var(--accent); width: 28%; font-variant-numeric: tabular-nums; }
+    .tiers td.ex    { color: var(--fg); }
+    .tiers td.vram  { color: var(--dim); text-align: right; width: 18%; font-variant-numeric: tabular-nums; }
+    .tiers td.price { color: var(--fg); text-align: right; width: 14%; font-variant-numeric: tabular-nums; }
+    pre.code {
+      background: var(--surface); border: 1px solid var(--border);
+      padding: 14px 16px; font-size: 11.5px; line-height: 1.6;
+      overflow-x: auto; color: var(--fg);
+    }
+    .limitations li { position: relative; padding-left: 16px; color: var(--fg); font-size: 12px; line-height: 1.7; }
+    .limitations li::before { content: '—'; position: absolute; left: 0; color: var(--warn); }
+    .limitations li em { color: var(--warn); font-style: normal; }
+  </style>
+
+  <section class="sec">
+    <div class="wrap">
+      <div><div class="eyebrow"><span class="num">00</span><span>Mine</span></div></div>
+      <div>
+        <p class="lede">Bring your gaming PC.<br/><em>Cathedral is for home-ownable compute.</em></p>
+        <p class="text-[12px] text-muted leading-relaxed max-w-[56ch] mt-4">
+          Consumer GPUs, workstations, Apple Silicon, DGX Spark. No data-center rentals.
+          Our validator verifies the card over SSH and routes work.
+          <span class="beta-tag">beta</span>
+        </p>
+        <p class="text-[11px] text-dim leading-relaxed mt-3">
+          Beta software on a live subnet. Looking to rent compute instead?
+          <a href="https://polaris.computer" class="text-muted hover:text-fg underline underline-offset-2 decoration-dim">polaris.computer</a>.
+        </p>
       </div>
-      <p class="text-[12px] text-muted leading-relaxed">
-        bring your gaming PC. we're a subnet for <span class="text-fg">home-ownable compute</span> —
-        consumer GPUs, workstations, Apple Silicon. no data-center rentals required.
-        our validator verifies the card over ssh and routes work.
-      </p>
-      <p class="text-[11.5px] text-dim leading-relaxed mt-2">
-        beta software on a live subnet. expect edges. looking to rent compute instead?
-        <a href="https://polaris.computer" class="text-muted hover:text-fg underline underline-offset-2 decoration-dim ml-0.5">polaris.computer</a>.
-      </p>
-    </section>
+    </div>
+  </section>
 
-    <section>
-      <h2 class="text-[12px] text-dim uppercase tracking-[0.15em] mb-2">supported GPU classes</h2>
-      <div class="border-t border-b border-border">
-        {GPU_TIERS.map((t) => (
-          <div class="flex items-baseline gap-3 py-1.5 border-b border-border last:border-b-0 text-[11.5px]">
-            <span class="text-accent w-[130px] shrink-0 tabular-nums">{t.name}</span>
-            <span class="text-fg flex-1 min-w-0 truncate">{t.examples}</span>
-            <span class="text-dim w-[90px] text-right shrink-0 tabular-nums">{t.vram}</span>
-            <span class="text-fg w-[80px] text-right shrink-0 tabular-nums">{t.price}</span>
-          </div>
-        ))}
+  <section class="sec">
+    <div class="wrap">
+      <div>
+        <div class="eyebrow"><span class="num">01</span><span>Supported hardware</span></div>
+        <p class="text-[11px] text-muted mt-4 leading-relaxed max-w-[28ch]">
+          Consumer, workstation, Apple. Data-center SKUs intentionally rejected.
+        </p>
       </div>
-      <p class="text-[11px] text-dim leading-relaxed mt-2">
-        data-center SKUs (A100, H100, MI300, etc.) are intentionally rejected at registration.
-        cathedral is for hardware you own, not hardware you resell. if you operate one at home
-        and want an exception, <a href="https://github.com/bigailabs/cathedral/issues" class="text-muted hover:text-fg underline underline-offset-2 decoration-dim">open an issue</a>.
-      </p>
-      <p class="text-[11px] text-warn leading-relaxed mt-2">
-        minimum vram floor: 7 GB. cards below that aren't useful for modern inference.
-      </p>
-    </section>
+      <div>
+        <table class="tiers">
+          <tbody>
+            {GPU_TIERS.map((t) => (
+              <tr>
+                <td class="name">{t.name}</td>
+                <td class="ex">{t.examples}</td>
+                <td class="vram">{t.vram}</td>
+                <td class="price">{t.price}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p class="text-[11px] text-dim leading-relaxed mt-4 max-w-[64ch]">
+          A100, H100, MI300, etc. are rejected at registration. Operate one at home and want an exception?
+          <a href="https://github.com/bigailabs/cathedral/issues" class="text-muted hover:text-fg underline underline-offset-2 decoration-dim">Open an issue</a>.
+        </p>
+        <p class="text-[11px] text-warn leading-relaxed mt-2">Minimum VRAM floor: 7 GB.</p>
+      </div>
+    </div>
+  </section>
 
-    <section>
-      <h2 class="text-[12px] text-dim uppercase tracking-[0.15em] mb-2">prerequisites</h2>
-      <ul class="text-[12px] text-fg space-y-1.5 list-none">
-        <li><span class="text-accent mr-2">—</span>bittensor hotkey registered on netuid 39</li>
-        <li><span class="text-accent mr-2">—</span>a gpu node from the list above · linux or apple silicon · ssh reachable from the internet</li>
-        <li><span class="text-accent mr-2">—</span>for nvidia: cuda 12.x · docker with nvidia runtime</li>
-        <li><span class="text-accent mr-2">—</span>a separate cpu-only host for the miner process (any cheap vps, or the same box if it's idle)</li>
-      </ul>
-    </section>
+  <section class="sec">
+    <div class="wrap">
+      <div><div class="eyebrow"><span class="num">02</span><span>Prerequisites</span></div></div>
+      <div>
+        <ul class="limitations space-y-1.5 list-none">
+          <li>Bittensor hotkey registered on netuid 39</li>
+          <li>A GPU node from the list above · Linux or Apple Silicon · SSH reachable</li>
+          <li>For Nvidia: CUDA 12.x · Docker with Nvidia runtime</li>
+          <li>A separate CPU-only host for the miner process (any cheap VPS)</li>
+        </ul>
+      </div>
+    </div>
+  </section>
 
-    <section>
-      <h2 class="text-[12px] text-dim uppercase tracking-[0.15em] mb-2">validator endpoint</h2>
-      <pre class="bg-surface border border-border p-3 text-[11.5px] overflow-x-auto leading-relaxed"><code class="text-fg">hotkey    5DnvAgAVykQFmgTSwLXTHpzfmi6W32VtV8L1D9yxSmtThWPb
+  <section class="sec">
+    <div class="wrap">
+      <div><div class="eyebrow"><span class="num">03</span><span>Validator endpoint</span></div></div>
+      <div>
+<pre class="code">hotkey    5DnvAgAVykQFmgTSwLXTHpzfmi6W32VtV8L1D9yxSmtThWPb
 grpc      http://135.181.8.214:50052
-axon      135.181.8.214:8080</code></pre>
-    </section>
+axon      135.181.8.214:8080</pre>
+      </div>
+    </div>
+  </section>
 
-    <section>
-      <h2 class="text-[12px] text-dim uppercase tracking-[0.15em] mb-2">miner.toml</h2>
-      <pre class="bg-surface border border-border p-3 text-[11px] overflow-x-auto leading-[1.6]"><code class="text-fg">{minerToml}</code></pre>
-    </section>
+  <section class="sec">
+    <div class="wrap">
+      <div><div class="eyebrow"><span class="num">04</span><span>miner.toml</span></div></div>
+      <div><pre class="code">{minerToml}</pre></div>
+    </div>
+  </section>
 
-    <section>
-      <h2 class="text-[12px] text-dim uppercase tracking-[0.15em] mb-2">build &amp; run</h2>
-      <pre class="bg-surface border border-border p-3 text-[11.5px] overflow-x-auto leading-relaxed"><code class="text-fg"># on an x86_64 linux box
+  <section class="sec">
+    <div class="wrap">
+      <div><div class="eyebrow"><span class="num">05</span><span>Build &amp; run</span></div></div>
+      <div>
+<pre class="code"># on an x86_64 linux box
 apt-get install -y protobuf-compiler pkg-config libssl-dev build-essential
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 source ~/.cargo/env
@@ -122,46 +180,56 @@ git clone https://github.com/bigailabs/cathedral.git
 cd cathedral
 cargo build --release --package basilica-miner
 
-./target/release/cathedral-miner --config /path/to/miner.toml</code></pre>
-    </section>
+./target/release/cathedral-miner --config /path/to/miner.toml</pre>
+      </div>
+    </div>
+  </section>
 
-    <section>
-      <h2 class="text-[12px] text-dim uppercase tracking-[0.15em] mb-2">expected logs</h2>
-      <pre class="bg-surface border border-border p-3 text-[11.5px] overflow-x-auto leading-relaxed"><code class="text-muted">INFO  registering nodes with validator   miner_hotkey=5... node_count=1
+  <section class="sec">
+    <div class="wrap">
+      <div><div class="eyebrow"><span class="num">06</span><span>Expected logs</span></div></div>
+      <div>
+<pre class="code" style="color: var(--muted);">INFO  registering nodes with validator   miner_hotkey=5... node_count=1
 INFO  successfully registered             registration_id=reg-... has_ssh_key=true
 INFO  deploying validator ssh key to nodes
 INFO  deployed ssh keys for validator     nodes=1
-INFO  starting lifecycle loop             health_check=60s</code></pre>
-    </section>
+INFO  starting lifecycle loop             health_check=60s</pre>
+        <p class="text-[11px] text-muted mt-4 leading-relaxed max-w-[56ch]">
+          Watch the validator side on <a href="/" class="text-muted hover:text-fg underline underline-offset-2 decoration-dim">the home page</a>.
+          Next verification cycle runs every ~10 min; your UID appears in the miners register once seen.
+          Long-form guide at <a href="https://github.com/bigailabs/cathedral/blob/main/docs/miner.md" class="text-muted hover:text-fg underline underline-offset-2 decoration-dim">docs/miner.md</a>.
+        </p>
+      </div>
+    </div>
+  </section>
 
-    <section>
-      <h2 class="text-[12px] text-dim uppercase tracking-[0.15em] mb-2">verify</h2>
-      <ul class="text-[12px] text-fg space-y-1.5 list-none">
-        <li><span class="text-accent mr-2">—</span>watch the validator side on <a href="/" class="text-accent hover:underline underline-offset-2">the dashboard</a> — next verification cycle runs every ~10 min</li>
-        <li><span class="text-accent mr-2">—</span>your uid appears in the miners table once scored</li>
-        <li><span class="text-accent mr-2">—</span>see <a href="https://github.com/bigailabs/cathedral/blob/main/docs/miner.md" class="text-accent hover:underline underline-offset-2">docs/miner.md</a> for the long form</li>
-      </ul>
-    </section>
+  <section class="sec">
+    <div class="wrap">
+      <div><div class="eyebrow"><span class="num">07</span><span>Known limitations</span></div></div>
+      <div>
+        <ul class="limitations space-y-2 list-none">
+          <li>Weights are <em>parked</em> — we're below SN39's ~14k α permit stake threshold. CUs accrue; emissions flow once weights unlock.</li>
+          <li>Binary GPU attestation is <em>disabled</em>. Verification runs over SSH via <code style="color:var(--muted)">nvidia-smi</code>. Spoofable for now — prover binary lands later.</li>
+          <li>GPU allow-list is a <em>string match</em> on <code style="color:var(--muted)">nvidia-smi</code> output. Audit tracked in <a href="https://github.com/bigailabs/cathedral/issues/24" class="text-muted hover:text-fg underline underline-offset-2 decoration-dim">#24</a>.</li>
+          <li>Apple Silicon verification isn't wired yet. Nvidia works today, Apple lands in Act 2.</li>
+          <li>Act 2 is about making mining economically coherent. Until it lands, the incentive is pre-emission CUs plus bootstrap participation.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
 
-    <section>
-      <h2 class="text-[12px] text-dim uppercase tracking-[0.15em] mb-2">known limitations</h2>
-      <ul class="text-[12px] text-fg space-y-1.5 list-none">
-        <li><span class="text-warn mr-2">—</span>weights are <span class="text-warn">parked</span> while we're below the sn39 permit stake threshold (~14k α). cus accrue; emissions flow once validator weights unlock</li>
-        <li><span class="text-warn mr-2">—</span>binary gpu attestation is <span class="text-warn">disabled</span>. verification runs over ssh via <code class="text-muted">nvidia-smi</code>. spoofable, honor-system for now — will swap in the prover binary when ready</li>
-        <li><span class="text-warn mr-2">—</span>gpu allow-list is a string match on <code class="text-muted">nvidia-smi</code> output. a determined miner can lie. we accept this tradeoff for now while onboarding real home miners is the priority — audit tracked in <a href="https://github.com/bigailabs/cathedral/issues/24" class="text-muted hover:text-fg underline underline-offset-2 decoration-dim">#24</a></li>
-        <li><span class="text-warn mr-2">—</span>apple silicon verification path isn't wired yet — nvidia cards work today, apple support lands in act 2</li>
-        <li><span class="text-warn mr-2">—</span>act 2 is about making mining here economically coherent. until it lands, the incentive is pre-emission cus plus the fact that you're helping bootstrap the subnet</li>
-      </ul>
-    </section>
-
-    <section class="pt-4 border-t border-border">
-      <h2 class="text-[11px] text-dim uppercase tracking-[0.15em] mb-2">disclaimer</h2>
-      <p class="text-[11px] text-dim leading-relaxed">
-        cathedral is early software on a live subnet. no sla, no uptime guarantee, no promise of yield.
-        hotkeys and ssh keys you deploy are your responsibility. code is <a href="https://github.com/bigailabs/cathedral/blob/main/LICENSE" class="text-muted hover:text-fg underline underline-offset-2 decoration-dim">mit-licensed</a>, operated under
-        <a href="https://github.com/bigailabs/cathedral/blob/main/docs/policy.md" class="text-muted hover:text-fg underline underline-offset-2 decoration-dim ml-1">the policy</a>.
-        run at your own risk.
-      </p>
-    </section>
-  </div>
+  <section class="sec">
+    <div class="wrap">
+      <div><div class="eyebrow"><span class="num">08</span><span>Disclaimer</span></div></div>
+      <div>
+        <p class="text-[12px] text-muted leading-relaxed max-w-[64ch]">
+          Cathedral is early software on a live subnet. No SLA, no uptime guarantee, no promise of yield.
+          Hotkeys and SSH keys you deploy are your responsibility. Code is
+          <a href="https://github.com/bigailabs/cathedral/blob/main/LICENSE" class="text-muted hover:text-fg underline underline-offset-2 decoration-dim">MIT-licensed</a>, operated under
+          <a href="https://github.com/bigailabs/cathedral/blob/main/docs/policy.md" class="text-muted hover:text-fg underline underline-offset-2 decoration-dim">the policy</a>.
+          Run at your own risk.
+        </p>
+      </div>
+    </div>
+  </section>
 </Base>

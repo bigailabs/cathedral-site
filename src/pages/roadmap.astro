@@ -1,6 +1,5 @@
 ---
 import Base from '../layouts/Base.astro'
-import RoseWindow from '../components/RoseWindow.astro'
 
 type Issue = {
   number: number
@@ -12,41 +11,21 @@ type Issue = {
 }
 
 const ACTS = [
-  {
-    id: 'act-1',
-    title: 'act 1 · baseline',
-    blurb: 'get the validator and miner reliable. unlock weights with stake. harden the rest api.',
-  },
-  {
-    id: 'act-2',
-    title: 'act 2 · mining',
-    blurb: 'make mining on cathedral economically coherent. generalize the image pipeline beyond one subnet. the business model is still being worked out in public.',
-  },
-  {
-    id: 'act-3',
-    title: 'act 3 · ecosystem',
-    blurb: 'external miners onboard. subnet scouting. a treasury view that shows compute in, mining out.',
-  },
+  { id: 'act-1', num: '01', title: 'Baseline', blurb: 'Get the validator and miner reliable. Unlock weights with stake. Harden the REST API.' },
+  { id: 'act-2', num: '02', title: 'Mining',   blurb: 'Make mining on cathedral economically coherent. Generalize the image pipeline. The business model is being worked out in public.' },
+  { id: 'act-3', num: '03', title: 'Ecosystem',blurb: 'External miners onboard. Subnet scouting. A treasury view that shows compute in, mining out.' },
 ] as const
 
 async function fetchIssues(): Promise<{ issues: Issue[]; ok: boolean }> {
   try {
-    const headers: Record<string, string> = {
-      'Accept': 'application/vnd.github+json',
-      'User-Agent': 'cathedral-site',
-    }
+    const headers: Record<string, string> = { 'Accept': 'application/vnd.github+json', 'User-Agent': 'cathedral-site' }
     const token = import.meta.env.GITHUB_TOKEN || process.env.GITHUB_TOKEN
     if (token) headers.Authorization = `Bearer ${token}`
-    const r = await fetch(
-      'https://api.github.com/repos/bigailabs/cathedral/issues?state=all&per_page=100',
-      { headers },
-    )
+    const r = await fetch('https://api.github.com/repos/bigailabs/cathedral/issues?state=all&per_page=100', { headers })
     if (!r.ok) return { issues: [], ok: false }
     const data = (await r.json()) as Issue[]
     return { issues: data.filter((i) => !i.pull_request), ok: true }
-  } catch {
-    return { issues: [], ok: false }
-  }
+  } catch { return { issues: [], ok: false } }
 }
 
 const { issues, ok: fetchOk } = await fetchIssues()
@@ -69,125 +48,151 @@ const openCount = issues.filter((i) => i.state === 'open').length
 ---
 
 <Base title="roadmap · cathedral">
-  <div class="max-w-[820px] w-full mx-auto space-y-10 py-4">
-    <section>
-      <h1 class="text-[15px] text-fg mb-1">roadmap</h1>
-      <p class="text-[12px] text-muted leading-relaxed">
-        three acts, in rough order. not dated, not promised — just the arc we
-        think the work wants to take. scope and sequencing change as we learn.
-      </p>
-      <p class="text-[11.5px] text-dim leading-relaxed mt-2">
-        live from <a href="https://github.com/bigailabs/cathedral/issues" class="text-muted hover:text-fg underline underline-offset-2 decoration-dim">github issues</a> · no private backlog
-      </p>
-      {total > 0 && (
-        <p class="text-[11px] text-dim mt-3 tabular-nums">
-          {openCount} open · {total - openCount} closed · {total} total
+  <style>
+    .eyebrow {
+      font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase;
+      color: var(--dim); display: flex; align-items: baseline; gap: 10px;
+    }
+    .eyebrow .num { font-variant-numeric: tabular-nums; color: var(--accent); }
+    .sec { padding: 56px 0; border-bottom: 1px solid var(--border-soft); }
+    .sec:last-of-type { border-bottom: 0; }
+    .sec .wrap { display: grid; grid-template-columns: 160px 1fr; gap: 48px; }
+    @media (max-width: 900px) {
+      .sec { padding: 44px 0; } .sec .wrap { grid-template-columns: 1fr; gap: 20px; }
+    }
+    .lede {
+      font-family: var(--font-serif, 'Newsreader', ui-serif, Georgia, serif);
+      font-size: 20px; font-weight: 300; line-height: 1.45; color: var(--fg);
+      max-width: 34ch; margin: 0;
+    }
+    .lede em { font-style: italic; color: var(--muted); }
+    .act-title {
+      font-family: var(--font-serif, 'Newsreader', ui-serif, Georgia, serif);
+      font-size: 22px; font-weight: 300; color: var(--fg); max-width: 36ch;
+    }
+    .act-title em { font-style: italic; color: var(--muted); }
+    .issue-row {
+      display: flex; align-items: baseline; gap: 12px;
+      padding: 10px 0; border-bottom: 1px solid var(--border-soft);
+      font-size: 12px;
+    }
+    .issue-row:last-child { border-bottom: 0; }
+    .issue-row .num { font-variant-numeric: tabular-nums; width: 44px; flex-shrink: 0; }
+    .issue-row .num.open { color: var(--accent); }
+    .issue-row .num.closed { color: var(--dim); }
+    .issue-row .t { flex: 1; min-width: 0; color: var(--fg); }
+    .issue-row a:hover .t { color: var(--accent); }
+    .issue-row .tags { display: inline-flex; gap: 8px; flex-shrink: 0; font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; }
+    .issue-row .tags .epic { color: var(--accent); }
+    .issue-row .tags .sec { color: var(--warn); }
+    .issue-row .tags .state { color: var(--dim); }
+    .issue-row .tags .state.open { color: var(--muted); }
+  </style>
+
+  <section class="sec">
+    <div class="wrap">
+      <div><div class="eyebrow"><span class="num">00</span><span>Roadmap</span></div></div>
+      <div>
+        <p class="lede">Three acts, in rough order.<br/><em>Not dated. Not promised.</em></p>
+        <p class="text-[12px] text-muted leading-relaxed mt-4 max-w-[56ch]">
+          The arc we think the work wants to take. Scope and sequencing shift as we learn.
+          Live from <a href="https://github.com/bigailabs/cathedral/issues" class="text-muted hover:text-fg underline underline-offset-2 decoration-dim">GitHub issues</a> — no private backlog.
         </p>
-      )}
+        {total > 0 && (
+          <p class="text-[11px] text-dim mt-3 tabular-nums">
+            {openCount} open · {total - openCount} closed · {total} total
+          </p>
+        )}
+      </div>
+    </div>
+  </section>
+
+  {!fetchOk && (
+    <section class="sec">
+      <div class="wrap">
+        <div></div>
+        <div class="border border-border bg-surface px-4 py-3">
+          <p class="text-[12px] text-muted leading-relaxed">
+            GitHub's API rate-limited our build. Source of truth is
+            <a href="https://github.com/bigailabs/cathedral/issues" class="text-fg hover:text-accent underline underline-offset-2 decoration-dim ml-1">the issue tracker</a>.
+          </p>
+        </div>
+      </div>
     </section>
+  )}
 
-    {!fetchOk && (
-      <section class="border border-border bg-surface px-4 py-3">
-        <p class="text-[12px] text-muted leading-relaxed">
-          github's api rate-limited our build. the list below may be empty or stale.
-          the real source of truth is
-          <a href="https://github.com/bigailabs/cathedral/issues" class="text-fg hover:text-accent underline underline-offset-2 decoration-dim ml-1">the issue tracker</a>.
-        </p>
-      </section>
-    )}
-
-    {ACTS.map((act, i) => {
-      const items = forAct(act.id)
-      return (
-        <section>
-          {i > 0 && (
-            <div class="flex justify-center py-2 -mt-4 mb-6 text-dim opacity-40">
-              <RoseWindow size={18} airy={true} />
+  {ACTS.map((act) => {
+    const items = forAct(act.id)
+    const open = items.filter((i) => i.state === 'open').length
+    const parts = act.blurb.split('. ')
+    const lede = parts[0] + (parts.length > 1 ? '.' : '')
+    const rest = parts.slice(1).join('. ')
+    return (
+      <section class="sec">
+        <div class="wrap">
+          <div><div class="eyebrow"><span class="num">{act.num}</span><span>{act.title}</span></div></div>
+          <div>
+            <p class="act-title">{lede}</p>
+            {rest && <p class="text-[12px] text-muted leading-relaxed mt-3 max-w-[64ch]">{rest}</p>}
+            <div class="flex items-baseline justify-between gap-4 mt-6 mb-3">
+              <h3 class="text-[10px] text-dim uppercase tracking-[0.2em]">In the issue tracker</h3>
+              {items.length > 0 && (
+                <span class="text-[11px] text-dim tabular-nums shrink-0">{open} open · {items.length} total</span>
+              )}
             </div>
-          )}
-          <h2 class="text-[13px] text-fg mb-2">{act.title}</h2>
-          <p class="text-[11.5px] text-muted mb-5 leading-relaxed">{act.blurb}</p>
-
-          <div class="flex items-baseline justify-between gap-4 mb-2">
-            <h3 class="text-[10px] text-dim uppercase tracking-[0.15em]">in the issue tracker</h3>
-            {items.length > 0 && (
-              <span class="text-[11px] text-dim tabular-nums shrink-0">
-                {items.filter((i) => i.state === 'open').length} open · {items.length} total
-              </span>
-            )}
-          </div>
-          {items.length === 0 ? (
-            <p class="text-[11.5px] text-dim italic">
-              {fetchOk ? 'nothing filed yet' : 'see github'}
-            </p>
-          ) : (
-            <ul class="space-y-0 divide-y divide-border border-t border-b border-border">
-              {items.map((i) => {
-                const isEpic = i.labels.some((l) => l.name === 'epic')
-                const isSec = i.labels.some((l) => l.name === 'security')
-                return (
-                  <li>
-                    <a
-                      href={i.html_url}
-                      class="flex items-start gap-3 px-1 py-2 hover:bg-surface transition-colors group"
-                    >
-                      <span class={`shrink-0 text-[10px] tabular-nums w-8 ${i.state === 'open' ? 'text-accent' : 'text-dim'}`}>
-                        #{i.number}
-                      </span>
-                      <span class="flex-1 min-w-0 text-[12px] text-fg group-hover:text-accent transition-colors">
-                        {i.title}
-                      </span>
-                      <span class="shrink-0 flex items-center gap-1.5">
-                        {isEpic && (
-                          <span class="text-[9px] text-accent uppercase tracking-[0.1em]">epic</span>
-                        )}
-                        {isSec && (
-                          <span class="text-[9px] text-warn uppercase tracking-[0.1em]">sec</span>
-                        )}
-                        <span class={`text-[9px] uppercase tracking-[0.1em] ${i.state === 'open' ? 'text-muted' : 'text-dim'}`}>
-                          {i.state}
-                        </span>
+            {items.length === 0 ? (
+              <p class="text-[11.5px] text-dim italic">{fetchOk ? 'nothing filed yet' : 'see github'}</p>
+            ) : (
+              <div style="border-top: 1px solid var(--border);">
+                {items.map((i) => {
+                  const isEpic = i.labels.some((l) => l.name === 'epic')
+                  const isSec = i.labels.some((l) => l.name === 'security')
+                  return (
+                    <a href={i.html_url} class="issue-row">
+                      <span class={`num ${i.state}`}>#{i.number}</span>
+                      <span class="t">{i.title}</span>
+                      <span class="tags">
+                        {isEpic && <span class="epic">epic</span>}
+                        {isSec && <span class="sec">sec</span>}
+                        <span class={`state ${i.state}`}>{i.state}</span>
                       </span>
                     </a>
-                  </li>
-                )
-              })}
-            </ul>
-          )}
-        </section>
-      )
-    })}
-
-    {unlabeled.length > 0 && (
-      <section>
-        <h2 class="text-[13px] text-fg mb-3">unscoped</h2>
-        <p class="text-[11.5px] text-muted mb-3 leading-relaxed">
-          filed but not yet assigned to an act.
-        </p>
-        <ul class="space-y-0 divide-y divide-border border-t border-b border-border">
-          {unlabeled.map((i) => (
-            <li>
-              <a href={i.html_url} class="flex items-start gap-3 px-1 py-2 hover:bg-surface transition-colors group">
-                <span class={`shrink-0 text-[10px] tabular-nums w-8 ${i.state === 'open' ? 'text-accent' : 'text-dim'}`}>
-                  #{i.number}
-                </span>
-                <span class="flex-1 min-w-0 text-[12px] text-fg group-hover:text-accent transition-colors">
-                  {i.title}
-                </span>
-                <span class={`shrink-0 text-[9px] uppercase tracking-[0.1em] ${i.state === 'open' ? 'text-muted' : 'text-dim'}`}>
-                  {i.state}
-                </span>
-              </a>
-            </li>
-          ))}
-        </ul>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+        </div>
       </section>
-    )}
+    )
+  })}
 
-    <section class="pt-4 border-t border-border">
-      <p class="text-[11px] text-dim leading-relaxed">
-        something missing? <a href="https://github.com/bigailabs/cathedral/issues/new" class="text-muted hover:text-fg underline underline-offset-2 decoration-dim">file it</a>.
-      </p>
+  {unlabeled.length > 0 && (
+    <section class="sec">
+      <div class="wrap">
+        <div><div class="eyebrow"><span class="num">·</span><span>Unscoped</span></div></div>
+        <div>
+          <p class="text-[11.5px] text-muted leading-relaxed mb-4">Filed but not yet assigned to an act.</p>
+          <div style="border-top: 1px solid var(--border);">
+            {unlabeled.map((i) => (
+              <a href={i.html_url} class="issue-row">
+                <span class={`num ${i.state}`}>#{i.number}</span>
+                <span class="t">{i.title}</span>
+                <span class="tags"><span class={`state ${i.state}`}>{i.state}</span></span>
+              </a>
+            ))}
+          </div>
+        </div>
+      </div>
     </section>
-  </div>
+  )}
+
+  <section class="sec">
+    <div class="wrap">
+      <div></div>
+      <p class="text-[11px] text-dim leading-relaxed">
+        Something missing? <a href="https://github.com/bigailabs/cathedral/issues/new" class="text-muted hover:text-fg underline underline-offset-2 decoration-dim">File it</a>.
+      </p>
+    </div>
+  </section>
 </Base>
