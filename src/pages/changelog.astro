@@ -32,46 +32,91 @@ const html = ok ? marked.parse(cleaned) : ''
 ---
 
 <Base title="changelog · cathedral">
-  <div class="max-w-[820px] w-full mx-auto space-y-6 py-4">
-    <section>
-      <h1 class="text-[15px] text-fg mb-1">changelog</h1>
-      <p class="text-[12px] text-muted leading-relaxed">
-        what shipped, in date order. the canonical record lives in
-        <a href="https://github.com/bigailabs/cathedral/blob/main/CHANGELOG.md" class="text-muted hover:text-fg underline underline-offset-2 decoration-dim">CHANGELOG.md</a>
-        on the cathedral repo; releases are tagged
-        <a href="https://github.com/bigailabs/cathedral/releases" class="text-muted hover:text-fg underline underline-offset-2 decoration-dim">there</a>.
-      </p>
-    </section>
+  <style>
+    .eyebrow {
+      font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase;
+      color: var(--dim);
+      display: flex; align-items: baseline; gap: 10px;
+    }
+    .eyebrow .num { font-variant-numeric: tabular-nums; color: var(--accent); }
+    .sec { padding: 56px 0; border-bottom: 1px solid var(--border-soft); }
+    .sec:last-of-type { border-bottom: 0; }
+    .sec .wrap { display: grid; grid-template-columns: 160px 1fr; gap: 48px; }
+    @media (max-width: 900px) {
+      .sec { padding: 44px 0; }
+      .sec .wrap { grid-template-columns: 1fr; gap: 20px; }
+    }
+    .lede {
+      font-family: var(--font-serif, 'Newsreader', ui-serif, Georgia, serif);
+      font-size: 20px; font-weight: 300; line-height: 1.45; color: var(--fg);
+      max-width: 34ch; margin: 0;
+    }
+    .lede em { font-style: italic; color: var(--muted); }
+  </style>
 
-    {!ok && (
-      <section class="border border-border bg-surface px-4 py-3">
-        <p class="text-[12px] text-muted leading-relaxed">
-          couldn't reach github at build time. read the canonical
-          <a href="https://github.com/bigailabs/cathedral/blob/main/CHANGELOG.md" class="text-fg hover:text-accent underline underline-offset-2 decoration-dim ml-1">CHANGELOG.md</a>.
+  <!-- 00 Changelog -->
+  <section class="sec">
+    <div class="wrap">
+      <div>
+        <div class="eyebrow"><span class="num">00</span><span>Changelog</span></div>
+      </div>
+      <div>
+        <p class="lede">
+          What shipped, in date order.<br/>
+          <em>Canonical record on GitHub.</em>
         </p>
-      </section>
-    )}
+        <p class="text-[12px] text-muted leading-relaxed mt-4 max-w-[56ch]">
+          Source of truth is
+          <a href="https://github.com/bigailabs/cathedral/blob/main/CHANGELOG.md" class="text-muted hover:text-fg underline underline-offset-2 decoration-dim">CHANGELOG.md</a>
+          on the cathedral repo. Releases are tagged
+          <a href="https://github.com/bigailabs/cathedral/releases" class="text-muted hover:text-fg underline underline-offset-2 decoration-dim">there</a>.
+        </p>
+      </div>
+    </div>
+  </section>
 
-    <article class="changelog-body" set:html={html}></article>
-  </div>
+  {!ok && (
+    <section class="sec">
+      <div class="wrap">
+        <div></div>
+        <div class="border border-border bg-surface px-4 py-3">
+          <p class="text-[12px] text-muted leading-relaxed">
+            Couldn't reach GitHub at build time. Read the canonical
+            <a href="https://github.com/bigailabs/cathedral/blob/main/CHANGELOG.md" class="text-fg hover:text-accent underline underline-offset-2 decoration-dim ml-1">CHANGELOG.md</a>.
+          </p>
+        </div>
+      </div>
+    </section>
+  )}
+
+  <section class="sec">
+    <div class="wrap">
+      <div>
+        <div class="eyebrow"><span class="num">01</span><span>Entries</span></div>
+      </div>
+      <article class="changelog-body" set:html={html}></article>
+    </div>
+  </section>
 </Base>
 
 <style is:global>
   .changelog-body h2 {
-    font-size: 13px;
+    font-family: var(--font-serif, 'Newsreader', ui-serif, Georgia, serif);
+    font-size: 22px;
+    font-weight: 300;
     color: var(--fg);
-    margin-top: 2.5rem;
+    margin-top: 2.25rem;
     margin-bottom: 0.75rem;
-    padding-bottom: 0.4rem;
+    padding-bottom: 0.5rem;
     border-bottom: 1px solid var(--border);
-    letter-spacing: 0.02em;
+    letter-spacing: 0;
   }
   .changelog-body h2:first-child { margin-top: 0; }
   .changelog-body h3 {
     font-size: 10px;
     color: var(--dim);
     text-transform: uppercase;
-    letter-spacing: 0.15em;
+    letter-spacing: 0.18em;
     margin-top: 1.5rem;
     margin-bottom: 0.5rem;
   }
