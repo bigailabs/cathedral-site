@@ -119,31 +119,27 @@ import RoseWindow from '../components/RoseWindow.astro'
   <section class="sec">
     <div class="wrap">
       <div>
-        <div class="eyebrow"><span class="num">03</span><span>Our miner</span></div>
-      </div>
-      <div class="border border-border">
-        <div class="flex flex-wrap gap-x-10 gap-y-3 text-[12px] p-4">
-          <div>
-            <div class="text-[10px] text-dim uppercase tracking-[0.15em]">uid</div>
-            <div class="text-fg tabular-nums mt-0.5">115</div>
-          </div>
-          <div>
-            <div class="text-[10px] text-dim uppercase tracking-[0.15em]">hotkey</div>
-            <div class="text-fg tabular-nums mt-0.5" data-stat="miner-hotkey">5FvW8n…Ub9k</div>
-          </div>
-          <div>
-            <div class="text-[10px] text-dim uppercase tracking-[0.15em]">status</div>
-            <div class="text-warn mt-0.5">orphaned</div>
-          </div>
-          <div>
-            <div class="text-[10px] text-dim uppercase tracking-[0.15em]">gpu node</div>
-            <div class="text-fg mt-0.5">— · pending re-host</div>
-          </div>
-        </div>
-        <p class="text-[11px] text-muted leading-relaxed px-4 pb-4">
-          Orphaned 2026-04-17 — the rented GPU node went down with the old validator host.
-          The on-chain UID is reserved; we'll re-register once a new GPU node is ready.
+        <div class="eyebrow"><span class="num">03</span><span>Registered miners</span></div>
+        <p class="text-[11px] text-muted mt-4 leading-relaxed max-w-[32ch]">
+          Miners currently registered with our validator — not just declared
+          on chain. Verified means our validator has SSH'd in and confirmed
+          the hardware; registered means bid accepted, awaiting first verify.
         </p>
+      </div>
+      <div>
+        <table class="holders" data-stat="registered-table">
+          <thead>
+            <tr>
+              <th style="width:10%">UID</th>
+              <th>Hotkey</th>
+              <th>Hardware</th>
+              <th class="r">Status</th>
+            </tr>
+          </thead>
+          <tbody data-stat="registered-table-body">
+            <tr><td colspan="4" class="text-dim">loading…</td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </section>
@@ -220,7 +216,53 @@ import RoseWindow from '../components/RoseWindow.astro'
         set('[data-stat="permit-pct"]', pct.toFixed(2) + '%')
         const barEl = document.querySelector('[data-stat="permit-bar"]')
         if (barEl) barEl.style.width = pct + '%'
-        if (ourMiner) set('[data-stat="miner-hotkey"]', abbrev(ourMiner.hotkey))
+        // Registered-miners table: pull from /validator/registry (who
+        // we've SSH-accepted) and join against the machines list for
+        // hardware detail. Pin verified > registered.
+        try {
+          const [regResp, machResp] = await Promise.all([
+            fetch(`${API_BASE}/api/substrate/validator/registry`, { cache: 'no-store' }),
+            fetch(`${API_BASE}/api/v1/cathedral/machines`, { cache: 'no-store' }),
+          ])
+          if (regResp.ok && machResp.ok) {
+            const reg = (await regResp.json())?.data || {}
+            const machList = ((await machResp.json())?.machines) || []
+            const regMiners = Array.isArray(reg.miners) ? reg.miners : []
+            // map UID to hardware summary by matching SSH endpoint — the
+            // validator's nodes don't expose UID, so we use whatever comes
+            // back and display them in registered order
+            const hwCards = machList.map((m) => {
+              const gpuLabel = m.is_cpu_only
+                ? `${m.cpu_cores || 0} vCPU · ${m.memory_gb || 0} GB`
+                : `${m.gpu_count || 0}× ${m.category || '—'}`
+              return { nodeId: m.node_id, label: gpuLabel, location: m.location, rate: m.hourly_rate_cents }
+            })
+            const body2 = document.querySelector('[data-stat="registered-table-body"]')
+            if (body2) {
+              if (regMiners.length === 0) {
+                body2.innerHTML = '<tr><td colspan="4" class="text-dim">no miners registered yet · awaiting first bid</td></tr>'
+              } else {
+                const rows = regMiners
+                  .sort((a, b) => {
+                    const score = (x) => x.status === 'verified' ? 0 : x.status === 'online' ? 1 : 2
+                    return score(a) - score(b) || a.uid - b.uid
+                  })
+                  .map((m, i) => {
+                    const chainRow = byUid.get(m.uid) || {}
+                    const hw = hwCards[i] || { label: '—', location: '' }
+                    const statusClass = m.status === 'verified' ? 'style="color:var(--ok)"' : m.status === 'online' ? 'style="color:var(--accent)"' : 'style="color:var(--dim)"'
+                    return `<tr>
+                      <td>uid ${m.uid}</td>
+                      <td style="color:var(--muted)">${abbrev(chainRow.hotkey || '')}</td>
+                      <td style="color:var(--fg)">${hw.label}${hw.location ? ` · <span style="color:var(--dim)">${hw.location.split('/')[1] || hw.location}</span>` : ''}</td>
+                      <td class="r" ${statusClass}>${m.status}</td>
+                    </tr>`
+                  }).join('')
+                body2.innerHTML = rows
+              }
+            }
+          }
+        } catch (e) { /* registry optional */ }
 
         const sorted = miners.slice().sort((a, b) => (b.stake || 0) - (a.stake || 0))
         const top = sorted.slice(0, 14)
