@@ -399,6 +399,21 @@ try {
     .hero-row { display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: start; }
     @media (max-width: 700px) { .hero-row { grid-template-columns: 1fr; } }
 
+    .stage { position: relative; }
+    .stage.is-complete h3 { color: var(--ok); }
+  </style>
+
+  <!--
+    Styles for JS-injected elements live in a global block. Astro's
+    scoped-CSS attribute is added at build time to elements present in
+    the static markup — runtime-created nodes (checkboxes, note
+    composers, comment panels, the login modal) don't receive it, so
+    scoped selectors wouldn't match them. Keeping these names distinct
+    (.stage-check, .stage-foot, .note-form, .own-note, .others, .auth-
+    widget, .login-modal, .login-card) so they don't collide with any
+    other page.
+  -->
+  <style is:global>
     .auth-widget {
       display: flex; align-items: center; gap: 10px;
       font-size: 11px; color: var(--muted);
@@ -435,10 +450,6 @@ try {
       font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--dim);
     }
 
-    /* Stage annotations: checkbox sits left of the number; note
-       affordances sit beneath the stage body. Scoped tightly so we
-       don't disturb the existing .stage grid elsewhere. */
-    .stage { position: relative; }
     .stage .stage-check {
       position: absolute; left: -28px; top: 24px;
       appearance: none; -webkit-appearance: none;
@@ -460,7 +471,6 @@ try {
       content: '✓'; color: var(--bg); font-size: 10px; line-height: 1;
     }
     .stage .stage-check[disabled] { opacity: 0.55; cursor: not-allowed; }
-    .stage.is-complete h3 { color: var(--ok); }
 
     .stage-foot {
       display: flex; justify-content: space-between; gap: 12px; align-items: center;
@@ -1392,33 +1402,74 @@ try {
     }
 
     function resetToLoggedOutUI() {
-      completedSteps = new Set()
+      // After sign-out, keep the local checkmarks — the user still
+      // expects their progress to be there when they come back.
+      // Own server-side comments drop because they belong to the
+      // server's account namespace.
+      completedSteps = loadLocalProgress()
       ownComments = new Map()
       renderProgressAndNotes()
     }
 
+    // ------------ localStorage fallback for anonymous progress -------
+    // Logged-out visitors can check stages off too; we persist to
+    // localStorage. On login, /me supersedes this (no merge yet —
+    // follow-up if we see people graduate mid-flow often).
+    const LOCAL_PROGRESS_KEY = 'afrotensor_progress_v1'
+    function loadLocalProgress() {
+      try {
+        const raw = localStorage.getItem(LOCAL_PROGRESS_KEY)
+        if (!raw) return new Set()
+        const arr = JSON.parse(raw)
+        return new Set(Array.isArray(arr) ? arr.map(Number).filter(Boolean) : [])
+      } catch { return new Set() }
+    }
+    function saveLocalProgress(set) {
+      try { localStorage.setItem(LOCAL_PROGRESS_KEY, JSON.stringify(Array.from(set))) } catch {}
+    }
+
+    // Seed from localStorage immediately so checkmarks survive reload
+    // even before auth decides anything.
+    completedSteps = loadLocalProgress()
+
     // ------------ Interactions (event delegation) ---------------------
     document.addEventListener('click', async (e) => {
-      // Checkbox toggle
+      // Checkbox toggle — works offline via localStorage; syncs to
+      // the server if signed in.
       const check = e.target.closest('[data-check]')
       if (check) {
         const step = parseInt(check.getAttribute('data-check'), 10)
         if (!step) return
-        const token = await currentAccessToken()
-        if (!token) { openLoginModal(); return }
         const wasDone = completedSteps.has(step)
-        check.setAttribute('aria-checked', wasDone ? 'false' : 'true') // optimistic
+        const willBeDone = !wasDone
+        // Optimistic UI update + local persistence first
+        if (willBeDone) completedSteps.add(step)
+        else completedSteps.delete(step)
+        check.setAttribute('aria-checked', willBeDone ? 'true' : 'false')
+        saveLocalProgress(completedSteps)
+        renderProgressAndNotes()
+
+        // If we have a session, sync to the server. If not, the
+        // localStorage write above is the whole story — no modal,
+        // no blocker.
+        const token = await currentAccessToken()
+        if (!token) return
         check.disabled = true
         try {
           const data = await authedFetch('/api/v1/cathedral/progress', {
             method: 'POST',
-            body: JSON.stringify({ step_num: step, completed: !wasDone }),
+            body: JSON.stringify({ step_num: step, completed: willBeDone }),
           })
           completedSteps = new Set(data.completed_steps || [])
+          saveLocalProgress(completedSteps)
           renderProgressAndNotes()
         } catch (err) {
-          check.setAttribute('aria-checked', wasDone ? 'true' : 'false')
-          if (err.message === 'not-authenticated') openLoginModal()
+          // Server round-trip failed; keep the local state. If the
+          // failure was auth-specific, nudge the user to sign in to
+          // sync, but don't yank their checkmark away.
+          if (err.message === 'not-authenticated') {
+            // silent — we already saved locally
+          }
         } finally {
           check.disabled = false
         }
@@ -1545,7 +1596,31 @@ try {
     async function hydrateFromMe() {
       try {
         const me = await authedFetch('/api/v1/cathedral/me')
-        completedSteps = new Set(me.completed_steps || [])
+        const serverSteps = new Set(me.completed_steps || [])
+        // Merge any local progress the user made while logged out.
+        // Local checkmarks become server checkmarks so they don't get
+        // "lost on sign-in" — a common frustration pattern. Cheap: at
+        // most 8 POSTs on first login.
+        const localOnly = Array.from(loadLocalProgress()).filter(
+          (s) => !serverSteps.has(s)
+        )
+        for (const step of localOnly) {
+          try {
+            const data = await authedFetch('/api/v1/cathedral/progress', {
+              method: 'POST',
+              body: JSON.stringify({ step_num: step, completed: true }),
+            })
+            if (data && Array.isArray(data.completed_steps)) {
+              for (const s of data.completed_steps) serverSteps.add(s)
+            } else {
+              serverSteps.add(step)
+            }
+          } catch (_) { /* keep local state; try again next load */ }
+        }
+        completedSteps = serverSteps
+        // Clear localStorage now that server has the full picture.
+        saveLocalProgress(completedSteps)
+
         ownComments = new Map()
         for (const c of (me.comments || [])) {
           const list = ownComments.get(c.step) || []
@@ -1560,7 +1635,7 @@ try {
           setAuthLoggedOut()
           return
         }
-        // API down — keep the page usable.
+        // API down — keep the page usable with local progress.
         setAuthUnavailable()
       }
     }
