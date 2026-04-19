@@ -13,7 +13,7 @@ type Issue = {
 const ACTS = [
   { id: 'act-1', num: '01', title: 'Foundation', blurb: 'Lay the base course. Get the validator and the first masons\u2019 stones reliable, unlock weights with stake, harden the REST API. Nothing rises until this sets.' },
   { id: 'act-2', num: '02', title: 'The work',   blurb: 'Make laying stones on cathedral economically coherent. Generalize the image pipeline. The business model is being worked out in public — one stone at a time.' },
-  { id: 'act-3', num: '03', title: 'The yard',   blurb: 'External masons join the courtyard. Subnet scouting. A treasury view that shows compute in, mining out — the ledger anyone can read.' },
+  { id: 'act-3', num: '03', title: 'The yard',   blurb: 'External masons join the courtyard. The whole order takes its place: masons at the wall, carpenters in the yard, patrons in the chapel. Subnet scouting. A treasury view that shows compute in, mining out — the ledger anyone can read.' },
 ] as const
 
 async function fetchIssues(): Promise<{ issues: Issue[]; ok: boolean }> {
