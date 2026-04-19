@@ -406,6 +406,36 @@ import RoseWindow from '../components/RoseWindow.astro'
       },
     },
     {
+      re: /Weight setting attempt \d+ failed/,
+      d: {
+        kind: 'parked',
+        title: 'weight retry (parked)',
+        meaning: 'an attempt in the weight retry loop. the validator expects these to fail until we have permit stake — same (1010) story, just surfaced per-attempt.',
+        doing: 'next attempt runs on schedule. nothing to fix.',
+        forceLevel: 'DEBUG',
+      },
+    },
+    {
+      re: /Failed to set weights (?:at block )?\d*:?\s*Failed to set weights after \d+ attempts/,
+      d: {
+        kind: 'parked',
+        title: 'weight submission parked',
+        meaning: 'the retry loop finished its attempts for this block and none landed. same (1010) / no-permit story — each batch of attempts is expected to fail at our current stake.',
+        doing: 'the loop restarts on the next block. emissions unlock the moment we clear the stake threshold.',
+        forceLevel: 'WARN',
+      },
+    },
+    {
+      re: /Failed to set weights after \d+ attempts/,
+      d: {
+        kind: 'parked',
+        title: 'weight submission parked',
+        meaning: 'retry batch for this block ended; no attempt landed because we don\u2019t hold a validator permit yet.',
+        doing: 'fresh batch on the next block. no restart, no data lost.',
+        forceLevel: 'WARN',
+      },
+    },
+    {
       re: /Validator \[redacted:[^\]]+\] not found on-chain; synthesizing placeholder/,
       d: {
         kind: 'info',
@@ -507,6 +537,21 @@ import RoseWindow from '../components/RoseWindow.astro'
     }
   }
 
+  // Dedupe decoder annotations within a 2-minute rolling window so a
+  // single event doesn't render its full "means / doing" block on every
+  // retry line. First occurrence gets the annotation; subsequent ones
+  // still force-level down to WARN/DEBUG but skip the block.
+  const recentAnnotations = new Map<string, number>()
+  const ANNOTATION_DEDUPE_WINDOW_SEC = 120
+
+  function shouldShowAnnotation(title: string, tsEpoch: number | null): boolean {
+    const now = tsEpoch ?? Date.now() / 1000
+    const last = recentAnnotations.get(title)
+    if (last != null && now - last < ANNOTATION_DEDUPE_WINDOW_SEC) return false
+    recentAnnotations.set(title, now)
+    return true
+  }
+
   function renderLine(line: Line): HTMLElement {
     // A "line" can render as either a single row or a row + annotation.
     // We return a wrapper div containing one or two children so the main
@@ -517,6 +562,7 @@ import RoseWindow from '../components/RoseWindow.astro'
 
     const dec = decode(line.message)
     const displayLevel = dec?.forceLevel ?? line.level
+    const showAnnotation = dec ? shouldShowAnnotation(dec.title, line.tsEpoch) : false
 
     const row = document.createElement('div')
     row.className = 'group flex gap-2 px-1 -mx-1 rounded-sm transition-colors duration-500'
@@ -547,7 +593,7 @@ import RoseWindow from '../components/RoseWindow.astro'
 
     wrapper.appendChild(row)
 
-    if (dec) {
+    if (dec && showAnnotation) {
       const kc = decoderKindClass(dec.kind)
       const annot = document.createElement('div')
       annot.className = `ml-[72px] my-1 pl-3 border-l-2 ${kc.bar} text-[11px] leading-[1.55] text-muted space-y-1`
@@ -561,6 +607,16 @@ import RoseWindow from '../components/RoseWindow.astro'
       const titleText = document.createElement('span')
       titleText.textContent = dec.title
       title.appendChild(titleText)
+      // "expected" / "info" / "needs attention" tag so at-a-glance it's
+      // obvious whether a red log line is actually a problem.
+      const tag = document.createElement('span')
+      const tagText =
+        dec.kind === 'parked' ? 'expected · no action'
+        : dec.kind === 'info' ? 'informational'
+        : 'needs attention'
+      tag.className = 'ml-auto text-dim font-normal normal-case tracking-normal text-[10px]'
+      tag.textContent = tagText
+      title.appendChild(tag)
       annot.appendChild(title)
 
       const meaning = document.createElement('div')
