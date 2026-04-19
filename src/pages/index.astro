@@ -39,18 +39,24 @@ import RoseWindow from '../components/RoseWindow.astro'
     .thesis p {
       font-family: var(--font-serif, 'Newsreader', ui-serif, Georgia, serif);
       font-weight: 300;
-      font-size: 20px;
-      line-height: 1.4;
-      color: var(--fg);
+      line-height: 1.45;
+      color: var(--muted);
       margin: 0;
       max-width: 30ch;
+      font-size: 15px;
     }
-    .thesis p + p { margin-top: 12px; color: var(--muted); font-size: 16px; }
-    .thesis p em { font-style: italic; color: var(--muted); }
+    .thesis p.thesis-lede {
+      font-size: 22px;
+      line-height: 1.35;
+      color: var(--fg);
+      margin-bottom: 18px;
+    }
+    .thesis p + p { margin-top: 12px; }
+    .thesis p em { font-style: italic; color: var(--dim); }
     .thesis p .accent { color: var(--accent); font-style: normal; }
     @media (max-width: 900px) {
-      .thesis p { font-size: 22px; }
-      .thesis p + p { font-size: 18px; }
+      .thesis p.thesis-lede { font-size: 24px; }
+      .thesis p { font-size: 16px; }
     }
 
     /* Hero — thesis left, live proof right. Spans the full shell
@@ -99,6 +105,7 @@ import RoseWindow from '../components/RoseWindow.astro'
     .thesis-fade { animation: fade-in 900ms ease-out both; }
     .thesis-fade p:nth-child(1) { animation: fade-in 700ms 80ms ease-out both; }
     .thesis-fade p:nth-child(2) { animation: fade-in 700ms 280ms ease-out both; }
+    .thesis-fade p:nth-child(3) { animation: fade-in 700ms 480ms ease-out both; }
     @keyframes fade-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
     @media (prefers-reduced-motion: reduce) {
       .thesis-fade, .thesis-fade p { animation: none !important; }
@@ -190,9 +197,11 @@ import RoseWindow from '../components/RoseWindow.astro'
           </p>
         </div>
         <div class="thesis thesis-fade">
+          <p class="thesis-lede">
+            A cathedral is a <span class="accent">commons</span>.
+          </p>
           <p>
-            A cathedral is a <span class="accent">commons</span> —<br/>
-            walls you didn't build,<br/>
+            Walls you didn't build,<br/>
             kept by hands you'll never meet.<br/>
             <em>The masons who laid the first stones<br/>knew they wouldn't see the spire.</em>
           </p>
@@ -383,6 +392,10 @@ import RoseWindow from '../components/RoseWindow.astro'
     meaning: string
     doing: string
     forceLevel?: string
+    /** When true, suppress this line entirely — ceremonial noise. */
+    suppress?: boolean
+    /** When set, replace the raw message with this compact form. */
+    compactMessage?: string
   }
 
   const DECODERS: { re: RegExp; d: Decoded }[] = [
@@ -404,6 +417,18 @@ import RoseWindow from '../components/RoseWindow.astro'
         meaning: 'the self-heal side of the parked weight-submission. the validator expects this to fail until we have permit stake.',
         doing: 'nothing to fix — this is the system working as designed. stake unlocks it.',
         forceLevel: 'DEBUG',
+        suppress: true,
+      },
+    },
+    {
+      re: /Initiating weight submission to chain netuid=\d+ version_key=\d+ weight_count=\d+ current_block=(\d+)/,
+      d: {
+        kind: 'info',
+        title: 'weight submission initiated',
+        meaning: 'the validator starts a fresh attempt to set on-chain weights for the current block. expected each interval.',
+        doing: 'the (1010) response will say no-permit, retry loop handles it.',
+        forceLevel: 'INFO',
+        compactMessage: 'weight submit · block $1',
       },
     },
     {
@@ -591,15 +616,14 @@ import RoseWindow from '../components/RoseWindow.astro'
     lvl.textContent = displayLevel
     row.appendChild(lvl)
 
-    const tgt = document.createElement('span')
-    tgt.className = 'text-dim shrink-0 w-[140px] truncate hidden sm:inline'
-    tgt.textContent = targetShort
-    tgt.title = line.target
-    row.appendChild(tgt)
+    // Target (e.g. "weight_setter") adds little for end-users — every
+    // validator log line is from the same handful of targets. Keep the
+    // info reachable via hover on the row, but don't spend ~140px on it.
+    row.title = line.target
 
     const msg = document.createElement('span')
     msg.className = 'text-fg break-words flex-1 min-w-0'
-    msg.textContent = formatMessage(line.message)
+    msg.textContent = formatMessage(line.message, dec)
     msg.title = line.message   // hover to see the raw wrapped form
     row.appendChild(msg)
 
@@ -608,7 +632,7 @@ import RoseWindow from '../components/RoseWindow.astro'
     if (dec && showAnnotation) {
       const kc = decoderKindClass(dec.kind)
       const annot = document.createElement('div')
-      annot.className = `ml-[72px] my-1 pl-3 border-l-2 ${kc.bar} text-[10.5px] leading-[1.5] text-muted space-y-0.5 max-w-[60ch]`
+      annot.className = `ml-[68px] my-1 pl-3 border-l-2 ${kc.bar} text-[10.5px] leading-[1.5] text-muted space-y-0.5 max-w-[60ch]`
       annot.dataset.annotation = dec.kind
 
       const title = document.createElement('div')
@@ -655,16 +679,28 @@ import RoseWindow from '../components/RoseWindow.astro'
   // The signal is: attempt N, (1010), netuid=39. Everything else is
   // wrapper layers from the substrate client. This formatter strips
   // redundant "X: Y: Z:" chains and collapses known noise patterns.
-  function formatMessage(raw: string): string {
+  function formatMessage(raw: string, dec?: Decoded): string {
+    // Decoder-supplied compact form wins. Supports $1..$9 backrefs
+    // against the decoder's regex so we can pull out block numbers etc.
+    if (dec?.compactMessage) {
+      for (const { re, d } of DECODERS) {
+        if (d !== dec) continue
+        const mm = re.exec(raw)
+        if (!mm) continue
+        return dec.compactMessage.replace(/\$(\d)/g, (_, n) => mm[Number(n)] ?? '')
+      }
+      return dec.compactMessage
+    }
     let m = raw
     // The (1010) cluster — most common noisy line. Extract attempt #
-    // and context bits, throw away 5 levels of "foo failed: bar failed:".
-    const invalid1010 = /Invalid Transaction \(1010\)(?:\s*-\s*Context:\s*(.+))?/.exec(m)
+    // and block (if present), drop the 5 levels of "foo failed: bar failed:".
+    const invalid1010 = /Invalid Transaction \(1010\)/.exec(m)
     if (invalid1010) {
       const attemptMatch = /attempt (\d+) failed/i.exec(m)
-      const ctx = invalid1010[1] ? invalid1010[1].trim() : ''
-      const attempt = attemptMatch ? ` attempt ${attemptMatch[1]}` : ''
-      return `weight (1010) · no-permit${attempt}${ctx ? ' · ' + ctx : ''}`
+      const netuidMatch = /netuid=(\d+)/.exec(m)
+      const attempt = attemptMatch ? ` · attempt ${attemptMatch[1]}` : ''
+      const netuid = netuidMatch ? ` · netuid=${netuidMatch[1]}` : ''
+      return `weight (1010) · no-permit${attempt}${netuid}`
     }
     // "Failed to set weights at block N: Failed to set weights after K attempts" → compact
     const failedBatch = /Failed to set weights (?:at block (\d+):\s*)?Failed to set weights after (\d+) attempts/.exec(m)
@@ -707,6 +743,8 @@ import RoseWindow from '../components/RoseWindow.astro'
     )
     for (const line of s.lines) {
       if (existingKeys.has(line.key)) continue
+      const dec = decode(line.message)
+      if (dec?.suppress) continue
       const el = renderLine(line)
       body.appendChild(el)
     }
