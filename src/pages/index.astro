@@ -771,6 +771,16 @@ import RoseWindow from '../components/RoseWindow.astro'
     lastMentionedTs?: number  // unix ms — last time validator log named it
   }
 
+  // Keyed by uid so /registry can race /state without losing tags.
+  // fetchRegistry writes here even if registerState.miners is empty;
+  // fetchState reads it when inserting/updating rows.
+  type ValidatorTag = {
+    validatorStatus: 'verified' | 'online' | 'offline' | 'unknown'
+    bidActive: boolean
+    hasRental: boolean
+  }
+  const validatorTags = new Map<number, ValidatorTag>()
+
   const registerState = {
     miners: new Map<number, MinerRow>(),
     order: [] as number[],   // render order; rejected floats to top of its section
@@ -984,6 +994,7 @@ import RoseWindow from '../components/RoseWindow.astro'
         const uid = Number(m?.uid)
         if (!Number.isFinite(uid)) continue
         const prev = registerState.miners.get(uid)
+        const tag = validatorTags.get(uid)
         registerState.miners.set(uid, {
           uid,
           hotkey: String(m?.hotkey ?? ''),
@@ -992,6 +1003,11 @@ import RoseWindow from '../components/RoseWindow.astro'
           incentive: Number(m?.incentive) || 0,
           ip: m?.ip ?? null,
           port: m?.port ?? null,
+          // Carry over any validator-side tag captured by fetchRegistry,
+          // falling back to the previous row if we already had it.
+          validatorStatus: tag?.validatorStatus ?? prev?.validatorStatus,
+          bidActive: tag?.bidActive ?? prev?.bidActive,
+          hasRental: tag?.hasRental ?? prev?.hasRental,
           // Preserve client-only state across refreshes
           rejected: prev?.rejected,
           lastMentionedTs: prev?.lastMentionedTs,
@@ -1042,19 +1058,43 @@ import RoseWindow from '../components/RoseWindow.astro'
         verStatusEl.className = verified > 0 ? 'status-ok' : 'status-pending'
       }
 
-      // Per-miner status: tag each row so the Miners Register sorts
-      // verified to the top, then registered, then the rest.
+      // Per-miner status: write into the shared validatorTags map so
+      // fetchState can pick it up even if fetchRegistry wins the race on
+      // the very first tick (registerState.miners is populated async).
+      // Also update any existing row in place and force a re-render.
       const perMiner: Array<{ uid: number; status: string; bid_active: boolean; has_rental: boolean }> = Array.isArray(data.miners) ? data.miners : []
+      const seen = new Set<number>()
       for (const m of perMiner) {
-        const row = registerState.miners.get(m.uid)
-        if (!row) continue
+        seen.add(m.uid)
         const validatorStatus =
           m.status === 'verified' ? 'verified' :
           m.status === 'online' ? 'online' :
           m.status === 'offline' ? 'offline' : 'unknown'
-        row.validatorStatus = validatorStatus as MinerRow['validatorStatus']
-        row.bidActive = !!m.bid_active
-        row.hasRental = !!m.has_rental
+        const tag: ValidatorTag = {
+          validatorStatus: validatorStatus as ValidatorTag['validatorStatus'],
+          bidActive: !!m.bid_active,
+          hasRental: !!m.has_rental,
+        }
+        validatorTags.set(m.uid, tag)
+        const row = registerState.miners.get(m.uid)
+        if (row) {
+          row.validatorStatus = tag.validatorStatus
+          row.bidActive = tag.bidActive
+          row.hasRental = tag.hasRental
+        }
+      }
+      // Clear tags for miners who no longer register with us, otherwise
+      // a freshly-deleted node keeps its stale "online" pill forever.
+      for (const uid of Array.from(validatorTags.keys())) {
+        if (!seen.has(uid)) {
+          validatorTags.delete(uid)
+          const row = registerState.miners.get(uid)
+          if (row) {
+            row.validatorStatus = undefined
+            row.bidActive = undefined
+            row.hasRental = undefined
+          }
+        }
       }
       renderMinersRegister()
     } catch { /* noop */ }
