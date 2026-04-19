@@ -46,7 +46,7 @@ const footerClass = fullHeight
   </head>
   <body class={`bg-bg text-fg font-mono text-[13px] leading-[1.6] selection:bg-accent/30 antialiased ${fullHeight ? 'overflow-hidden' : ''}`}>
     <div class={shellClass}>
-      <header class="flex items-center gap-6 text-[11px] text-muted mb-4 shrink-0">
+      <header class="flex flex-wrap items-center gap-x-6 gap-y-2 text-[11px] text-muted mb-4 shrink-0">
         <a href="/" class="flex items-center gap-2 text-fg hover:text-accent transition-colors tracking-[0.1em] uppercase">
           <RoseWindow size={14} class="text-accent opacity-80" />
           <span>cathedral</span>
@@ -155,6 +155,11 @@ const footerClass = fullHeight
         --scrollbar-thumb-hover: #b6b2a2;
       }
       html, body { background: var(--bg); color: var(--fg); }
+      /* Prevent stray horizontal scroll from wide children (long code
+         strings, grid-internal overflow) on narrow viewports. Individual
+         elements that need to scroll (code blocks) use their own
+         overflow-x: auto. */
+      html, body { overflow-x: hidden; }
       * { box-sizing: border-box; }
       a { text-decoration: none; }
       body { font-feature-settings: 'calt' 1, 'ss01' 1, 'ss02' 1, 'zero' 1, 'tnum' 1; }
