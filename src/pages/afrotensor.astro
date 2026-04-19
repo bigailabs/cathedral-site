@@ -120,16 +120,21 @@ try {
     .live-masons .uid { font-family: 'JetBrains Mono', ui-monospace, monospace; font-style: normal; color: var(--accent); font-size: 14px; letter-spacing: 0.02em; }
     .live-masons .you { color: var(--accent); font-style: normal; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 14px; letter-spacing: 0.02em; text-transform: uppercase; }
 
-    /* Tightened stages — title + one-line body + optional code/link card. */
+    /* Tightened stages — title + one-line body + optional code/link card.
+       The first column holds a checkbox + step number, stacked. No
+       absolute positioning — column is wide enough to keep both aligned
+       at any viewport, and content starts flush on the right. */
     .stage {
-      display: grid; grid-template-columns: 36px 1fr; gap: 18px;
+      display: grid; grid-template-columns: 44px 1fr; gap: 18px;
       padding: 22px 0;
       border-top: 1px solid var(--border-soft);
     }
     .stage:first-child { border-top: 0; padding-top: 6px; }
     .stage .n {
       font-variant-numeric: tabular-nums; color: var(--accent);
-      font-size: 12px; letter-spacing: 0.2em; padding-top: 3px;
+      font-size: 12px; letter-spacing: 0.2em;
+      display: flex; flex-direction: column; align-items: flex-start; gap: 10px;
+      padding-top: 3px;
     }
     .stage h3 {
       margin: 0; font-size: 15px; font-weight: 500;
@@ -402,22 +407,94 @@ try {
        Authenticated progression layer (login + stage checkoffs + notes).
        Additive — the rest of the page works without it.
        ----------------------------------------------------------- */
-    .hero-row { display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: start; }
-    @media (max-width: 700px) { .hero-row { grid-template-columns: 1fr; } }
+    /* Auth widget lives in the eyebrow column, below the "00 Afrotensor"
+       label. Keeps the hero content unencumbered by a floating button. */
+    .eyebrow-stack { display: flex; flex-direction: column; gap: 18px; }
 
-    .stage { position: relative; }
     .stage.is-complete h3 { color: var(--ok); }
+
+    /* Journal — one place to read/leave notes, keyed by stage. Replaces
+       the per-stage note affordance which was repetitive by step 03. */
+    .journal { max-width: 60ch; }
+    .journal .tabs {
+      display: flex; flex-wrap: wrap; gap: 6px;
+      margin-bottom: 16px;
+    }
+    .journal .tab {
+      font: inherit; cursor: pointer;
+      padding: 6px 10px;
+      font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+      background: transparent; color: var(--dim);
+      border: 1px solid var(--border-soft); border-radius: 2px;
+      transition: color 120ms ease, border-color 120ms ease;
+    }
+    .journal .tab:hover { color: var(--fg); border-color: var(--border); }
+    .journal .tab[aria-selected="true"] {
+      color: var(--accent); border-color: var(--accent);
+    }
+    .journal .stage-label {
+      font-family: var(--font-serif, 'Newsreader', serif);
+      font-size: 16px; color: var(--fg); font-weight: 300;
+      margin: 0 0 12px 0;
+    }
+    .journal .stage-label em { color: var(--muted); font-style: italic; }
+    .journal .compose { margin-bottom: 18px; }
+    .journal .compose textarea {
+      width: 100%; min-height: 72px; padding: 10px 12px;
+      background: var(--surface); color: var(--fg);
+      border: 1px solid var(--border); border-radius: 2px;
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 12px; line-height: 1.5; resize: vertical;
+    }
+    .journal .compose textarea:focus-visible { outline: 1px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
+    .journal .compose .actions {
+      display: flex; gap: 10px; margin-top: 8px; align-items: center;
+      font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase;
+      color: var(--dim);
+    }
+    .journal .compose button.submit {
+      font: inherit; cursor: pointer;
+      padding: 7px 14px;
+      background: transparent; color: var(--fg);
+      border: 1px solid var(--border); border-radius: 2px;
+    }
+    .journal .compose button.submit:hover { border-color: var(--accent); color: var(--accent); }
+    .journal .compose button.submit[disabled] { opacity: 0.5; cursor: not-allowed; }
+    .journal .compose .err { color: var(--err); letter-spacing: normal; text-transform: none; font-size: 11px; }
+    .journal .compose .hint {
+      font-size: 11px; letter-spacing: normal; text-transform: none;
+      color: var(--muted); line-height: 1.55; margin: 0 0 8px 0;
+    }
+    .journal .compose .hint button {
+      font: inherit; background: none; border: 0; padding: 0; cursor: pointer;
+      color: var(--accent); text-decoration: underline;
+      text-decoration-color: var(--dim); text-underline-offset: 2px;
+    }
+    .journal .compose .hint button:hover { text-decoration-color: var(--accent); }
+    .journal .notes .loading,
+    .journal .notes .empty {
+      font-size: 12px; color: var(--dim); font-style: italic;
+      padding: 10px 0;
+    }
+    .journal .note {
+      padding: 14px 0; border-top: 1px solid var(--border-soft);
+      font-size: 12.5px; color: var(--fg); line-height: 1.65;
+    }
+    .journal .note:first-child { border-top: 0; }
+    .journal .note.mine { padding-left: 12px; border-left: 2px solid var(--ok); background: var(--ok-dim); padding: 12px; margin: 8px 0; border-top: 0; }
+    .journal .note .who {
+      font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--dim); margin-bottom: 4px;
+    }
+    .journal .note .body { color: var(--fg); white-space: pre-wrap; word-break: break-word; }
   </style>
 
   <!--
     Styles for JS-injected elements live in a global block. Astro's
     scoped-CSS attribute is added at build time to elements present in
-    the static markup — runtime-created nodes (checkboxes, note
-    composers, comment panels, the login modal) don't receive it, so
-    scoped selectors wouldn't match them. Keeping these names distinct
-    (.stage-check, .stage-foot, .note-form, .own-note, .others, .auth-
-    widget, .login-modal, .login-card) so they don't collide with any
-    other page.
+    the static markup — runtime-created nodes (stage-check, auth-widget
+    contents, login modal) don't receive it, so scoped selectors
+    wouldn't match them.
   -->
   <style is:global>
     .auth-widget {
@@ -456,8 +533,8 @@ try {
       font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--dim);
     }
 
+    /* Checkbox sits inline in the .n column (not floating). */
     .stage .stage-check {
-      position: absolute; left: -28px; top: 24px;
       appearance: none; -webkit-appearance: none;
       width: 16px; height: 16px; border-radius: 50%;
       border: 1px solid var(--border); background: transparent;
@@ -465,9 +542,6 @@ try {
       display: inline-flex; align-items: center; justify-content: center;
       transition: background 120ms ease, border-color 120ms ease;
       flex-shrink: 0;
-    }
-    @media (max-width: 640px) {
-      .stage .stage-check { position: static; margin: 0 8px 4px 0; display: inline-flex; vertical-align: middle; }
     }
     .stage .stage-check:hover { border-color: var(--muted); }
     .stage .stage-check[aria-checked="true"] {
@@ -477,60 +551,6 @@ try {
       content: '✓'; color: var(--bg); font-size: 10px; line-height: 1;
     }
     .stage .stage-check[disabled] { opacity: 0.55; cursor: not-allowed; }
-
-    .stage-foot {
-      display: flex; justify-content: space-between; gap: 12px; align-items: center;
-      margin-top: 14px; padding-top: 10px; border-top: 1px dashed var(--border-soft);
-      font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
-    }
-    .stage-foot button {
-      background: none; border: 0; padding: 0; margin: 0; cursor: pointer;
-      font: inherit; color: var(--dim); letter-spacing: inherit; text-transform: inherit;
-    }
-    .stage-foot button:hover { color: var(--fg); }
-
-    .note-form { margin-top: 10px; display: none; }
-    .note-form.is-open { display: block; }
-    .note-form textarea {
-      width: 100%; min-height: 72px; padding: 10px 12px;
-      background: var(--surface); color: var(--fg);
-      border: 1px solid var(--border); border-radius: 2px;
-      font-family: 'JetBrains Mono', ui-monospace, monospace;
-      font-size: 12px; line-height: 1.5; resize: vertical; max-width: 60ch;
-    }
-    .note-form textarea:focus-visible { outline: 1px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
-    .note-form .actions { display: flex; gap: 10px; margin-top: 8px; align-items: center; }
-    .note-form button.submit {
-      font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
-      padding: 7px 14px; background: transparent; color: var(--fg);
-      border: 1px solid var(--border); border-radius: 2px; cursor: pointer;
-      font-family: inherit;
-    }
-    .note-form button.submit:hover { border-color: var(--accent); color: var(--accent); }
-    .note-form button.submit[disabled] { opacity: 0.5; cursor: not-allowed; }
-    .note-form .err { color: var(--err); font-size: 11px; }
-
-    .own-note {
-      margin-top: 12px; padding: 10px 12px;
-      background: var(--ok-dim); border-left: 2px solid var(--ok);
-      font-size: 12.5px; color: var(--fg); line-height: 1.6; max-width: 60ch;
-      white-space: pre-wrap; word-break: break-word;
-    }
-    .own-note .meta { font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--dim); margin-bottom: 4px; }
-
-    .others { margin-top: 10px; display: none; max-width: 60ch; }
-    .others.is-open { display: block; }
-    .others .loading, .others .empty { font-size: 11px; color: var(--dim); padding: 8px 0; font-style: italic; }
-    .others .item {
-      padding: 10px 0; border-top: 1px solid var(--border-soft);
-      font-size: 12.5px; color: var(--muted); line-height: 1.6;
-    }
-    .others .item:first-child { border-top: 0; }
-    .others .item .who {
-      font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase;
-      color: var(--dim); margin-bottom: 3px;
-    }
-    .others .item .body { color: var(--fg); white-space: pre-wrap; word-break: break-word; }
 
     /* Login modal */
     .login-modal[hidden] { display: none; }
@@ -583,9 +603,13 @@ try {
   <!-- 00 — Hero -->
   <section class="sec">
     <div class="wrap">
-      <div><div class="eyebrow"><span class="num">00</span><span>Afrotensor</span></div></div>
-      <div class="hero-row">
-       <div>
+      <div class="eyebrow-stack">
+        <div class="eyebrow"><span class="num">00</span><span>Afrotensor</span></div>
+        <div id="auth-widget" class="auth-widget" data-state="loading">
+          <span>checking…</span>
+        </div>
+      </div>
+      <div>
         <figure class="plate wide">
           <img
             src="/images/lalibela-hero.jpg"
@@ -625,10 +649,6 @@ try {
             {' '}<span class="you">you're next</span>.
           </p>
         )}
-       </div>
-       <div id="auth-widget" class="auth-widget" data-state="loading">
-         <span>checking…</span>
-       </div>
       </div>
     </div>
   </section>
@@ -876,11 +896,56 @@ try {
     </div>
   </section>
 
-  <!-- 04 — The yard & the guild (cards left untouched per brief). -->
+  <!-- 04 — Mason's journal. One place for notes, not one per stage. -->
+  <section class="sec" id="journal">
+    <div class="wrap">
+      <div>
+        <div class="eyebrow"><span class="num">04</span><span>Mason's journal</span></div>
+        <p class="caption" style="margin-top: 14px;">
+          Notes from the yard, kept by stone. What got you unstuck.
+        </p>
+      </div>
+      <div>
+        <div class="journal" data-journal>
+          <div class="tabs" role="tablist" aria-label="Select a stage to read or leave a note">
+            <button type="button" class="tab" role="tab" data-journal-tab="1" aria-selected="true">01</button>
+            <button type="button" class="tab" role="tab" data-journal-tab="2" aria-selected="false">02</button>
+            <button type="button" class="tab" role="tab" data-journal-tab="3" aria-selected="false">03</button>
+            <button type="button" class="tab" role="tab" data-journal-tab="4" aria-selected="false">04</button>
+            <button type="button" class="tab" role="tab" data-journal-tab="5" aria-selected="false">05</button>
+            <button type="button" class="tab" role="tab" data-journal-tab="6" aria-selected="false">06</button>
+            <button type="button" class="tab" role="tab" data-journal-tab="7" aria-selected="false">07</button>
+            <button type="button" class="tab" role="tab" data-journal-tab="8" aria-selected="false">08</button>
+          </div>
+
+          <p class="stage-label" data-journal-label>
+            Open a guild ledger on Polaris.
+          </p>
+
+          <div class="compose" data-journal-compose>
+            <p class="hint" data-journal-hint>
+              <button type="button" data-journal-signin>Sign in</button> to leave a note on this stone. Notes are public and help the masons who follow.
+            </p>
+            <textarea data-journal-input placeholder="What did you learn on this stone? What got you unstuck?" maxlength="2000" hidden></textarea>
+            <div class="actions" hidden data-journal-actions>
+              <button type="button" class="submit" data-journal-submit>Lay this note</button>
+              <span class="err" data-journal-err></span>
+            </div>
+          </div>
+
+          <div class="notes" data-journal-notes>
+            <div class="loading">Fetching notes…</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 — The yard & the guild (cards left untouched per brief). -->
   <section class="sec">
     <div class="wrap">
       <div>
-        <div class="eyebrow"><span class="num">04</span><span>The yard &amp; the guild</span></div>
+        <div class="eyebrow"><span class="num">05</span><span>The yard &amp; the guild</span></div>
         <p class="caption" style="margin-top: 14px;">
           Two buildings. One cathedral.
         </p>
@@ -922,11 +987,11 @@ try {
     </div>
   </section>
 
-  <!-- 05 — Support & community. -->
+  <!-- 06 — Support & community. -->
   <section class="sec">
     <div class="wrap">
       <div>
-        <div class="eyebrow"><span class="num">05</span><span>Support &amp; community</span></div>
+        <div class="eyebrow"><span class="num">06</span><span>Support &amp; community</span></div>
       </div>
       <div>
         <p class="prose">
@@ -942,12 +1007,12 @@ try {
     </div>
   </section>
 
-  <!-- 06 — Image attributions. Every photograph on this site ships with
+  <!-- 07 — Image attributions. Every photograph on this site ships with
        a source and a license. If we can't verify it, we don't use it. -->
   <section class="sec">
     <div class="wrap">
       <div>
-        <div class="eyebrow"><span class="num">06</span><span>Image credits</span></div>
+        <div class="eyebrow"><span class="num">07</span><span>Image credits</span></div>
         <p class="caption" style="margin-top: 14px;">
           Public-domain and Creative-Commons photographs. Links out to each source.
         </p>
@@ -1146,9 +1211,10 @@ try {
         .replace(/"/g, '&quot;').replace(/'/g, '&#39;')
     }
 
-    // ------------ Inject checkbox + note UI into each .stage ----------
-    // Pull the step number from the existing `.n` element, preserving
-    // the server-rendered content. If there's no .n (unexpected), skip.
+    // ------------ Inject checkbox into each .stage --------------------
+    // Each stage gets a small checkbox in the .n column so masons can
+    // mark progress. Notes live in a single journal section after the
+    // arc — not per-stage — to keep the arc itself clean.
     const stages = new Map() // stepNum -> root element
     $$('#work .stage').forEach((el) => {
       const nEl = el.querySelector('.n')
@@ -1158,10 +1224,7 @@ try {
       el.setAttribute('data-stage', String(step))
       stages.set(step, el)
 
-      const content = el.querySelector(':scope > div:not(.n)')
-      if (!content) return
-
-      // Checkbox: positioned absolutely over the stage by CSS.
+      // Checkbox: prepended into the .n column, stacked above the step number.
       const check = document.createElement('button')
       check.type = 'button'
       check.className = 'stage-check'
@@ -1169,42 +1232,7 @@ try {
       check.setAttribute('aria-checked', 'false')
       check.setAttribute('aria-label', `Mark stage ${step} as complete`)
       check.dataset.check = String(step)
-      el.appendChild(check) // appended last; positioned absolute
-
-      // Own-note placeholder
-      const ownNote = document.createElement('div')
-      ownNote.className = 'own-note'
-      ownNote.dataset.ownNote = String(step)
-      ownNote.hidden = true
-      content.appendChild(ownNote)
-
-      // Footer: "see other masons' notes" + "leave a note"
-      const foot = document.createElement('div')
-      foot.className = 'stage-foot'
-      foot.innerHTML = `
-        <button type="button" data-others-toggle="${step}">see other masons' notes</button>
-        <button type="button" data-note-toggle="${step}">leave a note for those who come after</button>
-      `
-      content.appendChild(foot)
-
-      // Note composer (hidden until toggled)
-      const form = document.createElement('div')
-      form.className = 'note-form'
-      form.dataset.noteForm = String(step)
-      form.innerHTML = `
-        <textarea data-note-input="${step}" placeholder="What did you learn? What got you unstuck?" maxlength="2000"></textarea>
-        <div class="actions">
-          <button type="button" class="submit" data-note-submit="${step}">Lay this note</button>
-          <span class="err" data-note-err="${step}"></span>
-        </div>
-      `
-      content.appendChild(form)
-
-      // Others panel
-      const others = document.createElement('div')
-      others.className = 'others'
-      others.dataset.others = String(step)
-      content.appendChild(others)
+      nEl.insertBefore(check, nEl.firstChild)
     })
 
     // ------------ Auth widget rendering -------------------------------
@@ -1217,6 +1245,7 @@ try {
       btn.textContent = 'Sign in with Polaris'
       btn.addEventListener('click', openLoginModal)
       authWidget.appendChild(btn)
+      setComposeAuthUI()
     }
 
     function setAuthUnavailable() {
@@ -1234,6 +1263,7 @@ try {
         alert('Sign in with Polaris is coming soon. For now, follow the steps below and your progress is saved locally.')
       })
       authWidget.appendChild(btn)
+      setComposeAuthUI()
     }
 
     function setAuthLoggedIn(me) {
@@ -1256,6 +1286,7 @@ try {
       `
       const out = $('#sign-out-btn')
       if (out) out.addEventListener('click', signOut)
+      setComposeAuthUI()
     }
 
     // ------------ Supabase client (lazy, CDN) -------------------------
@@ -1382,29 +1413,22 @@ try {
     let completedSteps = new Set()
     let ownComments = new Map() // step -> [{id, body, created_at}]
 
+    // Snapshot each stage's h3 so the journal's label can show which
+    // stone a given tab points at, without hard-coding titles twice.
+    const stageTitles = new Map()
+    for (const [step, el] of stages.entries()) {
+      const h3 = el.querySelector('h3')
+      stageTitles.set(step, h3 ? (h3.textContent || '').trim() : `Stone ${step}`)
+    }
+
     function renderProgressAndNotes() {
       for (const [step, el] of stages.entries()) {
         const check = el.querySelector(`[data-check="${step}"]`)
-        const ownNote = el.querySelector(`[data-own-note="${step}"]`)
         const done = completedSteps.has(step)
         el.classList.toggle('is-complete', done)
         if (check) check.setAttribute('aria-checked', done ? 'true' : 'false')
-
-        if (ownNote) {
-          const notes = ownComments.get(step) || []
-          if (!notes.length) {
-            ownNote.hidden = true
-            ownNote.innerHTML = ''
-          } else {
-            ownNote.hidden = false
-            ownNote.innerHTML = notes.map((c) => {
-              let when = ''
-              try { when = new Date(c.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) } catch (_) {}
-              return `<div class="meta">your note · ${escapeHtml(when)}</div><div>${escapeHtml(c.body)}</div>`
-            }).join('<div style="height:8px"></div>')
-          }
-        }
       }
+      renderJournal()
     }
 
     function resetToLoggedOutUI() {
@@ -1415,6 +1439,125 @@ try {
       completedSteps = loadLocalProgress()
       ownComments = new Map()
       renderProgressAndNotes()
+    }
+
+    // ------------ Journal: one notes panel for all stages -------------
+    let journalStep = 1
+    let journalNotesCache = new Map() // step -> {items, fetchedAt}
+    const JOURNAL_CACHE_MS = 30_000
+
+    const journalRoot = $('[data-journal]')
+    const journalLabel = journalRoot ? journalRoot.querySelector('[data-journal-label]') : null
+    const journalHint = journalRoot ? journalRoot.querySelector('[data-journal-hint]') : null
+    const journalInput = journalRoot ? journalRoot.querySelector('[data-journal-input]') : null
+    const journalActions = journalRoot ? journalRoot.querySelector('[data-journal-actions]') : null
+    const journalErr = journalRoot ? journalRoot.querySelector('[data-journal-err]') : null
+    const journalNotes = journalRoot ? journalRoot.querySelector('[data-journal-notes]') : null
+
+    function setJournalStep(step) {
+      if (!journalRoot) return
+      journalStep = step
+      journalRoot.querySelectorAll('[data-journal-tab]').forEach((t) => {
+        const s = parseInt(t.getAttribute('data-journal-tab'), 10)
+        t.setAttribute('aria-selected', s === step ? 'true' : 'false')
+      })
+      if (journalLabel) journalLabel.textContent = stageTitles.get(step) || `Stone ${step}`
+      if (journalErr) journalErr.textContent = ''
+      if (journalInput) journalInput.value = ''
+      renderJournal()
+      loadJournalNotes(step, false)
+    }
+
+    async function setComposeAuthUI() {
+      if (!journalRoot) return
+      const token = await currentAccessToken()
+      const authed = !!token
+      if (journalHint) journalHint.hidden = authed
+      if (journalInput) journalInput.hidden = !authed
+      if (journalActions) journalActions.hidden = !authed
+    }
+
+    function renderJournal() {
+      if (!journalRoot || !journalNotes) return
+      const cached = journalNotesCache.get(journalStep)
+      const mine = (ownComments.get(journalStep) || [])
+      const pieces = []
+      for (const c of mine) {
+        let when = ''
+        try { when = new Date(c.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) } catch (_) {}
+        pieces.push(`<div class="note mine"><div class="who">your note · ${escapeHtml(when)}</div><div class="body">${escapeHtml(c.body)}</div></div>`)
+      }
+      if (!cached) {
+        pieces.push('<div class="loading">Fetching notes…</div>')
+      } else {
+        const mineIds = new Set(mine.map((c) => c.id).filter(Boolean))
+        const others = (cached.items || []).filter((c) => !mineIds.has(c.id))
+        if (!others.length && !mine.length) {
+          pieces.push('<div class="empty">No notes on this stone yet. Be the first.</div>')
+        } else {
+          for (const c of others) {
+            let when = ''
+            try { when = new Date(c.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) } catch (_) {}
+            pieces.push(`<div class="note"><div class="who">${escapeHtml(c.author || 'mason')} · ${escapeHtml(when)}</div><div class="body">${escapeHtml(c.body)}</div></div>`)
+          }
+        }
+      }
+      journalNotes.innerHTML = pieces.join('')
+    }
+
+    async function loadJournalNotes(step, force) {
+      if (!journalNotes) return
+      const cached = journalNotesCache.get(step)
+      if (!force && cached && (Date.now() - cached.fetchedAt) < JOURNAL_CACHE_MS) {
+        renderJournal(); return
+      }
+      try {
+        const items = await publicFetch(`/api/v1/cathedral/comments?step=${step}`)
+        journalNotesCache.set(step, { items: Array.isArray(items) ? items : [], fetchedAt: Date.now() })
+      } catch (_) {
+        journalNotesCache.set(step, { items: [], fetchedAt: Date.now() })
+      }
+      if (step === journalStep) renderJournal()
+    }
+
+    if (journalRoot) {
+      journalRoot.addEventListener('click', async (e) => {
+        const tab = e.target.closest('[data-journal-tab]')
+        if (tab) {
+          const step = parseInt(tab.getAttribute('data-journal-tab'), 10)
+          if (step && step !== journalStep) setJournalStep(step)
+          return
+        }
+        const signInBtn = e.target.closest('[data-journal-signin]')
+        if (signInBtn) { openLoginModal(); return }
+        const submit = e.target.closest('[data-journal-submit]')
+        if (submit) {
+          if (!journalInput) return
+          const body = (journalInput.value || '').trim()
+          if (journalErr) journalErr.textContent = ''
+          if (!body) { if (journalErr) journalErr.textContent = 'Write something first.'; return }
+          submit.disabled = true
+          try {
+            const created = await authedFetch('/api/v1/cathedral/comments', {
+              method: 'POST',
+              body: JSON.stringify({ step_num: journalStep, body }),
+            })
+            const prior = ownComments.get(journalStep) || []
+            ownComments.set(journalStep, [...prior, created])
+            journalInput.value = ''
+            journalNotesCache.delete(journalStep) // force refetch next look
+            renderJournal()
+          } catch (err) {
+            if (err.message === 'not-authenticated') { openLoginModal(); return }
+            if (journalErr) journalErr.textContent = (err && err.message) || 'Could not lay this note.'
+          } finally {
+            submit.disabled = false
+          }
+        }
+      })
+      // Prime the first stage's notes + auth-aware compose.
+      setJournalStep(1)
+      setComposeAuthUI()
     }
 
     // ------------ localStorage fallback for anonymous progress -------
@@ -1482,90 +1625,7 @@ try {
         return
       }
 
-      // Note toggle
-      const noteToggle = e.target.closest('[data-note-toggle]')
-      if (noteToggle) {
-        const step = parseInt(noteToggle.getAttribute('data-note-toggle'), 10)
-        const token = await currentAccessToken()
-        if (!token) { openLoginModal(); return }
-        const form = document.querySelector(`[data-note-form="${step}"]`)
-        if (!form) return
-        form.classList.toggle('is-open')
-        if (form.classList.contains('is-open')) {
-          const ta = form.querySelector('textarea')
-          if (ta) ta.focus()
-        }
-        return
-      }
-
-      // Others toggle (public — no auth)
-      const othersToggle = e.target.closest('[data-others-toggle]')
-      if (othersToggle) {
-        const step = parseInt(othersToggle.getAttribute('data-others-toggle'), 10)
-        const panel = document.querySelector(`[data-others="${step}"]`)
-        if (!panel) return
-        const wasOpen = panel.classList.contains('is-open')
-        panel.classList.toggle('is-open')
-        othersToggle.textContent = wasOpen
-          ? `see other masons' notes`
-          : `hide other masons' notes`
-        if (!wasOpen) await loadPublicComments(step, panel)
-        return
-      }
-
-      // Note submit
-      const submit = e.target.closest('[data-note-submit]')
-      if (submit) {
-        const step = parseInt(submit.getAttribute('data-note-submit'), 10)
-        const form = document.querySelector(`[data-note-form="${step}"]`)
-        if (!form) return
-        const input = form.querySelector('textarea')
-        const errEl = form.querySelector('.err')
-        const body = ((input && input.value) || '').trim()
-        errEl.textContent = ''
-        if (!body) { errEl.textContent = 'Write something first.'; return }
-        submit.disabled = true
-        try {
-          const created = await authedFetch('/api/v1/cathedral/comments', {
-            method: 'POST',
-            body: JSON.stringify({ step_num: step, body }),
-          })
-          const prior = ownComments.get(step) || []
-          ownComments.set(step, [...prior, created])
-          input.value = ''
-          form.classList.remove('is-open')
-          renderProgressAndNotes()
-        } catch (err) {
-          if (err.message === 'not-authenticated') { openLoginModal(); return }
-          errEl.textContent = (err && err.message) || 'Could not lay this note.'
-        } finally {
-          submit.disabled = false
-        }
-        return
-      }
     })
-
-    async function loadPublicComments(step, panel) {
-      panel.innerHTML = '<div class="loading">Fetching notes…</div>'
-      try {
-        const items = await publicFetch(`/api/v1/cathedral/comments?step=${step}`)
-        if (!items.length) {
-          panel.innerHTML = '<div class="empty">No notes yet. Be the first.</div>'
-          return
-        }
-        panel.innerHTML = items.map((c) => {
-          let when = ''
-          try { when = new Date(c.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) } catch (_) {}
-          return `
-            <div class="item">
-              <div class="who">${escapeHtml(c.author)} · ${escapeHtml(when)}</div>
-              <div class="body">${escapeHtml(c.body)}</div>
-            </div>`
-        }).join('')
-      } catch (_) {
-        panel.innerHTML = '<div class="empty">Could not load notes right now.</div>'
-      }
-    }
 
     // ------------ Bootstrap -------------------------------------------
     (async function boot() {
