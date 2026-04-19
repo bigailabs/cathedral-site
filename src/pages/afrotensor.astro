@@ -1105,12 +1105,11 @@ try {
     const CFG = Object.assign(
       {
         apiBase: 'https://api.polaris.computer',
-        // Polaris Supabase project id: xuxtkpixggpmzjjogkmt.
-        // The publishable (anon) key must be provided at deploy time via
-        // window.__CATHEDRAL_CONFIG__ — until then the auth widget enters
-        // `unavailable` state and the page renders as read-only onboarding.
+        // Polaris Supabase project. The publishable (anon) key is public
+        // by design — Supabase RLS is the real security boundary.
+        // Overridable at runtime via window.__CATHEDRAL_CONFIG__.
         supabaseUrl: 'https://xuxtkpixggpmzjjogkmt.supabase.co',
-        supabasePublishableKey: '',
+        supabasePublishableKey: 'sb_publishable_bOPumgAxK8skthifaNIDkw_VkqjnpbB',
       },
       (typeof window !== 'undefined' && window.__CATHEDRAL_CONFIG__) || {},
     )
