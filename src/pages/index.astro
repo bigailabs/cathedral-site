@@ -179,7 +179,7 @@ import RoseWindow from '../components/RoseWindow.astro'
           </div>
           <div class="proof-meta">
             <div class="eyebrow"><span class="num">01</span><span>Live state</span></div>
-            <p class="cap">The validator, verifying. Miners on chain, as we see them.</p>
+            <p class="cap">The validator, verifying. Masons on chain, as we see them.</p>
             <p class="stats">
               <span class="line"><span class="k">sn39 · finney</span></span>
               <span class="line"><span class="k">block </span><span class="v" data-val="block">—</span></span>
@@ -244,19 +244,19 @@ import RoseWindow from '../components/RoseWindow.astro'
               <td class="r">—</td>
             </tr>
             <tr>
-              <td class="label">Miners declared on SN39</td>
+              <td class="label">Masons declared on SN39</td>
               <td class="status-ok">
                 On chain
-                <span class="ml-2 text-[9px] text-dim uppercase tracking-[0.12em] cursor-help" title="Declared = has an axon endpoint on chain. Cheap signal — doesn't mean the miner has ever contacted our validator.">· chain only</span>
+                <span class="ml-2 text-[9px] text-dim uppercase tracking-[0.12em] cursor-help" title="Declared = has an axon endpoint on chain. Cheap signal — doesn't mean the mason has ever contacted our validator.">· chain only</span>
               </td>
               <td class="r" data-val="miners-active">—</td>
               <td class="r">live</td>
             </tr>
             <tr>
-              <td class="label">Miners registered with us</td>
+              <td class="label">Masons registered with us</td>
               <td class="status-pending" data-val="miners-registered-status">
                 <span data-val="miners-registered-label">—</span>
-                <span class="ml-2 text-[9px] text-dim uppercase tracking-[0.12em] cursor-help" title="Miner has called RegisterBid on our validator with at least one node still active (bid_active=1 or under rental).">· registered</span>
+                <span class="ml-2 text-[9px] text-dim uppercase tracking-[0.12em] cursor-help" title="Mason has called RegisterBid on our validator with at least one node still active (bid_active=1 or under rental).">· registered</span>
               </td>
               <td class="r" data-val="miners-registered">—</td>
               <td class="r">live</td>
@@ -300,8 +300,8 @@ import RoseWindow from '../components/RoseWindow.astro'
         <div class="doors">
           <a href="/mine" class="door">
             <div>
-              <div class="k">For miners</div>
-              <div class="t">Run a node.<br/><em>Bring what you have.</em></div>
+              <div class="k">For masons</div>
+              <div class="t">Lay a stone.<br/><em>Bring what you have.</em></div>
             </div>
             <div class="flex items-center justify-between text-[10px] text-dim tracking-[0.18em] uppercase">
               <span>/mine</span>
@@ -853,7 +853,7 @@ import RoseWindow from '../components/RoseWindow.astro'
     if (m.validatorStatus === 'online' || m.bidActive || m.hasRental) return {
       text: 'registered',
       cls: 'text-accent border-accent',
-      title: 'Miner has registered at least one node with our validator (RegisterBid). Verification pending.',
+      title: 'Mason has registered at least one node with our validator (RegisterBid). Verification pending.',
     }
     if (m.uid === OUR_VALIDATOR_UID) return {
       text: 'ours · validator',
@@ -863,12 +863,12 @@ import RoseWindow from '../components/RoseWindow.astro'
     if (m.uid === OUR_MINER_UID) return {
       text: 'ours · orphaned',
       cls: 'text-warn border-warn',
-      title: 'Our old miner (UID 115). Registered on chain but the GPU node is gone; pending re-host.',
+      title: 'Our old mason (UID 115). Registered on chain but the GPU node is gone; pending re-host.',
     }
     if (m.status === 'Active') return {
       text: 'declared',
       cls: 'text-muted border-border',
-      title: 'Miner has declared an axon endpoint on chain. Not the same as verified — our validator has not yet SSH-confirmed GPU hardware. Could be live, could be a stub.',
+      title: 'Mason has declared an axon endpoint on chain. Not the same as verified — our validator has not yet SSH-confirmed GPU hardware. Could be live, could be a stub.',
     }
     return {
       text: 'unverified',

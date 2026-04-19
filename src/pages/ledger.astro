@@ -67,7 +67,7 @@ import RoseWindow from '../components/RoseWindow.astro'
       <div>
         <p class="lede">
           The master mason's ledger.<br/>
-          <em>Block, stake, miners, weights — what the validator sees, right now.</em>
+          <em>Block, stake, masons, weights — what the validator sees, right now.</em>
         </p>
         <p class="text-[11px] text-dim mt-4">
           Raw log tape on <a href="/" class="text-muted hover:text-fg underline underline-offset-2 decoration-dim">the home page</a>.
@@ -88,7 +88,7 @@ import RoseWindow from '../components/RoseWindow.astro'
           <div class="text-[10px] text-dim mt-0.5">sn39 · finney</div>
         </div>
         <div class="p-4 border-r border-border">
-          <div class="text-[10px] text-dim uppercase tracking-[0.15em]">miners active</div>
+          <div class="text-[10px] text-dim uppercase tracking-[0.15em]">masons active</div>
           <div class="text-[22px] text-fg tabular-nums mt-1 font-[300]" data-stat="active">—</div>
           <div class="text-[10px] text-dim mt-0.5"><span data-stat="total">—</span> uids total</div>
         </div>
@@ -126,7 +126,7 @@ import RoseWindow from '../components/RoseWindow.astro'
         </div>
         <p class="text-[11px] text-muted mt-4 leading-relaxed max-w-[64ch]">
           Threshold is the 14th-highest stake on SN39. Cross it and our weight-submissions
-          start landing on chain — miners we've scored begin receiving emissions.
+          start landing on chain — masons we've scored begin receiving emissions.
         </p>
       </div>
     </div>
@@ -135,9 +135,9 @@ import RoseWindow from '../components/RoseWindow.astro'
   <section class="sec">
     <div class="wrap">
       <div>
-        <div class="eyebrow"><span class="num">03</span><span>Registered miners</span></div>
+        <div class="eyebrow"><span class="num">03</span><span>Registered masons</span></div>
         <p class="text-[11px] text-muted mt-4 leading-relaxed max-w-[32ch]">
-          Miners currently registered with our validator — not just declared
+          Masons currently registered with our validator — not just declared
           on chain. Verified means our validator has SSH'd in and confirmed
           the hardware; registered means bid accepted, awaiting first verify.
         </p>
@@ -256,7 +256,7 @@ import RoseWindow from '../components/RoseWindow.astro'
             const body2 = document.querySelector('[data-stat="registered-table-body"]')
             if (body2) {
               if (regMiners.length === 0) {
-                body2.innerHTML = '<tr><td colspan="4" class="text-dim">no miners registered yet · awaiting first bid</td></tr>'
+                body2.innerHTML = '<tr><td colspan="4" class="text-dim">no masons registered yet · awaiting first bid</td></tr>'
               } else {
                 const rows = regMiners
                   .sort((a, b) => {
