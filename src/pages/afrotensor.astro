@@ -369,16 +369,22 @@ try {
     .plate img {
       display: block; width: 100%; height: auto;
       border: 1px solid var(--border-soft);
-      filter: grayscale(0.35) contrast(1.03) brightness(0.97);
+      /* Light touch: preserve the photograph's colour; just a hair of
+         grayscale + contrast to sit with the slate palette. Heavier
+         treatment made the dark rock-hewn shots look underexposed. */
+      filter: grayscale(0.15) contrast(1.05);
       transition: filter 600ms ease;
     }
-    html[data-theme='light'] .plate img { filter: grayscale(0.4) contrast(1.0) brightness(1.0); }
+    html[data-theme='light'] .plate img { filter: grayscale(0.2) contrast(1.02); }
     .plate .cap {
       margin-top: 8px; font-size: 10.5px; color: var(--dim);
       letter-spacing: 0.04em; line-height: 1.5;
     }
     .plate.tall img { aspect-ratio: 4 / 3; object-fit: cover; }
-    .plate.wide img { aspect-ratio: 16 / 7; object-fit: cover; }
+    /* Wide plates default to ~12:7 so portrait subjects (rock-hewn
+       monoliths, facades) keep vertical drama instead of being sliced
+       into a narrow strip. */
+    .plate.wide img { aspect-ratio: 12 / 7; object-fit: cover; }
 
     /* A thin banner image for pages that can't afford a full photo. */
     .banner {
@@ -582,13 +588,13 @@ try {
        <div>
         <figure class="plate wide">
           <img
-            src="/images/lalibela-sunset.jpg"
-            alt="Bete Giyorgis — the rock-hewn Church of Saint George, Lalibela, Ethiopia — at sunset"
-            width="1200" height="525"
+            src="/images/lalibela-hero.jpg"
+            alt="Bete Giyorgis — the rock-hewn Church of Saint George, Lalibela, Ethiopia — seen from the northeast"
+            width="1200" height="830"
             loading="eager" decoding="async"
           />
           <figcaption class="cap">
-            Bete Giyorgis, Lalibela — cut from a single block of rock, a thousand years ago.
+            Bete Giyorgis, Lalibela — carved down into the rock, one chisel-stroke at a time.
           </figcaption>
         </figure>
         <p class="lede">Lay a stone.<br/><em>Become a mason of the cathedral.</em></p>
