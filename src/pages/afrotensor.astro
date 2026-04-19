@@ -1,0 +1,245 @@
+---
+// Afrotensor — onboarding arc for African builders and students.
+//
+// Portability: This page is a standalone narrative. It lives on
+// cathedral.computer today for distribution, but is designed to lift
+// directly to afrotensor.com when that domain is ready. The only
+// cathedral-specific links are `/` (home), `/mine`, `/roadmap`,
+// `/changelog` — all of which become https://cathedral.computer/...
+// when we move, and https://polaris.computer links stay as-is.
+//
+// If moving: copy this file into a standalone Astro project with the
+// same Base layout (dark/light theme, same palette tokens), update
+// the four internal links to absolute, and deploy.
+import Base from '../layouts/Base.astro'
+
+// Central link map — update once when the page lifts to afrotensor.com.
+const LINKS = {
+  home: '/',
+  mine: '/mine',
+  roadmap: '/roadmap',
+  changelog: '/changelog',
+  minePath: '/mine#02',
+  polaris: 'https://polaris.computer',
+  faucet: 'https://app.minersunion.ai/testnet-faucet',
+  btcliDocs: 'https://docs.bittensor.com/getting-started/installation',
+  github: 'https://github.com/bigailabs/cathedral',
+  githubIssues: 'https://github.com/bigailabs/cathedral/issues',
+}
+---
+
+<Base title="afrotensor · cathedral">
+  <style>
+    .eyebrow {
+      font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase;
+      color: var(--dim); display: flex; align-items: baseline; gap: 10px;
+    }
+    .eyebrow .num { font-variant-numeric: tabular-nums; color: var(--accent); }
+    .sec { padding: 48px 0; border-bottom: 1px solid var(--border-soft); }
+    .sec:last-of-type { border-bottom: 0; }
+    .sec .wrap { display: grid; grid-template-columns: 160px 1fr; gap: 48px; }
+    @media (max-width: 900px) {
+      .sec { padding: 36px 0; } .sec .wrap { grid-template-columns: 1fr; gap: 20px; }
+    }
+    .lede {
+      font-family: var(--font-serif, 'Newsreader', ui-serif, Georgia, serif);
+      font-size: 22px; font-weight: 300; line-height: 1.4; color: var(--fg);
+      max-width: 36ch; margin: 0;
+    }
+    .lede em { font-style: italic; color: var(--muted); }
+    .tag {
+      display: inline-block; font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase;
+      padding: 2px 6px; margin-left: 8px; vertical-align: middle; border: 1px solid var(--border);
+    }
+    .tag.testnet { color: var(--ok); border-color: var(--ok); }
+    .tag.mainnet { color: var(--accent); border-color: var(--accent); }
+    .stage { display: grid; grid-template-columns: 36px 1fr; gap: 18px; padding: 14px 0; border-bottom: 1px solid var(--border-soft); }
+    .stage:last-child { border-bottom: 0; }
+    .stage .n {
+      font-variant-numeric: tabular-nums; color: var(--accent);
+      font-size: 12px; letter-spacing: 0.2em; padding-top: 2px;
+    }
+    .stage h3 { margin: 0 0 6px 0; font-size: 14px; font-weight: 500; color: var(--fg); letter-spacing: 0.02em; }
+    .stage p, .stage ul { margin: 4px 0 0 0; font-size: 12.5px; line-height: 1.65; color: var(--muted); }
+    .stage ul { padding-left: 16px; list-style: none; }
+    .stage ul li { position: relative; padding-left: 12px; }
+    .stage ul li::before { content: '—'; position: absolute; left: 0; color: var(--dim); }
+    .stage a { color: var(--fg); text-decoration: underline; text-decoration-color: var(--dim); text-underline-offset: 2px; }
+    .callout { border-left: 2px solid var(--accent); background: var(--accent-dim); padding: 14px 16px; font-size: 12.5px; color: var(--fg); line-height: 1.6; max-width: 64ch; }
+    .callout.ok { border-color: var(--ok); background: var(--ok-dim); }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; font-size: 12px; }
+    @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+    .card {
+      border: 1px solid var(--border); padding: 18px;
+      background: var(--surface); color: var(--fg);
+    }
+    .card h4 { margin: 0 0 8px 0; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--dim); font-weight: 400; }
+    .card p { font-size: 12.5px; line-height: 1.55; color: var(--muted); margin: 0; }
+    .card a.go {
+      display: inline-block; margin-top: 14px; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--accent); text-decoration: none; padding-bottom: 1px; border-bottom: 1px solid var(--accent);
+    }
+  </style>
+
+  <section class="sec">
+    <div class="wrap">
+      <div><div class="eyebrow"><span class="num">00</span><span>Afrotensor</span></div></div>
+      <div>
+        <p class="lede">Lay a stone.<br/><em>Become a mason of the cathedral.</em></p>
+        <p class="text-[12px] text-muted leading-relaxed max-w-[60ch] mt-4">
+          A cathedral is built slowly, by many hands, over long time.
+          The masons who laid the first stones knew they wouldn't see the spire.
+          Afrotensor is an invitation to builders, students, and cooperatives across Africa
+          to pick up a chisel.
+        </p>
+        <p class="text-[12px] text-muted leading-relaxed max-w-[60ch] mt-3">
+          No need to own a GPU. A laptop, a cheap VPS, or a spare desktop is a stone.
+          Three stages: <strong style="color: var(--fg)">apprentice</strong> on testnet (free test TAO),
+          <strong style="color: var(--fg)">journeyman</strong> on mainnet once your work holds,
+          <strong style="color: var(--fg)">build</strong> on top with agents and services that use the compute you (and others) contribute.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="wrap">
+      <div>
+        <div class="eyebrow"><span class="num">01</span><span>The work</span></div>
+        <p class="text-[11px] text-muted mt-4 leading-relaxed max-w-[28ch]">
+          Eight stones. Each fits on its own.
+        </p>
+      </div>
+      <div>
+        <div class="stage">
+          <div class="n">01</div>
+          <div>
+            <h3>Open a guild ledger on Polaris</h3>
+            <p>Polaris is the guild office — your identity, your balance, your access to compute across many yards (including Cathedral itself).</p>
+            <p>Walk in at <a href={LINKS.polaris}>polaris.computer</a> and sign up. Free.</p>
+          </div>
+        </div>
+        <div class="stage">
+          <div class="n">02</div>
+          <div>
+            <h3>Cut your mark — create a wallet</h3>
+            <p>A wallet is your mason's mark: the thing the subnet uses to recognise your work. Install <a href={LINKS.btcliDocs}>btcli</a>, then:</p>
+            <ul>
+              <li><code style="color:var(--muted)">btcli wallet new-coldkey --wallet.name cathedral</code></li>
+              <li><code style="color:var(--muted)">btcli wallet new-hotkey --wallet.name cathedral --wallet.hotkey default</code></li>
+              <li>Write the mnemonic down. Lose it and your mark is gone.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="stage">
+          <div class="n">03</div>
+          <div>
+            <h3>Take stone from the yard — test TAO</h3>
+            <p>Test TAO is free. You only need enough to register (<code style="color:var(--muted)">~0.001 τ</code>).</p>
+            <p>Faucet: <a href={LINKS.faucet}>app.minersunion.ai/testnet-faucet</a></p>
+            <p>Paste your <strong style="color:var(--fg)">coldkey address</strong> from step 02, send the request, receive test TAO within a minute.</p>
+          </div>
+        </div>
+        <div class="stage">
+          <div class="n">04</div>
+          <div>
+            <h3>Enter your name on the testnet roll</h3>
+            <p>Cathedral's apprentice yard is testnet SN292. Register your hotkey there first to prove your hands are steady:</p>
+            <p><code style="color:var(--muted)">btcli subnet register --wallet.name cathedral --wallet.hotkey default --netuid 292 --subtensor.network test</code></p>
+            <p>Costs <code style="color:var(--muted)">0.0005 τ</code> from the test TAO you just received. You'll be given a UID — your place on the roll.</p>
+          </div>
+        </div>
+        <div class="stage">
+          <div class="n">05</div>
+          <div>
+            <h3>Choose a stone</h3>
+            <p>You don't need marble. A humble stone — a laptop, a cheap VPS, a desktop in the corner — is a full contribution.</p>
+            <ul>
+              <li><strong style="color:var(--fg)">CPU:</strong> any Ubuntu 22.04+ box with SSH. 4 vCPU + 8 GB RAM is a <code style="color:var(--muted)">CPU_STANDARD</code>.</li>
+              <li><strong style="color:var(--fg)">GPU:</strong> a gaming PC or workstation you own. See <a href={LINKS.minePath}>the cut list</a>.</li>
+              <li><strong style="color:var(--fg)">Rent a block:</strong> Polaris can rent you a machine by the hour — a few cents for a CPU tier while you learn.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="stage">
+          <div class="n">06</div>
+          <div>
+            <h3>Raise the stone — run cathedral-miner</h3>
+            <p>Build steps and config templates for CPU and GPU live on the <a href={LINKS.mine}>mine page</a>. Point the miner at testnet SN292 and start it.</p>
+            <p>Within a minute you'll appear on the <a href={LINKS.home}>register</a> as <strong style="color:var(--accent)">recognised</strong>. Within ~15 min the master mason will inspect your work and mark you <strong style="color:var(--ok)">verified</strong>.</p>
+          </div>
+        </div>
+        <div class="stage">
+          <div class="n">07</div>
+          <div>
+            <h3>Step up to the main yard</h3>
+            <p>When your testnet stone holds, move to mainnet. Register the same hotkey on SN39, change <code style="color:var(--muted)">network</code> to <code style="color:var(--muted)">"finney"</code> and <code style="color:var(--muted)">netuid</code> to <code style="color:var(--muted)">39</code>, restart the miner. Real burn: ~0.004 τ.</p>
+            <p>Emissions are still parked — we're below the permit stake. Your compute units accrue from the moment you're verified; they convert to flow when the gate opens.</p>
+          </div>
+        </div>
+        <div class="stage">
+          <div class="n">08</div>
+          <div>
+            <h3>Build on what others have built</h3>
+            <p>The cathedral is not only walls. Once you are a mason, you can also be a user: rent a GPU from the yard for a training run, deploy an agent, run inference on a stone someone else has laid.</p>
+            <p>That happens on <a href={LINKS.polaris}>polaris.computer</a>. Cathedral is the base course; Polaris is everything built above.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="wrap">
+      <div>
+        <div class="eyebrow"><span class="num">02</span><span>The yard &amp; the guild</span></div>
+        <p class="text-[11px] text-muted mt-4 leading-relaxed max-w-[28ch]">
+          Two buildings. One cathedral.
+        </p>
+      </div>
+      <div>
+        <div class="two-col">
+          <div class="card">
+            <h4>Cathedral <span class="tag mainnet">the yard</span></h4>
+            <p>
+              Where masons cut and lay stone. On-chain. Open source. Community owned. SN39 on mainnet, SN292 on testnet.
+              Hardware verification, scoring, emissions.
+            </p>
+            <a class="go" href={LINKS.github}>View the protocol ↗</a>
+          </div>
+          <div class="card">
+            <h4>Polaris <span class="tag">the guild</span></h4>
+            <p>
+              Where the guild handles membership and commerce. Accounts, balance, rentals, jobs, agents.
+              Polaris can route work onto Cathedral masons — or any other yard.
+            </p>
+            <a class="go" href={LINKS.polaris}>Open Polaris ↗</a>
+          </div>
+        </div>
+        <p class="text-[11px] text-dim leading-relaxed mt-6 max-w-[64ch]">
+          You can only lay stone, only commission, or both. This page assumes you'll lay first — the cheapest way into the craft.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="wrap">
+      <div>
+        <div class="eyebrow"><span class="num">03</span><span>Support &amp; community</span></div>
+      </div>
+      <div>
+        <p class="text-[12px] text-muted leading-relaxed max-w-[60ch]">
+          Questions, stuck, want to share what you built? Open a GitHub issue on
+          <a href={LINKS.githubIssues} class="text-muted hover:text-fg underline underline-offset-2 decoration-dim">bigailabs/cathedral</a>
+          or drop by Discord.
+        </p>
+        <p class="text-[12px] text-muted leading-relaxed max-w-[60ch] mt-3">
+          The full protocol story lives on the <a href={LINKS.roadmap} class="text-muted hover:text-fg underline underline-offset-2 decoration-dim">roadmap</a>.
+          Validator activity is visible live on <a href={LINKS.home} class="text-muted hover:text-fg underline underline-offset-2 decoration-dim">the home page</a>.
+          Shipped work is on the <a href={LINKS.changelog} class="text-muted hover:text-fg underline underline-offset-2 decoration-dim">changelog</a>.
+        </p>
+      </div>
+    </div>
+  </section>
+</Base>
