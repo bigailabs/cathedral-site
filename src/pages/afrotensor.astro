@@ -84,12 +84,17 @@ try {
     .sec { padding: 48px 0; border-bottom: 1px solid var(--border-soft); }
     .sec:last-of-type { border-bottom: 0; }
     .sec .wrap { display: grid; grid-template-columns: 160px 1fr; gap: 48px; }
+    /* min-width: 0 on grid children lets the 1fr track actually shrink
+       instead of being padded out by intrinsic content widths (long
+       code strings, max-width: min(60ch, 100%) prose). Without this, CSS grid
+       expands the track and causes horizontal body overflow on mobile. */
+    .sec .wrap > * { min-width: 0; }
     @media (max-width: 900px) {
       .sec { padding: 36px 0; } .sec .wrap { grid-template-columns: 1fr; gap: 20px; }
     }
 
     /* Prose defaults — promote body to --fg, breathe at 1.7, cap at 60ch. */
-    .prose { max-width: 60ch; font-size: 13px; line-height: 1.7; color: var(--fg); }
+    .prose { max-width: min(60ch, 100%); font-size: 13px; line-height: 1.7; color: var(--fg); }
     .prose + .prose { margin-top: 14px; }
     .prose a { color: var(--fg); text-decoration: underline; text-decoration-color: var(--dim); text-underline-offset: 2px; }
     .prose a:hover { text-decoration-color: var(--accent); }
@@ -114,7 +119,7 @@ try {
     /* Live mason line — a single sentence, serif, quiet. */
     .live-masons {
       margin-top: 22px; font-family: var(--font-serif, 'Newsreader', serif);
-      font-size: 16px; line-height: 1.55; color: var(--fg); max-width: 60ch;
+      font-size: 16px; line-height: 1.55; color: var(--fg); max-width: min(60ch, 100%);
       font-weight: 300; font-style: italic;
     }
     .live-masons .uid { font-family: 'JetBrains Mono', ui-monospace, monospace; font-style: normal; color: var(--accent); font-size: 14px; letter-spacing: 0.02em; }
@@ -129,6 +134,8 @@ try {
       padding: 22px 0;
       border-top: 1px solid var(--border-soft);
     }
+    .stage > *,
+    .stage > div > * { min-width: 0; max-width: 100%; }
     .stage:first-child { border-top: 0; padding-top: 6px; }
     .stage .n {
       font-variant-numeric: tabular-nums; color: var(--accent);
@@ -142,7 +149,7 @@ try {
     }
     .stage .body {
       margin: 8px 0 0 0; font-size: 13px; line-height: 1.7;
-      color: var(--fg); max-width: 60ch;
+      color: var(--fg); max-width: min(60ch, 100%);
     }
     .stage .body strong { color: var(--fg); font-weight: 500; }
     .stage a {
@@ -156,7 +163,7 @@ try {
       margin-top: 12px; padding: 10px 12px;
       border: 1px solid var(--border-soft); background: var(--surface);
       font-size: 12px; line-height: 1.6; color: var(--fg);
-      max-width: 60ch; overflow-x: auto;
+      max-width: min(60ch, 100%); overflow-x: auto;
     }
     .block code { font-family: 'JetBrains Mono', ui-monospace, monospace; color: var(--fg); }
     .block + .block { margin-top: 8px; }
@@ -224,7 +231,7 @@ try {
     .signup .lede-form em { color: var(--muted); font-style: italic; }
     .signup .intro {
       font-size: 12.5px; line-height: 1.7; color: var(--muted);
-      margin: 6px 0 22px 0; max-width: 60ch;
+      margin: 6px 0 22px 0; max-width: min(60ch, 100%);
     }
 
     .signup form { display: block; }
@@ -350,7 +357,7 @@ try {
     }
     .signup .thanks a:hover { text-decoration-color: var(--accent); }
 
-    .callout { border-left: 2px solid var(--accent); background: var(--accent-dim); padding: 14px 16px; font-size: 13px; color: var(--fg); line-height: 1.7; max-width: 60ch; }
+    .callout { border-left: 2px solid var(--accent); background: var(--accent-dim); padding: 14px 16px; font-size: 13px; color: var(--fg); line-height: 1.7; max-width: min(60ch, 100%); }
     .callout.ok { border-color: var(--ok); background: var(--ok-dim); }
 
     /* Cards in the yard & guild section — untouched. */
@@ -370,7 +377,7 @@ try {
     /* Photographic plate — a single image with a thin border and a
        whisper of a caption underneath. The plate is tuned down so it
        sits next to the mono/serif prose without shouting. */
-    .plate { margin: 0 0 28px 0; max-width: 64ch; }
+    .plate { margin: 0 0 28px 0; max-width: min(64ch, 100%); }
     .plate img {
       display: block; width: 100%; height: auto;
       border: 1px solid var(--border-soft);
@@ -415,7 +422,7 @@ try {
 
     /* Journal — one place to read/leave notes, keyed by stage. Replaces
        the per-stage note affordance which was repetitive by step 03. */
-    .journal { max-width: 60ch; }
+    .journal { max-width: min(60ch, 100%); }
     .journal .tabs {
       display: flex; flex-wrap: wrap; gap: 6px;
       margin-bottom: 16px;
