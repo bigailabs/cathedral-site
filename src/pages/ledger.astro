@@ -41,7 +41,23 @@ import RoseWindow from '../components/RoseWindow.astro'
     .holders td.r { text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; }
     .holders tr.ours td { color: var(--accent); }
     .holders tr.ours { background: var(--accent-dim); }
+
+    /* Thin banner — a stonemason at the bench. Dialled right down so the
+       tables stay the page's centre of gravity. */
+    .banner {
+      width: 100%; height: 80px; margin-bottom: 24px;
+      background-image: url('/images/stonemason-tailleur.jpg');
+      background-size: cover; background-position: center 45%;
+      filter: grayscale(1) contrast(0.95) brightness(0.95);
+      opacity: 0.3;
+      border-bottom: 1px solid var(--border-soft);
+      mask-image: linear-gradient(to right, transparent 0%, black 18%, black 82%, transparent 100%);
+      -webkit-mask-image: linear-gradient(to right, transparent 0%, black 18%, black 82%, transparent 100%);
+    }
+    html[data-theme='light'] .banner { opacity: 0.22; filter: grayscale(1) contrast(0.9) brightness(1.04); }
   </style>
+
+  <div class="banner" role="presentation" aria-hidden="true"></div>
 
   <section class="sec">
     <div class="wrap">
@@ -50,8 +66,8 @@ import RoseWindow from '../components/RoseWindow.astro'
       </div>
       <div>
         <p class="lede">
-          What the validator sees, right now.<br/>
-          <em>Block, stake, miners, weights.</em>
+          The master mason's ledger.<br/>
+          <em>Block, stake, miners, weights — what the validator sees, right now.</em>
         </p>
         <p class="text-[11px] text-dim mt-4">
           Raw log tape on <a href="/" class="text-muted hover:text-fg underline underline-offset-2 decoration-dim">the home page</a>.

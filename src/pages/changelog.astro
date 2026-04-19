@@ -39,13 +39,35 @@ const html = ok ? marked.parse(cleaned) : ''
       max-width: 34ch; margin: 0;
     }
     .lede em { font-style: italic; color: var(--muted); }
+
+    /* Thin banner — workers setting a marble block in place. */
+    .banner {
+      width: 100%; height: 80px; margin-bottom: 24px;
+      background-image: url('/images/stonework-nypl.jpg');
+      background-size: cover; background-position: center 55%;
+      filter: grayscale(1) contrast(0.95) brightness(0.95);
+      opacity: 0.32;
+      border-bottom: 1px solid var(--border-soft);
+      mask-image: linear-gradient(to right, transparent 0%, black 18%, black 82%, transparent 100%);
+      -webkit-mask-image: linear-gradient(to right, transparent 0%, black 18%, black 82%, transparent 100%);
+    }
+    html[data-theme='light'] .banner { opacity: 0.24; filter: grayscale(1) contrast(0.9) brightness(1.04); }
+
+    .stone-line {
+      margin-top: 14px; font-family: var(--font-serif, 'Newsreader', serif);
+      font-style: italic; font-weight: 300; font-size: 14px;
+      color: var(--muted); max-width: 56ch;
+    }
   </style>
+
+  <div class="banner" role="presentation" aria-hidden="true"></div>
 
   <section class="sec">
     <div class="wrap">
       <div><div class="eyebrow"><span class="num">00</span><span>Changelog</span></div></div>
       <div>
         <p class="lede">What shipped, in date order.<br/><em>Canonical record on GitHub.</em></p>
+        <p class="stone-line">Each entry is a stone laid.</p>
         <p class="text-[12px] text-muted leading-relaxed mt-4 max-w-[56ch]">
           Source of truth is
           <a href="https://github.com/bigailabs/cathedral/blob/main/CHANGELOG.md" class="text-muted hover:text-fg underline underline-offset-2 decoration-dim">CHANGELOG.md</a>
