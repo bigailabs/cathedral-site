@@ -72,6 +72,17 @@ import RoseWindow from '../components/RoseWindow.astro'
       border-top: 1px solid var(--border-soft);
       padding-top: 20px;
     }
+    /* When proof-meta leads the column, drop the top border — the
+       stats ARE the headline, not a continuation. The thesis below
+       gets the soft separator instead, as the quiet reflection. */
+    .hero-left .proof-meta.proof-meta--lead {
+      border-top: 0;
+      padding-top: 0;
+    }
+    .hero-left .proof-meta.proof-meta--lead + .thesis {
+      border-top: 1px solid var(--border-soft);
+      padding-top: 24px;
+    }
     .hero-left .proof-meta .cap {
       font-size: 12px; color: var(--muted);
       max-width: 32ch; line-height: 1.55; margin: 8px 0 0 0;
@@ -169,6 +180,15 @@ import RoseWindow from '../components/RoseWindow.astro'
   <section class="sec hero">
     <div class="hero-grid">
       <aside class="hero-left">
+        <div class="proof-meta proof-meta--lead">
+          <div class="eyebrow"><span class="num">01</span><span>Live state</span></div>
+          <p class="cap">The validator, verifying. Masons on chain, as we see them.</p>
+          <p class="stats">
+            <span class="line"><span class="k">sn39 · finney</span></span>
+            <span class="line"><span class="k">block </span><span class="v" data-val="block">—</span></span>
+            <span class="line"><span class="k">stake </span><span class="v">131.82α</span><span class="k"> / ~14k α permit</span></span>
+          </p>
+        </div>
         <div class="thesis thesis-fade">
           <p>
             A cathedral is a <span class="accent">commons</span> —<br/>
@@ -179,15 +199,6 @@ import RoseWindow from '../components/RoseWindow.astro'
           <p>
             We're building compute the same way.<br/>
             In public, over time, for whoever needs it.
-          </p>
-        </div>
-        <div class="proof-meta">
-          <div class="eyebrow"><span class="num">01</span><span>Live state</span></div>
-          <p class="cap">The validator, verifying. Masons on chain, as we see them.</p>
-          <p class="stats">
-            <span class="line"><span class="k">sn39 · finney</span></span>
-            <span class="line"><span class="k">block </span><span class="v" data-val="block">—</span></span>
-            <span class="line"><span class="k">stake </span><span class="v">131.82α</span><span class="k"> / ~14k α permit</span></span>
           </p>
         </div>
       </aside>
