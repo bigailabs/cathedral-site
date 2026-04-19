@@ -995,11 +995,26 @@ import RoseWindow from '../components/RoseWindow.astro'
     }
   }
 
+  // Track health of each endpoint so the UI can tell the user what's
+  // happening instead of sitting on "loading…" when an upstream is down.
+  const fetchHealth = {
+    state: { lastOk: 0, lastError: '' as string | '' },
+    registry: { lastOk: 0, lastError: '' as string | '' },
+  }
+
   async function fetchState() {
+    const ctrl = new AbortController()
+    const t = setTimeout(() => ctrl.abort(), 20_000)
     try {
-      const r = await fetch(ENDPOINTS.state, { cache: 'no-store' })
-      if (!r.ok) return
+      const r = await fetch(ENDPOINTS.state, { cache: 'no-store', signal: ctrl.signal })
+      if (!r.ok) {
+        fetchHealth.state.lastError = `HTTP ${r.status}`
+        updateDataFreshness()
+        return
+      }
       const data = await r.json()
+      fetchHealth.state.lastOk = Date.now()
+      fetchHealth.state.lastError = ''
       const blockEl = document.querySelector<HTMLElement>('[data-val="block"]')
       if (blockEl) {
         const block = data?.summary?.block
@@ -1047,16 +1062,30 @@ import RoseWindow from '../components/RoseWindow.astro'
         })
       }
       renderMinersRegister()
-    } catch { /* noop */ }
+      updateDataFreshness()
+    } catch (err: any) {
+      fetchHealth.state.lastError = err?.name === 'AbortError' ? 'timeout' : (err?.message || 'network error')
+      updateDataFreshness()
+    } finally {
+      clearTimeout(t)
+    }
   }
 
   async function fetchRegistry() {
     // Three-tier funnel: declared on chain (above) → registered with us → verified.
     // Backend caches this at 30s so hammering is cheap.
+    const ctrl = new AbortController()
+    const t = setTimeout(() => ctrl.abort(), 20_000)
     try {
-      const r = await fetch(ENDPOINTS.registry, { cache: 'no-store' })
-      if (!r.ok) return
+      const r = await fetch(ENDPOINTS.registry, { cache: 'no-store', signal: ctrl.signal })
+      if (!r.ok) {
+        fetchHealth.registry.lastError = `HTTP ${r.status}`
+        updateDataFreshness()
+        return
+      }
       const payload = await r.json()
+      fetchHealth.registry.lastOk = Date.now()
+      fetchHealth.registry.lastError = ''
       const data = payload?.data
       if (!data) return
 
@@ -1130,7 +1159,48 @@ import RoseWindow from '../components/RoseWindow.astro'
         }
       }
       renderMinersRegister()
-    } catch { /* noop */ }
+      updateDataFreshness()
+    } catch (err: any) {
+      fetchHealth.registry.lastError = err?.name === 'AbortError' ? 'timeout' : (err?.message || 'network error')
+      updateDataFreshness()
+    } finally {
+      clearTimeout(t)
+    }
+  }
+
+  // Updates the "loading" placeholder in the register list + the
+  // freshness marker next to the header counts. If either endpoint is
+  // down and we have no cached rows, show a clear "can't reach" message
+  // instead of spinning forever on "loading…".
+  function updateDataFreshness(): void {
+    const listEl = document.querySelector<HTMLElement>('[data-miners-list]')
+    const updatedEl = document.querySelector<HTMLElement>('[data-miners-updated]')
+    if (!listEl) return
+
+    const hasRows = registerState.miners.size > 0
+    const placeholder = listEl.querySelector<HTMLElement>('.miners-placeholder, .miners-error')
+    const anyError = fetchHealth.state.lastError || fetchHealth.registry.lastError
+    const anyFresh = fetchHealth.state.lastOk || fetchHealth.registry.lastOk
+
+    if (!hasRows) {
+      if (placeholder) placeholder.remove()
+      const el = document.createElement('div')
+      if (anyError && !anyFresh) {
+        el.className = 'miners-error px-3 py-4 text-[11px] text-warn'
+        el.textContent = `couldn't reach the subnet (${anyError}) — retrying`
+      } else {
+        el.className = 'miners-placeholder px-3 py-4 text-[11px] text-dim'
+        el.textContent = 'loading…'
+      }
+      // Only add if there's no content already
+      if (listEl.children.length === 0) listEl.appendChild(el)
+    }
+
+    // Header "last seen" — prefer newest success of either fetch.
+    const newest = Math.max(fetchHealth.state.lastOk, fetchHealth.registry.lastOk)
+    if (updatedEl && newest) {
+      updatedEl.textContent = new Date(newest).toLocaleTimeString()
+    }
   }
 
   // ---------------------------------------------------------------------------
