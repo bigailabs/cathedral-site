@@ -837,13 +837,15 @@ import RoseWindow from '../components/RoseWindow.astro'
     const updatedEl = document.querySelector<HTMLElement>('[data-miners-updated]')
     if (!listEl) return
 
-    // Ordering, top → bottom:
-    //   1. Verified — real live miners, stay sticky at the top
-    //   2. Registered with our validator (but not yet verified)
+    // Ordering, top → bottom. Only the signal tiers render — declared-
+    // on-chain miners are hidden because that signal is cheap and noisy:
+    //   1. Verified — SSH-confirmed live miners
+    //   2. Registered — called RegisterBid, not yet verified
     //   3. Rejected — surfaced so we can see what's been kicked
-    //   4. Ours — our validator + orphan miner slot, pinned for identity
-    //   5. Active on chain (declared) — chain signal, not our signal
-    //   6. Inactive / unseen — everyone else
+    //   4. Ours — validator + any of our own miner slots, for identity
+    // Everything else is chain-noise and doesn't render. The raw UID
+    // count stays visible in the header so operators can still see
+    // how many miners have declared.
     const all = Array.from(registerState.miners.values())
     const taken = new Set<number>()
     const pick = (pred: (m: MinerRow) => boolean): MinerRow[] => {
@@ -856,16 +858,17 @@ import RoseWindow from '../components/RoseWindow.astro'
     const registered = pick((m) => m.validatorStatus === 'online' || m.bidActive || m.hasRental)
     const rejected = pick((m) => !!m.rejected)
     const ours = pick((m) => m.uid === OUR_VALIDATOR_UID || m.uid === OUR_MINER_UID)
-    const active = pick((m) => m.status === 'Active')
-    const inactive = pick(() => true)
 
     verified.sort((a, b) => a.uid - b.uid)
     registered.sort((a, b) => a.uid - b.uid)
-    active.sort((a, b) => (b.stake || 0) - (a.stake || 0))
-    inactive.sort((a, b) => a.uid - b.uid)
 
-    const ordered = [...verified, ...registered, ...rejected, ...ours, ...active, ...inactive]
+    const ordered = [...verified, ...registered, ...rejected, ...ours]
     registerState.order = ordered.map((m) => m.uid)
+
+    // Stats for the footer — declared count is total Active minus our
+    // visible bands so the header math still works out.
+    const declaredCount = all.filter((m) => m.status === 'Active' && !taken.has(m.uid)).length
+    const inactiveCount = all.filter((m) => m.status !== 'Active' && !taken.has(m.uid)).length
 
     // Diff-render: only touch what changed
     const existing = new Map<number, HTMLElement>()
@@ -912,8 +915,15 @@ import RoseWindow from '../components/RoseWindow.astro'
 
     // Footer tallies
     if (countEl) countEl.textContent = String(all.length) + ' uids'
-    if (activeEl) activeEl.textContent = active.length + ' active'
-    if (pendingEl) pendingEl.textContent = inactive.length + ' inactive · ' + rejected.length + ' rejected'
+    // Header label: emphasise signal tiers. Declared/inactive are hidden
+    // from the list but counted so the user can still see the funnel.
+    if (activeEl) {
+      const label = verified.length > 0
+        ? `${verified.length} verified · ${registered.length} registered`
+        : `${registered.length} registered`
+      activeEl.textContent = label
+    }
+    if (pendingEl) pendingEl.textContent = `${declaredCount} declared · ${inactiveCount} inactive · ${rejected.length} rejected`
     if (updatedEl) updatedEl.textContent = new Date().toLocaleTimeString()
   }
 
