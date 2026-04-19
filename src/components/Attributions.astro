@@ -1,0 +1,78 @@
+---
+// Image attributions for photography sourced from Wikimedia Commons and
+// the NYPL Digital Collections. Every image on this site is either in the
+// public domain or used under a Creative Commons license that permits
+// reuse with credit. If we can't verify the license, it doesn't ship.
+//
+// Update this list whenever a new image is added under /public/images/.
+
+interface Credit {
+  file: string
+  title: string
+  author: string
+  license: string
+  source: string
+}
+
+const CREDITS: Credit[] = [
+  {
+    file: 'lalibela-sunset.jpg',
+    title: 'Church of Saint George (Bete Giyorgis), Lalibela — sunset',
+    author: 'Thomas Fuhrmann (User:Snowmanstudios)',
+    license: 'CC BY-SA 4.0',
+    source: 'https://commons.wikimedia.org/wiki/File:Ethiopia_-_sunset_at_Church_of_Saint_George,_Lalibela_01.jpg',
+  },
+  {
+    file: 'lalibela-exterior.jpg',
+    title: 'Church of Saint George, Lalibela — exterior',
+    author: 'Sailko',
+    license: 'CC BY 3.0',
+    source: 'https://commons.wikimedia.org/wiki/File:Lalibela,_san_giorgio,_esterno_17.jpg',
+  },
+  {
+    file: 'notre-dame-sunrise.jpg',
+    title: 'Notre-Dame de Paris — northwest view at sunrise',
+    author: 'DXR (User:DXR)',
+    license: 'CC BY-SA 3.0',
+    source: 'https://commons.wikimedia.org/wiki/File:Cath%C3%A9drale_Notre-Dame_de_Paris,_Northwest_view_at_sunrise_20140320.jpg',
+  },
+  {
+    file: 'stonemason-tailleur.jpg',
+    title: 'Tailleur de pierre (stonemason at work)',
+    author: 'Myrabella (User:Myrabella)',
+    license: 'CC BY-SA 3.0',
+    source: 'https://commons.wikimedia.org/wiki/File:Tailleur_de_pierre.jpg',
+  },
+  {
+    file: 'stonework-nypl.jpg',
+    title: 'Exterior marble work — men putting a stone in place',
+    author: 'New York Public Library Digital Collections (b11524053)',
+    license: 'Public Domain',
+    source: 'https://commons.wikimedia.org/wiki/File:Exterior_marble_work_-_men_putting_a_stone_in_place_(NYPL_b11524053-489470).tiff',
+  },
+]
+---
+
+<style>
+  .attr-list { list-style: none; margin: 0; padding: 0; font-size: 11px; line-height: 1.65; }
+  .attr-list li { padding: 6px 0; border-bottom: 1px solid var(--border-soft); color: var(--muted); }
+  .attr-list li:last-child { border-bottom: 0; }
+  .attr-list a { color: var(--muted); text-decoration: underline; text-decoration-color: var(--dim); text-underline-offset: 2px; }
+  .attr-list a:hover { color: var(--fg); }
+  .attr-list .file { color: var(--dim); font-variant-numeric: tabular-nums; }
+  .attr-list .lic  { color: var(--dim); }
+</style>
+
+<ul class="attr-list">
+  {CREDITS.map((c) => (
+    <li>
+      <span class="file">/images/{c.file}</span>
+      {' — '}
+      <a href={c.source}>{c.title}</a>
+      {' · '}
+      {c.author}
+      {' · '}
+      <span class="lic">{c.license}</span>
+    </li>
+  ))}
+</ul>

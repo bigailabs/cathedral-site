@@ -11,9 +11,9 @@ type Issue = {
 }
 
 const ACTS = [
-  { id: 'act-1', num: '01', title: 'Baseline', blurb: 'Get the validator and miner reliable. Unlock weights with stake. Harden the REST API.' },
-  { id: 'act-2', num: '02', title: 'Mining',   blurb: 'Make mining on cathedral economically coherent. Generalize the image pipeline. The business model is being worked out in public.' },
-  { id: 'act-3', num: '03', title: 'Ecosystem',blurb: 'External miners onboard. Subnet scouting. A treasury view that shows compute in, mining out.' },
+  { id: 'act-1', num: '01', title: 'Foundation', blurb: 'Lay the base course. Get the validator and miner reliable, unlock weights with stake, harden the REST API. Nothing rises until this sets.' },
+  { id: 'act-2', num: '02', title: 'The work',   blurb: 'Make mining on cathedral economically coherent. Generalize the image pipeline. The business model is being worked out in public — one stone at a time.' },
+  { id: 'act-3', num: '03', title: 'The yard',   blurb: 'External masons join the courtyard. Subnet scouting. A treasury view that shows compute in, mining out — the ledger anyone can read.' },
 ] as const
 
 async function fetchIssues(): Promise<{ issues: Issue[]; ok: boolean }> {
@@ -87,15 +87,32 @@ const openCount = issues.filter((i) => i.state === 'open').length
     .issue-row .tags .sec { color: var(--warn); }
     .issue-row .tags .state { color: var(--dim); }
     .issue-row .tags .state.open { color: var(--muted); }
+
+    /* Thin banner — 19th-century stonework, desaturated, edges faded so
+       it reads as a watermark under the page title, not a photograph. */
+    .banner {
+      width: 100%; height: 80px; margin-bottom: 24px;
+      background-image: url('/images/stonework-nypl.jpg');
+      background-size: cover; background-position: center 60%;
+      filter: grayscale(1) contrast(0.95) brightness(0.95);
+      opacity: 0.32;
+      border-bottom: 1px solid var(--border-soft);
+      mask-image: linear-gradient(to right, transparent 0%, black 18%, black 82%, transparent 100%);
+      -webkit-mask-image: linear-gradient(to right, transparent 0%, black 18%, black 82%, transparent 100%);
+    }
+    html[data-theme='light'] .banner { opacity: 0.24; filter: grayscale(1) contrast(0.9) brightness(1.04); }
   </style>
+
+  <div class="banner" role="presentation" aria-hidden="true"></div>
 
   <section class="sec">
     <div class="wrap">
       <div><div class="eyebrow"><span class="num">00</span><span>Roadmap</span></div></div>
       <div>
-        <p class="lede">Three acts, in rough order.<br/><em>Not dated. Not promised.</em></p>
+        <p class="lede">Three acts, in rough order.<br/><em>Foundation, then walls, then the yard.</em></p>
         <p class="text-[12px] text-muted leading-relaxed mt-4 max-w-[56ch]">
-          The arc we think the work wants to take. Scope and sequencing shift as we learn.
+          The arc we think the work wants to take. Scope and sequencing shift as we learn —
+          masons lay the next stone where the last one settled, not where the drawing said.
           Live from <a href="https://github.com/bigailabs/cathedral/issues" class="text-muted hover:text-fg underline underline-offset-2 decoration-dim">GitHub issues</a> — no private backlog.
         </p>
         {total > 0 && (
