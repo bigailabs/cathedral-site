@@ -39,13 +39,13 @@ import RoseWindow from '../components/RoseWindow.astro'
     .thesis p {
       font-family: var(--font-serif, 'Newsreader', ui-serif, Georgia, serif);
       font-weight: 300;
-      font-size: 22px;
+      font-size: 20px;
       line-height: 1.4;
       color: var(--fg);
       margin: 0;
-      max-width: 32ch;
+      max-width: 30ch;
     }
-    .thesis p + p { margin-top: 14px; color: var(--muted); font-size: 17px; }
+    .thesis p + p { margin-top: 12px; color: var(--muted); font-size: 16px; }
     .thesis p em { font-style: italic; color: var(--muted); }
     .thesis p .accent { color: var(--accent); font-style: normal; }
     @media (max-width: 900px) {
@@ -59,8 +59,8 @@ import RoseWindow from '../components/RoseWindow.astro'
     .sec.hero { padding-top: 48px; }
     .hero-grid {
       display: grid;
-      grid-template-columns: 300px 1fr;
-      gap: 32px;
+      grid-template-columns: 280px 1fr;
+      gap: 28px;
       align-items: start;
     }
     .hero-grid > * { min-width: 0; }
@@ -588,7 +588,8 @@ import RoseWindow from '../components/RoseWindow.astro'
 
     const msg = document.createElement('span')
     msg.className = 'text-fg break-words flex-1 min-w-0'
-    msg.textContent = line.message
+    msg.textContent = formatMessage(line.message)
+    msg.title = line.message   // hover to see the raw wrapped form
     row.appendChild(msg)
 
     wrapper.appendChild(row)
@@ -596,7 +597,7 @@ import RoseWindow from '../components/RoseWindow.astro'
     if (dec && showAnnotation) {
       const kc = decoderKindClass(dec.kind)
       const annot = document.createElement('div')
-      annot.className = `ml-[72px] my-1 pl-3 border-l-2 ${kc.bar} text-[11px] leading-[1.55] text-muted space-y-1`
+      annot.className = `ml-[72px] my-1 pl-3 border-l-2 ${kc.bar} text-[10.5px] leading-[1.5] text-muted space-y-0.5 max-w-[60ch]`
       annot.dataset.annotation = dec.kind
 
       const title = document.createElement('div')
@@ -631,6 +632,42 @@ import RoseWindow from '../components/RoseWindow.astro'
     }
 
     return wrapper
+  }
+
+  // Trim backend-wrapped error noise down to the signal.
+  //
+  // Backend gives us sausage like:
+  //   "Weight submission attempt 1 failed: Weight submission failed
+  //    (Unknown): Transaction submission failed: Failed to submit
+  //    extrinsic: RPC error: User error: Invalid Transaction (1010) -
+  //    Context: netuid=39, version_key=5592, uids=[204]"
+  // The signal is: attempt N, (1010), netuid=39. Everything else is
+  // wrapper layers from the substrate client. This formatter strips
+  // redundant "X: Y: Z:" chains and collapses known noise patterns.
+  function formatMessage(raw: string): string {
+    let m = raw
+    // The (1010) cluster — most common noisy line. Extract attempt #
+    // and context bits, throw away 5 levels of "foo failed: bar failed:".
+    const invalid1010 = /Invalid Transaction \(1010\)(?:\s*-\s*Context:\s*(.+))?/.exec(m)
+    if (invalid1010) {
+      const attemptMatch = /attempt (\d+) failed/i.exec(m)
+      const ctx = invalid1010[1] ? invalid1010[1].trim() : ''
+      const attempt = attemptMatch ? ` attempt ${attemptMatch[1]}` : ''
+      return `weight (1010) · no-permit${attempt}${ctx ? ' · ' + ctx : ''}`
+    }
+    // "Failed to set weights at block N: Failed to set weights after K attempts" → compact
+    const failedBatch = /Failed to set weights (?:at block (\d+):\s*)?Failed to set weights after (\d+) attempts/.exec(m)
+    if (failedBatch) {
+      const block = failedBatch[1] ? ` · block ${failedBatch[1]}` : ''
+      return `weight batch parked · ${failedBatch[2]} attempts${block}`
+    }
+    // Generic nested "X: Y: Z:" — keep only the last non-empty segment
+    // when the message is very long and heavily colon-nested.
+    if (m.length > 140 && (m.match(/:/g) || []).length >= 4) {
+      const parts = m.split(/:\s*/).filter(Boolean)
+      if (parts.length >= 3) return parts[parts.length - 1].slice(0, 200)
+    }
+    return m
   }
 
   function escapeHtml(s: string): string {
