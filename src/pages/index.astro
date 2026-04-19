@@ -53,12 +53,13 @@ import RoseWindow from '../components/RoseWindow.astro'
       .thesis p + p { font-size: 18px; }
     }
 
-    /* Hero — thesis left, live proof right. Shared vertical rhythm so
-       the proof lands next to the copy rather than below a big empty
-       gutter. Collapses to stacked on narrow viewports. */
+    /* Hero — thesis left, live proof right. Spans the full shell
+       (no 160px eyebrow gutter) so the copy doesn't feel squeezed.
+       Collapses to stacked below 1100px. */
+    .sec.hero { padding-top: 48px; }
     .hero-grid {
       display: grid;
-      grid-template-columns: 380px 1fr;
+      grid-template-columns: 420px 1fr;
       gap: 56px;
       align-items: start;
     }
@@ -157,44 +158,43 @@ import RoseWindow from '../components/RoseWindow.astro'
     }
   </style>
 
-  <!-- ═══════════════ 00 Hero — thesis + live proof ═══════════════ -->
-  <section class="sec">
-    <div class="wrap">
-      <div>
-        <div class="eyebrow"><span class="num">00</span><span>Thesis</span></div>
-      </div>
-      <div class="hero-grid">
-        <aside class="hero-left">
-          <div class="thesis thesis-fade">
-            <p>
-              A cathedral is a <span class="accent">commons</span> —<br/>
-              walls you didn't build,<br/>
-              kept by hands you'll never meet.<br/>
-              <em>The masons who laid the first stones<br/>knew they wouldn't see the spire.</em>
-            </p>
-            <p>
-              We're building compute the same way.<br/>
-              In public, over time, for whoever needs it.
-            </p>
-          </div>
-          <div class="proof-meta">
-            <div class="eyebrow"><span class="num">01</span><span>Live state</span></div>
-            <p class="cap">The validator, verifying. Masons on chain, as we see them.</p>
-            <p class="stats">
-              <span class="line"><span class="k">sn39 · finney</span></span>
-              <span class="line"><span class="k">block </span><span class="v" data-val="block">—</span></span>
-              <span class="line"><span class="k">stake </span><span class="v">131.82α</span><span class="k"> / ~14k α permit</span></span>
-            </p>
-          </div>
-        </aside>
-        <div class="state-grid">
-          <LogStream id="validator" label="validator" host="vps · fin" role="VERIFY" terminalIndex="T1" />
-          <MinersRegister />
-          {/* safelist for dynamic classes set by JS below:
-              bg-accentDim border-l-2 border-accent pl-2 -ml-2
-              border-warn bg-warnDim text-warn bg-muted text-dim
-              bg-errDim border-err text-err */}
+  <!-- ═══════════════ Hero — thesis + live proof ═══════════════ -->
+  <!-- No numbered eyebrow on the hero; the thesis leads, and "01 Live
+       state" rides under the copy as the left column's own eyebrow.
+       The hero spans the full shell width so the copy lands visually
+       balanced instead of pinned right of a 160px gutter. -->
+  <section class="sec hero">
+    <div class="hero-grid">
+      <aside class="hero-left">
+        <div class="thesis thesis-fade">
+          <p>
+            A cathedral is a <span class="accent">commons</span> —<br/>
+            walls you didn't build,<br/>
+            kept by hands you'll never meet.<br/>
+            <em>The masons who laid the first stones<br/>knew they wouldn't see the spire.</em>
+          </p>
+          <p>
+            We're building compute the same way.<br/>
+            In public, over time, for whoever needs it.
+          </p>
         </div>
+        <div class="proof-meta">
+          <div class="eyebrow"><span class="num">01</span><span>Live state</span></div>
+          <p class="cap">The validator, verifying. Masons on chain, as we see them.</p>
+          <p class="stats">
+            <span class="line"><span class="k">sn39 · finney</span></span>
+            <span class="line"><span class="k">block </span><span class="v" data-val="block">—</span></span>
+            <span class="line"><span class="k">stake </span><span class="v">131.82α</span><span class="k"> / ~14k α permit</span></span>
+          </p>
+        </div>
+      </aside>
+      <div class="state-grid">
+        <LogStream id="validator" label="validator" host="vps · fin" role="VERIFY" terminalIndex="T1" />
+        <MinersRegister />
+        {/* safelist for dynamic classes set by JS below:
+            bg-accentDim border-l-2 border-accent pl-2 -ml-2
+            border-warn bg-warnDim text-warn bg-muted text-dim
+            bg-errDim border-err text-err */}
       </div>
     </div>
   </section>
