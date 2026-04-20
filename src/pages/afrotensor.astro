@@ -125,6 +125,68 @@ try {
     .live-masons .uid { font-family: 'JetBrains Mono', ui-monospace, monospace; font-style: normal; color: var(--accent); font-size: 14px; letter-spacing: 0.02em; }
     .live-masons .you { color: var(--accent); font-style: normal; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 14px; letter-spacing: 0.02em; text-transform: uppercase; }
 
+    /* Step-through mode: only the active stage is visible. Others stay in
+       the DOM (so progress/comments wiring still finds them) but are
+       hidden via CSS. */
+    .stage[data-stage-hidden="true"] { display: none !important; }
+
+    /* Stage indicator: a horizontal row of 8 numbered nodes above the
+       active stage. Highlights current, marks completed. Clickable to
+       jump between stones. */
+    .stage-indicator {
+      display: flex; flex-wrap: wrap; gap: 6px;
+      margin-bottom: 28px; padding-bottom: 18px;
+      border-bottom: 1px solid var(--border-soft);
+    }
+    .stage-indicator .pip {
+      font: inherit; cursor: pointer;
+      padding: 6px 10px;
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 10px; letter-spacing: 0.18em;
+      background: transparent; color: var(--dim);
+      border: 1px solid var(--border-soft); border-radius: 2px;
+      transition: color 120ms ease, border-color 120ms ease, background 120ms ease;
+      font-variant-numeric: tabular-nums;
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .stage-indicator .pip:hover { color: var(--fg); border-color: var(--border); }
+    .stage-indicator .pip[aria-current="step"] {
+      color: var(--accent); border-color: var(--accent);
+      background: var(--accent-dim);
+    }
+    .stage-indicator .pip.is-complete { color: var(--ok); border-color: var(--ok); }
+    .stage-indicator .pip.is-complete::before {
+      content: '\2713'; font-size: 10px; line-height: 1;
+    }
+    .stage-indicator .pip[aria-current="step"].is-complete { color: var(--ok); }
+
+    /* Step-through navigation: prev / mark-complete-and-next. Sits at
+       the bottom of the active stage. */
+    .stage-nav {
+      display: flex; gap: 10px; margin-top: 24px; padding-top: 18px;
+      border-top: 1px solid var(--border-soft); flex-wrap: wrap;
+      align-items: center;
+    }
+    .stage-nav button {
+      font: inherit; cursor: pointer;
+      padding: 9px 16px;
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+      background: transparent; color: var(--fg);
+      border: 1px solid var(--border); border-radius: 2px;
+      transition: color 120ms ease, border-color 120ms ease, background 120ms ease;
+    }
+    .stage-nav button:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+    .stage-nav button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .stage-nav .next { border-color: var(--accent); color: var(--accent); }
+    .stage-nav .next:hover:not(:disabled) { background: var(--accent-dim); }
+    .stage-nav .spacer { flex: 1; }
+    .stage-nav .progress {
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 10px; letter-spacing: 0.18em; color: var(--dim);
+      font-variant-numeric: tabular-nums;
+    }
+
     /* Tightened stages — title + one-line body + optional code/link card.
        The first column holds a checkbox + step number, stacked. No
        absolute positioning — column is wide enough to keep both aligned
@@ -137,6 +199,8 @@ try {
     .stage > *,
     .stage > div > * { min-width: 0; max-width: 100%; }
     .stage:first-child { border-top: 0; padding-top: 6px; }
+    /* In step-through mode each visible stage stands alone: no top border. */
+    .stage[data-stage] { border-top: 0; padding-top: 0; }
     .stage .n {
       font-variant-numeric: tabular-nums; color: var(--accent);
       font-size: 12px; letter-spacing: 0.2em;
@@ -786,17 +850,31 @@ try {
     </div>
   </section>
 
-  <!-- 03 — The work: eight tight stages. -->
+  <!-- 03 — The work: eight stones, stepped through one at a time. -->
   <section class="sec" id="work">
     <div class="wrap">
       <div>
         <div class="eyebrow"><span class="num">03</span><span>The work</span></div>
         <p class="caption" style="margin-top: 14px;">
-          Eight stones. Each fits on its own.
+          Eight stones. One at a time. Your progress is kept.
         </p>
       </div>
       <div>
-        <div class="stage">
+        <!-- Stage indicator: 01 … 08, click to jump. Completed stones get
+             a check; the active stone is highlighted. Wired up by the
+             step-through script below. -->
+        <nav class="stage-indicator" aria-label="Stage navigation" data-stage-indicator>
+          <button type="button" class="pip" data-stage-link="1" aria-current="step">01</button>
+          <button type="button" class="pip" data-stage-link="2">02</button>
+          <button type="button" class="pip" data-stage-link="3">03</button>
+          <button type="button" class="pip" data-stage-link="4">04</button>
+          <button type="button" class="pip" data-stage-link="5">05</button>
+          <button type="button" class="pip" data-stage-link="6">06</button>
+          <button type="button" class="pip" data-stage-link="7">07</button>
+          <button type="button" class="pip" data-stage-link="8">08</button>
+        </nav>
+
+        <div class="stage" data-stage="1">
           <div class="n">01</div>
           <div>
             <h3>Open a guild ledger on Polaris.</h3>
@@ -808,7 +886,7 @@ try {
           </div>
         </div>
 
-        <div class="stage">
+        <div class="stage" data-stage="2" data-stage-hidden="true">
           <div class="n">02</div>
           <div>
             <h3>Cut your mark — create a wallet.</h3>
@@ -826,7 +904,7 @@ try {
           </div>
         </div>
 
-        <div class="stage">
+        <div class="stage" data-stage="3" data-stage-hidden="true">
           <div class="n">03</div>
           <div>
             <h3>Take stone from the yard — claim test TAO.</h3>
@@ -839,7 +917,7 @@ try {
           </div>
         </div>
 
-        <div class="stage">
+        <div class="stage" data-stage="4" data-stage-hidden="true">
           <div class="n">04</div>
           <div>
             <h3>Enter your name on the testnet roll.</h3>
@@ -852,7 +930,7 @@ try {
           </div>
         </div>
 
-        <div class="stage">
+        <div class="stage" data-stage="5" data-stage-hidden="true">
           <div class="n">05</div>
           <div>
             <h3>Choose a stone — the hardware you'll run.</h3>
@@ -865,7 +943,7 @@ try {
           </div>
         </div>
 
-        <div class="stage">
+        <div class="stage" data-stage="6" data-stage-hidden="true">
           <div class="n">06</div>
           <div>
             <h3>Raise the stone — run cathedral-miner.</h3>
@@ -878,7 +956,7 @@ try {
           </div>
         </div>
 
-        <div class="stage">
+        <div class="stage" data-stage="7" data-stage-hidden="true">
           <div class="n">07</div>
           <div>
             <h3>Step up to the main yard.</h3>
@@ -891,7 +969,7 @@ try {
           </div>
         </div>
 
-        <div class="stage">
+        <div class="stage" data-stage="8" data-stage-hidden="true">
           <div class="n">08</div>
           <div>
             <h3>Build on what others have built.</h3>
@@ -902,6 +980,15 @@ try {
             </div>
             <p class="body" style="margin-top: 10px; font-size: 12px; color: var(--muted);">Cathedral is the base course; Polaris is everything built above.</p>
           </div>
+        </div>
+
+        <!-- Step-through navigation. Rendered once; its buttons act on
+             whichever stage is currently active. -->
+        <div class="stage-nav" data-stage-nav>
+          <button type="button" data-stage-prev>&larr; previous</button>
+          <button type="button" class="next" data-stage-next>mark complete + next &rarr;</button>
+          <span class="spacer"></span>
+          <span class="progress" data-stage-progress>stage 1 of 8</span>
         </div>
       </div>
     </div>
@@ -1156,6 +1243,169 @@ try {
           submitBtn.textContent = originalLabel
         }
       })
+    })()
+  </script>
+
+  <!--
+    Step-through controller.
+
+    The work section renders all eight stages in the DOM, but only the
+    active stage is visible. Active stage is driven by:
+      · ?s=N URL param, if 1-8
+      · otherwise the first incomplete stage from localStorage progress
+      · falls back to 1
+
+    Exposed on window as __afroStep so the progression script below can
+    re-sync the indicator when a stage is checked off. Runs inline
+    before the Supabase module script so prev/next UX is snappy and
+    doesn't depend on supabase-js loading from the CDN.
+  -->
+  <script is:inline>
+    (function () {
+      var STAGE_COUNT = 8
+      var LOCAL_PROGRESS_KEY = 'afrotensor_progress_v1' // same key as progression script
+      var stages = document.querySelectorAll('#work [data-stage]')
+      if (!stages.length) return
+      var pips = document.querySelectorAll('[data-stage-link]')
+      var prevBtn = document.querySelector('[data-stage-prev]')
+      var nextBtn = document.querySelector('[data-stage-next]')
+      var progressLbl = document.querySelector('[data-stage-progress]')
+
+      function loadProgress() {
+        try {
+          var raw = localStorage.getItem(LOCAL_PROGRESS_KEY)
+          if (!raw) return new Set()
+          var arr = JSON.parse(raw)
+          return new Set(Array.isArray(arr) ? arr.map(Number).filter(Boolean) : [])
+        } catch (_) { return new Set() }
+      }
+
+      function pickDefaultStage() {
+        var params = new URLSearchParams(window.location.search)
+        var requested = parseInt(params.get('s') || '0', 10)
+        if (requested >= 1 && requested <= STAGE_COUNT) return requested
+        var done = loadProgress()
+        for (var i = 1; i <= STAGE_COUNT; i++) {
+          if (!done.has(i)) return i
+        }
+        return STAGE_COUNT // all done, show the last stone
+      }
+
+      var activeStage = pickDefaultStage()
+
+      function syncIndicator() {
+        var done = loadProgress()
+        pips.forEach(function (pip) {
+          var s = parseInt(pip.getAttribute('data-stage-link'), 10)
+          if (s === activeStage) pip.setAttribute('aria-current', 'step')
+          else pip.removeAttribute('aria-current')
+          pip.classList.toggle('is-complete', done.has(s))
+        })
+      }
+
+      function syncNavButtons() {
+        if (prevBtn) prevBtn.disabled = activeStage <= 1
+        if (nextBtn) {
+          if (activeStage >= STAGE_COUNT) {
+            nextBtn.textContent = 'mark complete ✓'
+          } else {
+            nextBtn.textContent = 'mark complete + next →'
+          }
+        }
+        if (progressLbl) progressLbl.textContent = 'stage ' + activeStage + ' of ' + STAGE_COUNT
+      }
+
+      function syncJournal(step) {
+        // Click the matching journal tab so notes switch to this stone.
+        // Handler in the progression script is idempotent if step is
+        // already selected.
+        var tab = document.querySelector('[data-journal-tab="' + step + '"]')
+        if (tab) tab.click()
+      }
+
+      function setActive(step, opts) {
+        opts = opts || {}
+        if (step < 1) step = 1
+        if (step > STAGE_COUNT) step = STAGE_COUNT
+        activeStage = step
+        stages.forEach(function (el) {
+          var s = parseInt(el.getAttribute('data-stage'), 10)
+          if (s === step) el.removeAttribute('data-stage-hidden')
+          else el.setAttribute('data-stage-hidden', 'true')
+        })
+        syncIndicator()
+        syncNavButtons()
+        syncJournal(step)
+        // Reflect in URL. replaceState so back-button doesn't walk
+        // every stage the user clicked through.
+        try {
+          var url = new URL(window.location.href)
+          url.searchParams.set('s', String(step))
+          window.history.replaceState({}, '', url.toString())
+        } catch (_) {}
+        if (opts.scroll !== false) {
+          var work = document.getElementById('work')
+          if (work && 'scrollIntoView' in work) {
+            work.scrollIntoView({ behavior: 'smooth', block: 'start' })
+          }
+        }
+      }
+
+      // Indicator clicks: jump to any stage.
+      pips.forEach(function (pip) {
+        pip.addEventListener('click', function () {
+          var s = parseInt(pip.getAttribute('data-stage-link'), 10)
+          if (s) setActive(s)
+        })
+      })
+
+      // Prev button.
+      if (prevBtn) {
+        prevBtn.addEventListener('click', function () {
+          if (activeStage > 1) setActive(activeStage - 1)
+        })
+      }
+
+      // Next button: mark the current stage complete, then advance to
+      // the next stone. We click the existing inline checkbox so the
+      // progression script's server-sync runs. We also write to
+      // localStorage directly as a belt-and-braces fallback in case the
+      // module script hasn't yet registered its click handler.
+      if (nextBtn) {
+        nextBtn.addEventListener('click', function () {
+          var done = loadProgress()
+          if (!done.has(activeStage)) {
+            // Update local store immediately so indicator reflects it
+            // even if the progression script isn't loaded yet.
+            done.add(activeStage)
+            try { localStorage.setItem(LOCAL_PROGRESS_KEY, JSON.stringify(Array.from(done))) } catch (_) {}
+            var check = document.querySelector('[data-check="' + activeStage + '"]')
+            if (check) {
+              // Only click if the checkbox isn't already marked, to
+              // avoid toggling it back off.
+              if (check.getAttribute('aria-checked') !== 'true') check.click()
+            }
+          }
+          if (activeStage < STAGE_COUNT) {
+            setActive(activeStage + 1)
+          } else {
+            // On the last stone, just refresh indicator so the check shows.
+            setTimeout(syncIndicator, 50)
+          }
+        })
+      }
+
+      // Expose a small API so the progression script can tell us when
+      // progress changes (e.g. user clicks the inline stage checkbox
+      // inside the active stage).
+      window.__afroStep = {
+        setActive: setActive,
+        syncIndicator: syncIndicator,
+        get activeStage() { return activeStage },
+      }
+
+      // Initial paint: no scroll so landing page load doesn't jump.
+      setActive(activeStage, { scroll: false })
     })()
   </script>
 
@@ -1438,6 +1688,10 @@ try {
         const done = completedSteps.has(step)
         el.classList.toggle('is-complete', done)
         if (check) check.setAttribute('aria-checked', done ? 'true' : 'false')
+      }
+      // Keep the step-through indicator's check marks in sync.
+      if (window.__afroStep && typeof window.__afroStep.syncIndicator === 'function') {
+        window.__afroStep.syncIndicator()
       }
       renderJournal()
     }
