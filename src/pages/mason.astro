@@ -1,0 +1,449 @@
+---
+import Base from '../layouts/Base.astro'
+import RoseWindow from '../components/RoseWindow.astro'
+---
+
+<Base title="mason · cathedral">
+  <style>
+    .eyebrow {
+      font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase;
+      color: var(--dim);
+      display: flex; align-items: baseline; gap: 10px;
+    }
+    .eyebrow .num { font-variant-numeric: tabular-nums; color: var(--accent); }
+    .sec { padding: 48px 0; border-bottom: 1px solid var(--border-soft); }
+    .sec:last-of-type { border-bottom: 0; }
+    .sec .wrap { display: grid; grid-template-columns: 160px 1fr; gap: 48px; }
+    @media (max-width: 900px) {
+      .sec { padding: 36px 0; }
+      .sec .wrap { grid-template-columns: 1fr; gap: 20px; }
+    }
+    .lede {
+      font-family: var(--font-serif, 'Newsreader', ui-serif, Georgia, serif);
+      font-size: 20px; font-weight: 300; line-height: 1.45; color: var(--fg);
+      max-width: 40ch; margin: 0;
+    }
+    .lede em { font-style: italic; color: var(--muted); }
+
+    .hero {
+      display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: baseline;
+    }
+    @media (max-width: 700px) { .hero { grid-template-columns: 1fr; } }
+    .hero .abbrev {
+      font-family: var(--font-serif, 'Newsreader', ui-serif, Georgia, serif);
+      font-size: 34px; font-weight: 300; color: var(--fg);
+      font-variant-numeric: tabular-nums; line-height: 1.1;
+    }
+    .hero .full {
+      margin-top: 10px; font-size: 11px; color: var(--muted);
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    }
+    .hero .full code {
+      font-family: inherit; color: var(--fg);
+      background: var(--surface);
+      border: 1px solid var(--border-soft);
+      padding: 4px 8px;
+      font-variant-numeric: tabular-nums;
+      word-break: break-all;
+    }
+    .hero .full button {
+      background: transparent; color: var(--accent);
+      border: 1px solid var(--accent);
+      padding: 4px 10px; font-size: 10px;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      cursor: pointer; transition: background 120ms;
+      font-family: inherit;
+    }
+    .hero .full button:hover { background: var(--accent-dim); }
+
+    .pill {
+      display: inline-block; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+      border: 1px solid var(--border); padding: 2px 8px; color: var(--muted);
+    }
+    .pill.verified { color: var(--ok); border-color: var(--ok); }
+    .pill.registered { color: var(--accent); border-color: var(--accent); }
+    .pill.founding { color: var(--warn); border-color: var(--warn); background: var(--warn-dim); }
+    .pill.unknown { color: var(--dim); }
+
+    .bands {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px;
+      background: var(--border-soft); border: 1px solid var(--border-soft);
+    }
+    @media (max-width: 800px) { .bands { grid-template-columns: 1fr; } }
+    .band { background: var(--bg); padding: 20px; min-height: 140px; }
+    .band .k {
+      font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--dim);
+      margin-bottom: 10px;
+    }
+    .band .v { font-size: 16px; color: var(--fg); font-weight: 300; font-variant-numeric: tabular-nums; }
+    .band .sub { margin-top: 6px; font-size: 11px; color: var(--muted); line-height: 1.5; }
+
+    .badge-box {
+      border: 1px solid var(--border);
+      padding: 18px;
+      background: var(--surface);
+    }
+    .badge-box .label { font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.15em; }
+    .badge-box pre {
+      margin: 10px 0 0 0;
+      font-family: inherit;
+      font-size: 11px;
+      color: var(--fg);
+      background: var(--bg);
+      border: 1px solid var(--border-soft);
+      padding: 10px;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .badge-box .hint {
+      margin-top: 10px; font-size: 10px; color: var(--dim); line-height: 1.5;
+      font-family: var(--font-serif, 'Newsreader', ui-serif, Georgia, serif);
+      font-style: italic;
+    }
+
+    .foot-links {
+      display: flex; gap: 18px; font-size: 11px; color: var(--muted);
+      letter-spacing: 0.1em; text-transform: uppercase;
+    }
+    .foot-links a:hover { color: var(--fg); }
+
+    .err {
+      color: var(--warn);
+      font-size: 12px;
+      padding: 14px;
+      border: 1px solid var(--warn);
+      background: var(--warn-dim);
+    }
+  </style>
+
+  <section class="sec">
+    <div class="wrap">
+      <div>
+        <div class="eyebrow"><span class="num">00</span><span>Register entry</span></div>
+        <p class="text-[11px] text-muted mt-4 leading-relaxed max-w-[28ch]">
+          A permanent per-mason page. Link to it. Put it in your bio.
+          It follows the stone, not the person.
+        </p>
+      </div>
+      <div>
+        <div class="hero">
+          <div>
+            <div class="abbrev" data-mason="abbrev">—</div>
+            <div class="full">
+              <code data-mason="full">—</code>
+              <button type="button" data-mason="copy">copy</button>
+              <span class="text-[10px] text-dim" data-mason="copied"></span>
+            </div>
+          </div>
+          <div class="flex flex-col items-end gap-2" data-mason="pills">
+            <span class="pill unknown">loading…</span>
+          </div>
+        </div>
+        <div data-mason="missing" class="err mt-6 hidden">
+          No hotkey supplied. Use <code style="color:var(--fg)">/mason?h=…</code> with a full hotkey to open a register entry.
+        </div>
+        <div data-mason="notfound" class="err mt-6 hidden">
+          No register entry found for this hotkey. The mason may not be on SN39, or hasn't declared yet.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="wrap">
+      <div>
+        <div class="eyebrow"><span class="num">01</span><span>Evidence</span></div>
+        <p class="text-[11px] text-muted mt-4 leading-relaxed max-w-[30ch]">
+          What our validator sees for this mason, right now.
+        </p>
+      </div>
+      <div>
+        <div class="bands">
+          <div class="band">
+            <div class="k">Mining status</div>
+            <div class="v" data-mason="status-v">—</div>
+            <div class="sub" data-mason="status-sub">reading registry</div>
+          </div>
+          <div class="band">
+            <div class="k">Hardware</div>
+            <div class="v" data-mason="hardware-v">—</div>
+            <div class="sub" data-mason="hardware-sub">from declared node inventory</div>
+          </div>
+          <div class="band">
+            <div class="k">Verified since</div>
+            <div class="v" data-mason="verified-v">—</div>
+            <div class="sub" data-mason="verified-sub">timestamp surfaces as backend exposes it</div>
+          </div>
+        </div>
+        <div class="bands mt-[1px]" style="margin-top: 12px;">
+          <div class="band">
+            <div class="k">CUs this week</div>
+            <div class="v" data-mason="cus-v">—</div>
+            <div class="sub">computing · streaming once scoring starts</div>
+          </div>
+          <div class="band">
+            <div class="k">On chain</div>
+            <div class="v" data-mason="chain-v">—</div>
+            <div class="sub" data-mason="chain-sub">uid · stake · axon</div>
+          </div>
+          <div class="band">
+            <div class="k">Registered with us</div>
+            <div class="v" data-mason="regus-v">—</div>
+            <div class="sub" data-mason="regus-sub">bid status · rental status</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="wrap">
+      <div>
+        <div class="eyebrow"><span class="num">02</span><span>Embed</span></div>
+        <p class="text-[11px] text-muted mt-4 leading-relaxed max-w-[28ch]">
+          Drop this into a README, blog, or profile. It points back at your
+          register entry — a shareable, permanent receipt.
+        </p>
+      </div>
+      <div>
+        <div class="badge-box">
+          <div class="label">Markdown</div>
+          <pre data-mason="embed-md">—</pre>
+          <div class="label mt-4">HTML</div>
+          <pre data-mason="embed-html">—</pre>
+          <div class="hint">
+            A real badge image endpoint is on the roadmap. Until then, the link
+            itself is the badge — a URL your verifier can click.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="wrap">
+      <div>
+        <div class="eyebrow"><span class="num">03</span><span>Elsewhere</span></div>
+      </div>
+      <div class="foot-links">
+        <a href="/masons">← all masons</a>
+        <a href="/">cathedral.computer</a>
+        <a href="/afrotensor">become a mason</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-8 flex justify-center text-dim">
+    <RoseWindow size={28} airy={true} class="opacity-40" />
+  </section>
+
+  <script is:inline>
+    (function () {
+      const API_BASE = 'https://api.polaris.computer'
+      const SITE = 'https://cathedral.computer'
+
+      function abbrev(s) {
+        if (!s || s.length < 10) return s || ''
+        return s.slice(0, 6) + '…' + s.slice(-4)
+      }
+      function countryFromLocation(loc) {
+        if (!loc) return null
+        const parts = loc.split('/').map((p) => p.trim()).filter(Boolean)
+        return parts.length ? parts[parts.length - 1] : null
+      }
+      function setText(sel, val) {
+        const el = document.querySelector(sel)
+        if (el) el.textContent = val
+      }
+      function setHidden(sel, hidden) {
+        const el = document.querySelector(sel)
+        if (!el) return
+        if (hidden) el.classList.add('hidden')
+        else el.classList.remove('hidden')
+      }
+
+      async function fetchJson(url) {
+        const ctrl = new AbortController()
+        const t = setTimeout(() => ctrl.abort(), 20000)
+        try {
+          const r = await fetch(url, { cache: 'no-store', signal: ctrl.signal })
+          if (!r.ok) return null
+          return await r.json()
+        } catch (_) {
+          return null
+        } finally {
+          clearTimeout(t)
+        }
+      }
+
+      function getHotkey() {
+        try {
+          const url = new URL(window.location.href)
+          return (url.searchParams.get('h') || '').trim()
+        } catch (_) {
+          return ''
+        }
+      }
+
+      function renderPills(container, labels) {
+        container.innerHTML = ''
+        for (const { text, cls } of labels) {
+          const span = document.createElement('span')
+          span.className = 'pill ' + (cls || '')
+          span.textContent = text
+          container.appendChild(span)
+        }
+      }
+
+      function fillEmbed(hotkey) {
+        const permalink = SITE + '/mason?h=' + encodeURIComponent(hotkey)
+        const mdEl = document.querySelector('[data-mason="embed-md"]')
+        const htmlEl = document.querySelector('[data-mason="embed-html"]')
+        const md = '[Verified mason · cathedral.computer](' + permalink + ')'
+        const html = '<a href="' + permalink + '">Verified mason · cathedral.computer</a>'
+        if (mdEl) mdEl.textContent = md
+        if (htmlEl) htmlEl.textContent = html
+      }
+
+      function wireCopy(full) {
+        const btn = document.querySelector('[data-mason="copy"]')
+        const echo = document.querySelector('[data-mason="copied"]')
+        if (!btn) return
+        btn.addEventListener('click', async () => {
+          try {
+            await navigator.clipboard.writeText(full)
+            if (echo) {
+              echo.textContent = 'copied'
+              setTimeout(() => { echo.textContent = '' }, 1600)
+            }
+          } catch (_) {
+            if (echo) echo.textContent = 'copy blocked'
+          }
+        })
+      }
+
+      async function boot() {
+        const hotkey = getHotkey()
+        const pillsEl = document.querySelector('[data-mason="pills"]')
+
+        if (!hotkey) {
+          setHidden('[data-mason="missing"]', false)
+          if (pillsEl) renderPills(pillsEl, [{ text: 'no hotkey', cls: 'unknown' }])
+          setText('[data-mason="abbrev"]', '—')
+          setText('[data-mason="full"]', '/mason?h=<hotkey>')
+          return
+        }
+
+        setText('[data-mason="abbrev"]', abbrev(hotkey))
+        setText('[data-mason="full"]', hotkey)
+        fillEmbed(hotkey)
+        wireCopy(hotkey)
+
+        const [stateData, registry, machines] = await Promise.all([
+          fetchJson(API_BASE + '/api/substrate/state'),
+          fetchJson(API_BASE + '/api/substrate/validator/registry'),
+          fetchJson(API_BASE + '/api/v1/cathedral/machines'),
+        ])
+
+        const miners = (stateData && stateData.miners) || []
+        const chainRow = miners.find((m) => m.hotkey === hotkey)
+
+        const regData = registry && registry.data ? registry.data : {}
+        const regMiners = Array.isArray(regData.miners) ? regData.miners : []
+        const regRow = chainRow ? regMiners.find((r) => r.uid === chainRow.uid) : null
+
+        if (!chainRow && !regRow) {
+          setHidden('[data-mason="notfound"]', false)
+          if (pillsEl) renderPills(pillsEl, [{ text: 'not found', cls: 'unknown' }])
+          return
+        }
+
+        // Hardware best-effort — /machines doesn't expose per-mason uid,
+        // so we can't reliably attribute. Leave as a summary line.
+        const machList = (machines && machines.machines) || []
+        const hwSummary = machList.length
+          ? machList.length + ' node' + (machList.length === 1 ? '' : 's') + ' live across register'
+          : '—'
+
+        // Pills
+        const pills = []
+        const verified = regRow && regRow.status === 'verified'
+        if (verified) {
+          pills.push({ text: 'verified', cls: 'verified' })
+          // Founding — position within first N verified by uid-asc
+          const verifiedSorted = regMiners
+            .filter((r) => r.status === 'verified')
+            .sort((a, b) => a.uid - b.uid)
+          const idx = verifiedSorted.findIndex((r) => r.uid === (regRow ? regRow.uid : -1))
+          if (idx >= 0 && idx < 10) {
+            pills.push({ text: 'founding', cls: 'founding' })
+          }
+        } else if (regRow) {
+          pills.push({ text: 'apprentice', cls: 'registered' })
+        } else if (chainRow && chainRow.status === 'Active') {
+          pills.push({ text: 'declared', cls: 'unknown' })
+        } else {
+          pills.push({ text: 'unknown', cls: 'unknown' })
+        }
+        if (pillsEl) renderPills(pillsEl, pills)
+
+        // Status band
+        if (verified) {
+          setText('[data-mason="status-v"]', 'Verified')
+          setText('[data-mason="status-sub"]', 'SSH-confirmed by our validator')
+        } else if (regRow) {
+          setText('[data-mason="status-v"]', 'Apprentice')
+          setText('[data-mason="status-sub"]', 'registered · awaiting first verify')
+        } else if (chainRow && chainRow.status === 'Active') {
+          setText('[data-mason="status-v"]', 'Declared')
+          setText('[data-mason="status-sub"]', 'axon on chain · not registered with us yet')
+        } else {
+          setText('[data-mason="status-v"]', 'Unknown')
+          setText('[data-mason="status-sub"]', 'no registry record')
+        }
+
+        // Hardware band
+        setText('[data-mason="hardware-v"]', hwSummary)
+        setText('[data-mason="hardware-sub"]', 'per-mason inventory surfaces as backend exposes uid→node mapping')
+
+        // Verified-since band
+        setText('[data-mason="verified-v"]', verified ? '—' : '—')
+        setText('[data-mason="verified-sub"]', verified ? 'timestamp pending · backend does not expose it yet' : 'awaiting first verify')
+
+        // CUs this week — not yet exposed
+        setText('[data-mason="cus-v"]', '—')
+
+        // On chain band
+        if (chainRow) {
+          const uid = chainRow.uid
+          const stake = chainRow.stake
+          const axon = (chainRow.ip && chainRow.port) ? (chainRow.ip + ':' + chainRow.port) : null
+          setText('[data-mason="chain-v"]', 'uid ' + uid)
+          const parts = []
+          if (typeof stake === 'number') parts.push(stake.toFixed(2) + 'α stake')
+          if (axon) parts.push('axon · ' + axon)
+          parts.push('status · ' + (chainRow.status || '—').toLowerCase())
+          setText('[data-mason="chain-sub"]', parts.join(' · '))
+        } else {
+          setText('[data-mason="chain-v"]', '—')
+          setText('[data-mason="chain-sub"]', 'not visible on SN39 yet')
+        }
+
+        // Registered-with-us band
+        if (regRow) {
+          setText('[data-mason="regus-v"]', verified ? 'Verified' : 'Registered')
+          const parts = []
+          parts.push('bid ' + (regRow.bid_active ? 'active' : 'inactive'))
+          parts.push('rental ' + (regRow.has_rental ? 'active' : 'none'))
+          setText('[data-mason="regus-sub"]', parts.join(' · '))
+        } else {
+          setText('[data-mason="regus-v"]', '—')
+          setText('[data-mason="regus-sub"]', 'no RegisterBid on file')
+        }
+      }
+
+      boot()
+    })()
+  </script>
+</Base>

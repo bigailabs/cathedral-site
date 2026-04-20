@@ -1,0 +1,533 @@
+---
+import Base from '../../layouts/Base.astro'
+import RoseWindow from '../../components/RoseWindow.astro'
+---
+
+<Base title="masons · cathedral">
+  <style>
+    .eyebrow {
+      font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase;
+      color: var(--dim);
+      display: flex; align-items: baseline; gap: 10px;
+    }
+    .eyebrow .num { font-variant-numeric: tabular-nums; color: var(--accent); }
+    .sec { padding: 56px 0; border-bottom: 1px solid var(--border-soft); }
+    .sec:last-of-type { border-bottom: 0; }
+    .sec .wrap { display: grid; grid-template-columns: 160px 1fr; gap: 48px; }
+    @media (max-width: 900px) {
+      .sec { padding: 44px 0; }
+      .sec .wrap { grid-template-columns: 1fr; gap: 20px; }
+    }
+    .lede {
+      font-family: var(--font-serif, 'Newsreader', ui-serif, Georgia, serif);
+      font-size: 20px; font-weight: 300; line-height: 1.45; color: var(--fg);
+      max-width: 36ch; margin: 0;
+    }
+    .lede em { font-style: italic; color: var(--muted); }
+
+    /* Stat triptych */
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border: 1px solid var(--border); }
+    .stats > div { padding: 16px; border-right: 1px solid var(--border); }
+    .stats > div:last-child { border-right: 0; }
+    @media (max-width: 700px) {
+      .stats { grid-template-columns: 1fr; }
+      .stats > div { border-right: 0; border-bottom: 1px solid var(--border); }
+      .stats > div:last-child { border-bottom: 0; }
+    }
+    .stats .k { font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.15em; }
+    .stats .v { font-size: 22px; color: var(--fg); font-weight: 300; font-variant-numeric: tabular-nums; margin-top: 4px; }
+    .stats .sub { font-size: 10px; color: var(--dim); margin-top: 2px; }
+
+    /* Mason cards — a register, not a showroom */
+    .mason-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1px;
+      background: var(--border-soft);
+      border: 1px solid var(--border-soft);
+    }
+    .mason {
+      background: var(--bg);
+      padding: 16px;
+      display: flex; flex-direction: column; gap: 8px;
+      min-height: 128px;
+      transition: background 120ms;
+    }
+    .mason:hover { background: var(--surface); }
+    .mason .row { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+    .mason .hk { font-size: 12px; color: var(--fg); font-variant-numeric: tabular-nums; }
+    .mason .uid { font-size: 10px; color: var(--dim); letter-spacing: 0.1em; }
+    .mason .pill {
+      display: inline-block; font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase;
+      border: 1px solid var(--border); padding: 1px 6px;
+      color: var(--muted);
+    }
+    .mason .pill.verified { color: var(--ok); border-color: var(--ok); }
+    .mason .pill.registered { color: var(--accent); border-color: var(--accent); }
+    .mason .pill.founding {
+      color: var(--warn); border-color: var(--warn);
+      background: var(--warn-dim);
+    }
+    .mason .meta { font-size: 10px; color: var(--dim); line-height: 1.5; font-variant-numeric: tabular-nums; }
+    .mason .arrow { font-size: 10px; color: var(--accent); }
+    .mason a.permalink {
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.12em;
+      border-top: 1px solid var(--border-soft); padding-top: 8px; margin-top: auto;
+    }
+    .mason a.permalink:hover { color: var(--fg); }
+
+    /* Evidence strip — three streams across the bottom */
+    .evidence {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px;
+      background: var(--border-soft); border: 1px solid var(--border-soft);
+    }
+    @media (max-width: 800px) { .evidence { grid-template-columns: 1fr; } }
+    .evidence .stream { background: var(--bg); padding: 20px; min-height: 160px; }
+    .evidence .stream .head {
+      font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--dim);
+      display: flex; align-items: center; gap: 8px; margin-bottom: 14px;
+    }
+    .evidence .stream .head .tag {
+      font-size: 9px; color: var(--muted); border: 1px solid var(--border);
+      padding: 1px 6px; letter-spacing: 0.1em;
+    }
+    .evidence .stream .tiers { display: flex; flex-direction: column; gap: 6px; }
+    .evidence .stream .tier { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; font-size: 11px; }
+    .evidence .stream .tier .label { color: var(--muted); }
+    .evidence .stream .tier .val { color: var(--fg); font-variant-numeric: tabular-nums; }
+    .evidence .stream .tier.dim .val { color: var(--dim); }
+
+    .cta-band { padding: 36px 0; text-align: center; }
+    .cta-band a {
+      display: inline-block; border: 1px solid var(--accent); color: var(--accent);
+      padding: 10px 18px; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+      transition: background 120ms;
+    }
+    .cta-band a:hover { background: var(--accent-dim); }
+    .cta-band .note {
+      font-family: var(--font-serif, 'Newsreader', ui-serif, Georgia, serif);
+      font-size: 15px; color: var(--muted); font-style: italic; font-weight: 300;
+      margin-bottom: 18px;
+    }
+  </style>
+
+  <section class="sec">
+    <div class="wrap">
+      <div>
+        <div class="eyebrow"><span class="num">00</span><span>Register</span></div>
+      </div>
+      <div>
+        <p class="lede">
+          The register of masons laying stone on cathedral.<br/>
+          <em>Each entry a verified hand, named on chain.</em>
+        </p>
+        <div class="stats mt-6">
+          <div>
+            <div class="k">Verified</div>
+            <div class="v" data-stat="verified-count">—</div>
+            <div class="sub">SSH-confirmed by our validator</div>
+          </div>
+          <div>
+            <div class="k">Apprentices</div>
+            <div class="v" data-stat="apprentice-count">—</div>
+            <div class="sub">registered · awaiting first verify</div>
+          </div>
+          <div>
+            <div class="k">Countries</div>
+            <div class="v" data-stat="country-count">—</div>
+            <div class="sub">where stones are being laid</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="wrap">
+      <div>
+        <div class="eyebrow"><span class="num">01</span><span>Founding masons</span></div>
+        <p class="text-[11px] text-muted mt-4 leading-relaxed max-w-[32ch]">
+          The first ten to verify. A permanent designation — the hands that
+          laid the first stones. Order by verification timestamp, ascending.
+        </p>
+      </div>
+      <div>
+        <div class="mason-grid" data-stat="founding-grid">
+          <div class="mason" style="border: 1px dashed var(--border-soft); opacity: 0.7;">
+            <div class="row">
+              <span class="uid">—</span>
+              <span class="pill">computing</span>
+            </div>
+            <div class="meta">Founding seats fill as the first ten masons verify.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="wrap">
+      <div>
+        <div class="eyebrow"><span class="num">02</span><span>All masons</span></div>
+        <p class="text-[11px] text-muted mt-4 leading-relaxed max-w-[32ch]">
+          Verified masons first, apprentices below. Each entry links to a
+          permanent per-mason page at /mason?h=…
+        </p>
+      </div>
+      <div>
+        <div class="mason-grid" data-stat="mason-grid">
+          <div class="mason" style="opacity: 0.6;">
+            <div class="row">
+              <span class="uid">loading…</span>
+            </div>
+            <div class="meta">Reading from the validator registry.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="wrap">
+      <div>
+        <div class="eyebrow"><span class="num">03</span><span>Evidence</span></div>
+        <p class="text-[11px] text-muted mt-4 leading-relaxed max-w-[32ch]">
+          Three streams of proof, aggregated across the register.
+          No marketing numbers. If we don't have it, it reads " — ".
+        </p>
+      </div>
+      <div>
+        <div class="evidence">
+          <div class="stream">
+            <div class="head">
+              <span>Mining</span>
+              <span class="tag" data-stat="mining-tag">live</span>
+            </div>
+            <div class="tiers">
+              <div class="tier">
+                <span class="label">declared on chain</span>
+                <span class="val" data-stat="tier-declared">—</span>
+              </div>
+              <div class="tier">
+                <span class="label">registered with us</span>
+                <span class="val" data-stat="tier-registered">—</span>
+              </div>
+              <div class="tier">
+                <span class="label">verified</span>
+                <span class="val" data-stat="tier-verified">—</span>
+              </div>
+              <div class="tier dim">
+                <span class="label">scoring</span>
+                <span class="val">parked · below permit</span>
+              </div>
+            </div>
+          </div>
+          <div class="stream">
+            <div class="head">
+              <span>Work</span>
+              <span class="tag" data-stat="work-tag">computing</span>
+            </div>
+            <div class="tiers">
+              <div class="tier">
+                <span class="label">nodes live</span>
+                <span class="val" data-stat="work-nodes">—</span>
+              </div>
+              <div class="tier">
+                <span class="label">GPU count</span>
+                <span class="val" data-stat="work-gpus">—</span>
+              </div>
+              <div class="tier dim">
+                <span class="label">CUs this week</span>
+                <span class="val" data-stat="work-cus">—</span>
+              </div>
+            </div>
+          </div>
+          <div class="stream">
+            <div class="head">
+              <span>Community</span>
+              <span class="tag" data-stat="community-tag">computing</span>
+            </div>
+            <div class="tiers">
+              <div class="tier">
+                <span class="label">apprentices</span>
+                <span class="val" data-stat="community-apprentices">—</span>
+              </div>
+              <div class="tier">
+                <span class="label">verified masons</span>
+                <span class="val" data-stat="community-verified">—</span>
+              </div>
+              <div class="tier dim">
+                <span class="label">conversion</span>
+                <span class="val" data-stat="community-conversion">—</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta-band">
+    <div class="note">Bring what you have. We keep the ledger.</div>
+    <a href="/afrotensor">become a mason →</a>
+  </section>
+
+  <section class="py-8 flex justify-center text-dim">
+    <RoseWindow size={28} airy={true} class="opacity-40" />
+  </section>
+
+  <script is:inline>
+    (function () {
+      const API_BASE = 'https://api.polaris.computer'
+      const POLL_MS = 15000
+      const FOUNDING_LIMIT = 10
+
+      function abbrev(s) {
+        if (!s || s.length < 10) return s || ''
+        return s.slice(0, 6) + '…' + s.slice(-4)
+      }
+      function fmtDate(iso) {
+        if (!iso) return '—'
+        try {
+          const d = new Date(iso)
+          if (!isFinite(d.getTime())) return '—'
+          return d.toISOString().slice(0, 10)
+        } catch (_) { return '—' }
+      }
+      function countryFromLocation(loc) {
+        if (!loc) return null
+        const parts = loc.split('/').map((p) => p.trim()).filter(Boolean)
+        return parts.length ? parts[parts.length - 1] : null
+      }
+
+      async function fetchJson(url) {
+        const ctrl = new AbortController()
+        const t = setTimeout(() => ctrl.abort(), 20000)
+        try {
+          const r = await fetch(url, { cache: 'no-store', signal: ctrl.signal })
+          if (!r.ok) return null
+          return await r.json()
+        } catch (_) {
+          return null
+        } finally {
+          clearTimeout(t)
+        }
+      }
+
+      function buildMasonCard(m, opts) {
+        const card = document.createElement('div')
+        card.className = 'mason'
+
+        const row = document.createElement('div')
+        row.className = 'row'
+        const uid = document.createElement('span')
+        uid.className = 'uid'
+        uid.textContent = 'uid ' + (m.uid != null ? m.uid : '—')
+        row.appendChild(uid)
+
+        const pill = document.createElement('span')
+        if (opts.founding) {
+          pill.className = 'pill founding'
+          pill.textContent = 'founding'
+        } else if (m.validatorStatus === 'verified') {
+          pill.className = 'pill verified'
+          pill.textContent = 'verified'
+        } else {
+          pill.className = 'pill registered'
+          pill.textContent = 'apprentice'
+        }
+        row.appendChild(pill)
+        card.appendChild(row)
+
+        const hk = document.createElement('div')
+        hk.className = 'hk'
+        hk.textContent = abbrev(m.hotkey || '')
+        card.appendChild(hk)
+
+        const meta = document.createElement('div')
+        meta.className = 'meta'
+        const hwLine = document.createElement('div')
+        hwLine.textContent = m.hardwareLabel || 'hardware — computing'
+        meta.appendChild(hwLine)
+        const dateLine = document.createElement('div')
+        const dateText = m.verifiedAt ? ('verified · ' + fmtDate(m.verifiedAt)) : (m.validatorStatus === 'verified' ? 'verified · date pending' : 'awaiting first verify')
+        dateLine.textContent = dateText
+        meta.appendChild(dateLine)
+        if (m.country) {
+          const locLine = document.createElement('div')
+          locLine.textContent = m.country
+          meta.appendChild(locLine)
+        }
+        card.appendChild(meta)
+
+        if (m.hotkey) {
+          const link = document.createElement('a')
+          link.className = 'permalink'
+          link.href = '/mason?h=' + encodeURIComponent(m.hotkey)
+          const label = document.createElement('span')
+          label.textContent = 'open register entry'
+          link.appendChild(label)
+          const arr = document.createElement('span')
+          arr.className = 'arrow'
+          arr.textContent = '→'
+          link.appendChild(arr)
+          card.appendChild(link)
+        }
+
+        return card
+      }
+
+      async function refresh() {
+        const [stateData, registry, machines] = await Promise.all([
+          fetchJson(API_BASE + '/api/substrate/state'),
+          fetchJson(API_BASE + '/api/substrate/validator/registry'),
+          fetchJson(API_BASE + '/api/v1/cathedral/machines'),
+        ])
+
+        const miners = (stateData && stateData.miners) || []
+        const summary = (stateData && stateData.summary) || {}
+        const byUid = new Map(miners.map((m) => [m.uid, m]))
+
+        const regData = registry && registry.data ? registry.data : {}
+        const regMiners = Array.isArray(regData.miners) ? regData.miners : []
+        const machList = (machines && machines.machines) || []
+
+        // Map validator registry entries to a richer model. Hardware is a
+        // parallel list without UID mapping — we pair best-effort by index,
+        // same pattern /ledger uses.
+        const hwCards = machList.map((x) => {
+          const gpuLabel = x.is_cpu_only
+            ? (x.cpu_cores || 0) + ' vCPU · ' + (x.memory_gb || 0) + ' GB'
+            : (x.gpu_count || 0) + '× ' + (x.category || '—')
+          return { label: gpuLabel, location: x.location || '', country: countryFromLocation(x.location) }
+        })
+
+        const verifiedMiners = regMiners.filter((r) => r.status === 'verified')
+        const apprenticeMiners = regMiners.filter((r) => r.status !== 'verified')
+
+        // Stable order: verified sorted by uid (proxy for verification time
+        // until the backend exposes a timestamp), apprentices after.
+        verifiedMiners.sort((a, b) => a.uid - b.uid)
+        apprenticeMiners.sort((a, b) => a.uid - b.uid)
+
+        const enrich = (r, idx) => {
+          const chainRow = byUid.get(r.uid) || {}
+          const hw = hwCards[idx] || { label: '—', location: '', country: null }
+          return {
+            uid: r.uid,
+            hotkey: chainRow.hotkey || '',
+            validatorStatus: r.status,
+            bidActive: !!r.bid_active,
+            hasRental: !!r.has_rental,
+            hardwareLabel: hw.label,
+            country: hw.country,
+            // Timestamp is not exposed yet — leave slot for when it is.
+            verifiedAt: null,
+          }
+        }
+        const verifiedEnriched = verifiedMiners.map(enrich)
+        const apprenticeEnriched = apprenticeMiners.map((r, i) => enrich(r, verifiedEnriched.length + i))
+
+        // Hero stats
+        const setText = (sel, val) => {
+          const el = document.querySelector(sel)
+          if (el) el.textContent = val
+        }
+        setText('[data-stat="verified-count"]', verifiedEnriched.length.toString())
+        setText('[data-stat="apprentice-count"]', apprenticeEnriched.length.toString())
+        const countries = new Set()
+        for (const m of verifiedEnriched.concat(apprenticeEnriched)) {
+          if (m.country) countries.add(m.country)
+        }
+        setText('[data-stat="country-count"]', countries.size ? countries.size.toString() : '—')
+
+        // Founding masons — first N verified by uid-asc (proxy for time)
+        const foundingGrid = document.querySelector('[data-stat="founding-grid"]')
+        if (foundingGrid) {
+          foundingGrid.innerHTML = ''
+          const founding = verifiedEnriched.slice(0, FOUNDING_LIMIT)
+          if (founding.length === 0) {
+            const placeholder = document.createElement('div')
+            placeholder.className = 'mason'
+            placeholder.style.opacity = '0.7'
+            const row = document.createElement('div')
+            row.className = 'row'
+            const uid = document.createElement('span')
+            uid.className = 'uid'
+            uid.textContent = '—'
+            row.appendChild(uid)
+            const pill = document.createElement('span')
+            pill.className = 'pill'
+            pill.textContent = 'computing'
+            row.appendChild(pill)
+            placeholder.appendChild(row)
+            const meta = document.createElement('div')
+            meta.className = 'meta'
+            meta.textContent = 'Founding seats fill as the first ten masons verify.'
+            placeholder.appendChild(meta)
+            foundingGrid.appendChild(placeholder)
+          } else {
+            for (const m of founding) {
+              foundingGrid.appendChild(buildMasonCard(m, { founding: true }))
+            }
+          }
+        }
+
+        // All masons — verified first, apprentices after
+        const masonGrid = document.querySelector('[data-stat="mason-grid"]')
+        if (masonGrid) {
+          masonGrid.innerHTML = ''
+          const ordered = verifiedEnriched.concat(apprenticeEnriched)
+          if (ordered.length === 0) {
+            const empty = document.createElement('div')
+            empty.className = 'mason'
+            empty.style.opacity = '0.6'
+            const row = document.createElement('div')
+            row.className = 'row'
+            const uid = document.createElement('span')
+            uid.className = 'uid'
+            uid.textContent = 'no masons yet'
+            row.appendChild(uid)
+            empty.appendChild(row)
+            const meta = document.createElement('div')
+            meta.className = 'meta'
+            meta.textContent = 'Be the first to register. See /afrotensor for the onboarding path.'
+            empty.appendChild(meta)
+            masonGrid.appendChild(empty)
+          } else {
+            for (const m of ordered) {
+              masonGrid.appendChild(buildMasonCard(m, { founding: false }))
+            }
+          }
+        }
+
+        // Evidence strip
+        setText('[data-stat="tier-declared"]', (summary.active_miners != null ? summary.active_miners : '—').toString())
+        setText('[data-stat="tier-registered"]', (regData.miners_with_nodes != null ? regData.miners_with_nodes : '—').toString())
+        setText('[data-stat="tier-verified"]', (regData.nodes_verified != null ? regData.nodes_verified : '—').toString())
+
+        const nodesRegistered = regData.nodes_registered != null ? regData.nodes_registered : (machList.length || 0)
+        const gpuCount = machList.reduce((acc, x) => acc + (x.is_cpu_only ? 0 : (x.gpu_count || 0)), 0)
+        setText('[data-stat="work-nodes"]', nodesRegistered ? nodesRegistered.toString() : '—')
+        setText('[data-stat="work-gpus"]', gpuCount ? gpuCount.toString() : '—')
+        setText('[data-stat="work-cus"]', '—')
+
+        const apprenticeCount = apprenticeEnriched.length
+        const verifiedCount = verifiedEnriched.length
+        setText('[data-stat="community-apprentices"]', apprenticeCount.toString())
+        setText('[data-stat="community-verified"]', verifiedCount.toString())
+        const denom = apprenticeCount + verifiedCount
+        if (denom > 0) {
+          const pct = Math.round((verifiedCount / denom) * 100)
+          setText('[data-stat="community-conversion"]', pct + '%')
+        } else {
+          setText('[data-stat="community-conversion"]', '—')
+        }
+      }
+
+      refresh()
+      setInterval(refresh, POLL_MS)
+    })()
+  </script>
+</Base>
