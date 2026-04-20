@@ -42,6 +42,53 @@ import RoseWindow from '../components/RoseWindow.astro'
     .holders tr.ours td { color: var(--accent); }
     .holders tr.ours { background: var(--accent-dim); }
 
+    /* Pipeline band — editorial, one row per stage. No gamification,
+       no progress bars. Just a register the visitor can read. */
+    .pipeline { border-top: 1px solid var(--border-soft); }
+    .pipeline-row {
+      display: grid;
+      grid-template-columns: 44px 1fr 96px;
+      gap: 20px;
+      padding: 18px 0;
+      border-bottom: 1px solid var(--border-soft);
+      align-items: baseline;
+    }
+    .pipeline-row:last-child { border-bottom: 0; }
+    .pipeline-row .idx {
+      font-family: var(--font-serif, 'Newsreader', ui-serif, Georgia, serif);
+      font-size: 12px; color: var(--dim); font-variant-numeric: tabular-nums;
+      letter-spacing: 0.08em;
+    }
+    .pipeline-row .stage {
+      font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase;
+      color: var(--muted);
+      display: block;
+    }
+    .pipeline-row .note {
+      font-size: 12px; color: var(--dim); margin-top: 4px;
+      max-width: 52ch; line-height: 1.5;
+    }
+    .pipeline-row .num-cell {
+      font-variant-numeric: tabular-nums; text-align: right;
+      font-size: 18px; font-weight: 300; color: var(--fg);
+      line-height: 1;
+    }
+    .pipeline-row .num-cell.live { color: var(--accent); }
+    .pipeline-row .num-cell.empty { color: var(--warn); }
+    .pipeline-row .num-cell.future { color: var(--dim); }
+    .pipeline-row .dot {
+      display: inline-block; width: 5px; height: 5px; border-radius: 50%;
+      background: var(--accent); margin-left: 6px; vertical-align: 1px;
+      opacity: 0.7;
+    }
+    .pipeline-row .sub {
+      display: block; font-size: 9px; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--dim); margin-top: 4px;
+    }
+    @media (max-width: 600px) {
+      .pipeline-row { grid-template-columns: 28px 1fr 72px; gap: 12px; }
+    }
+
     /* Thin banner — a stonemason at the bench. Dialled right down so the
        tables stay the page's centre of gravity. */
     .banner {
@@ -79,7 +126,90 @@ import RoseWindow from '../components/RoseWindow.astro'
   <section class="sec">
     <div class="wrap">
       <div>
-        <div class="eyebrow"><span class="num">01</span><span>Our validator</span></div>
+        <div class="eyebrow"><span class="num">01</span><span>Pipeline</span></div>
+        <p class="text-[11px] text-muted mt-4 leading-relaxed max-w-[32ch]">
+          How a visitor becomes a mason, and a mason becomes a patron.
+          Aggregate across the subnet — not per account.
+        </p>
+      </div>
+      <div>
+        <div class="pipeline" data-stat="pipeline">
+          <div class="pipeline-row" data-pipe-row="apprentice">
+            <div class="idx">01</div>
+            <div>
+              <span class="stage">Apprentice · signed up for Afrotensor</span>
+              <div class="note">A name and a country on the roster. The first commitment the work asks for.</div>
+            </div>
+            <div class="num-cell" data-pipe-num="apprentice">—</div>
+          </div>
+
+          <div class="pipeline-row" data-pipe-row="verified">
+            <div class="idx">02</div>
+            <div>
+              <span class="stage">Mason · SSH-verified by our validator</span>
+              <div class="note">Our validator has SSH'd the node and confirmed the hardware. The bid is real.</div>
+            </div>
+            <div class="num-cell" data-pipe-num="verified">—</div>
+          </div>
+
+          <div class="pipeline-row" data-pipe-row="earning">
+            <div class="idx">03</div>
+            <div>
+              <span class="stage">Mason · earning CUs</span>
+              <div class="note">First rental received. Income has started. <span data-pipe-sub="earning-sub" class="sub"></span></div>
+            </div>
+            <div class="num-cell" data-pipe-num="earning">—</div>
+          </div>
+
+          <div class="pipeline-row" data-pipe-row="ambassador">
+            <div class="idx">04</div>
+            <div>
+              <span class="stage">Ambassador · referred three apprentices</span>
+              <div class="note">Bringing others in. <span class="sub" style="display:inline;margin:0">not yet measurable</span></div>
+            </div>
+            <div class="num-cell future" data-pipe-num="ambassador">—</div>
+          </div>
+
+          <div class="pipeline-row" data-pipe-row="mentor">
+            <div class="idx">05</div>
+            <div>
+              <span class="stage">Mentor · answered in the Afrotensor threads</span>
+              <div class="note">Reading the comment history to find who helps whom. <span class="sub" style="display:inline;margin:0">rolling up</span></div>
+            </div>
+            <div class="num-cell future" data-pipe-num="mentor">—</div>
+          </div>
+
+          <div class="pipeline-row" data-pipe-row="patron">
+            <div class="idx">06</div>
+            <div>
+              <span class="stage">Patron · stake delegated to our validator</span>
+              <div class="note">Putting TAO behind the work. <span class="sub" style="display:inline;margin:0">awaiting delegator feed</span></div>
+            </div>
+            <div class="num-cell future" data-pipe-num="patron">—</div>
+          </div>
+
+          <div class="pipeline-row" data-pipe-row="clerk">
+            <div class="idx">07</div>
+            <div>
+              <span class="stage">Clerk · running own validator, trusting ours</span>
+              <div class="note">Operators extending the cathedral. <span class="sub" style="display:inline;margin:0">future stage</span></div>
+            </div>
+            <div class="num-cell future" data-pipe-num="clerk">—</div>
+          </div>
+        </div>
+        <p class="text-[11px] text-dim mt-6 leading-relaxed max-w-[54ch]">
+          Counts refresh every 10 seconds. Figures in slate are live.
+          Figures in amber mean the stage is measurable but empty today.
+          Figures in grey are stages we haven't instrumented yet.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="wrap">
+      <div>
+        <div class="eyebrow"><span class="num">02</span><span>Our validator</span></div>
       </div>
       <div class="grid grid-cols-2 md:grid-cols-4 gap-0 border border-border">
         <div class="p-4 border-r border-border">
@@ -109,7 +239,7 @@ import RoseWindow from '../components/RoseWindow.astro'
   <section class="sec">
     <div class="wrap">
       <div>
-        <div class="eyebrow"><span class="num">02</span><span>Permit progress</span></div>
+        <div class="eyebrow"><span class="num">03</span><span>Permit progress</span></div>
         <p class="lede mt-4 text-[15px]">
           Top 14 by stake set weights.<br/>
           <em>We're not there yet.</em>
@@ -135,7 +265,7 @@ import RoseWindow from '../components/RoseWindow.astro'
   <section class="sec">
     <div class="wrap">
       <div>
-        <div class="eyebrow"><span class="num">03</span><span>Registered masons</span></div>
+        <div class="eyebrow"><span class="num">04</span><span>Registered masons</span></div>
         <p class="text-[11px] text-muted mt-4 leading-relaxed max-w-[32ch]">
           Masons currently registered with our validator — not just declared
           on chain. Verified means our validator has SSH'd in and confirmed
@@ -146,9 +276,9 @@ import RoseWindow from '../components/RoseWindow.astro'
         <table class="holders" data-stat="registered-table">
           <thead>
             <tr>
-              <th style="width:10%">UID</th>
+              <th style="width:14%">UID</th>
               <th>Hotkey</th>
-              <th>Hardware</th>
+              <th class="r">Rental</th>
               <th class="r">Status</th>
             </tr>
           </thead>
@@ -156,6 +286,9 @@ import RoseWindow from '../components/RoseWindow.astro'
             <tr><td colspan="4" class="text-dim">loading…</td></tr>
           </tbody>
         </table>
+        <p class="text-[11px] text-dim mt-3 leading-relaxed max-w-[54ch]" data-stat="hardware-summary">
+          &nbsp;
+        </p>
       </div>
     </div>
   </section>
@@ -163,7 +296,7 @@ import RoseWindow from '../components/RoseWindow.astro'
   <section class="sec">
     <div class="wrap">
       <div>
-        <div class="eyebrow"><span class="num">04</span><span>Permit holders</span></div>
+        <div class="eyebrow"><span class="num">05</span><span>Permit holders</span></div>
         <p class="text-[11px] text-muted mt-4 leading-relaxed max-w-[28ch]">
           The 14 validators currently setting weights on SN39. Updated every 10s.
         </p>
@@ -193,6 +326,8 @@ import RoseWindow from '../components/RoseWindow.astro'
   <script is:inline>
     const API_BASE = 'https://api.polaris.computer'
     const POLL_MS = 10000
+    const FETCH_TIMEOUT_MS = 20000
+    const OUR_VALIDATOR_UID = 123
 
     function abbrev(s) {
       if (!s || s.length < 10) return s || ''
@@ -204,109 +339,257 @@ import RoseWindow from '../components/RoseWindow.astro'
       if (n >= 10) return n.toFixed(1)
       return n.toFixed(2)
     }
-    async function refresh() {
-      try {
-        const r = await fetch(`${API_BASE}/api/substrate/state`, { cache: 'no-store' })
-        if (!r.ok) return
-        const data = await r.json()
-        const miners = data.miners || []
-        const summary = data.summary || {}
-        const byUid = new Map(miners.map((m) => [m.uid, m]))
-        const us = byUid.get(123)
-        const ourMiner = byUid.get(115)
-        const stakes = miners.map((m) => m.stake || 0).sort((a, b) => b - a)
-        const permitThreshold = stakes[13] || 0
-        const ourStake = us?.stake || 0
-        const pct = permitThreshold > 0 ? Math.min(100, (ourStake / permitThreshold) * 100) : 0
-
-        const set = (sel, val) => {
-          const el = document.querySelector(sel)
-          if (el && val != null) el.textContent = val
-        }
-        set('[data-stat="block"]', summary.block?.toLocaleString() ?? '—')
-        set('[data-stat="active"]', summary.active_miners?.toLocaleString() ?? '—')
-        set('[data-stat="total"]', summary.total_miners?.toLocaleString() ?? '—')
-        set('[data-stat="val-status"]', us?.status ? us.status.toLowerCase() : 'unknown')
-        set('[data-stat="our-stake"]', fmtStake(ourStake))
-        set('[data-stat="permit-threshold"]', fmtStake(permitThreshold))
-        set('[data-stat="permit-pct"]', pct.toFixed(2) + '%')
-        const barEl = document.querySelector('[data-stat="permit-bar"]')
-        if (barEl) barEl.style.width = pct + '%'
-        // Registered-miners table: pull from /validator/registry (who
-        // we've SSH-accepted) and join against the machines list for
-        // hardware detail. Pin verified > registered.
-        try {
-          const [regResp, machResp] = await Promise.all([
-            fetch(`${API_BASE}/api/substrate/validator/registry`, { cache: 'no-store' }),
-            fetch(`${API_BASE}/api/v1/cathedral/machines`, { cache: 'no-store' }),
-          ])
-          if (regResp.ok && machResp.ok) {
-            const reg = (await regResp.json())?.data || {}
-            const machList = ((await machResp.json())?.machines) || []
-            const regMiners = Array.isArray(reg.miners) ? reg.miners : []
-            // map UID to hardware summary by matching SSH endpoint — the
-            // validator's nodes don't expose UID, so we use whatever comes
-            // back and display them in registered order
-            const hwCards = machList.map((m) => {
-              const gpuLabel = m.is_cpu_only
-                ? `${m.cpu_cores || 0} vCPU · ${m.memory_gb || 0} GB`
-                : `${m.gpu_count || 0}× ${m.category || '—'}`
-              return { nodeId: m.node_id, label: gpuLabel, location: m.location, rate: m.hourly_rate_cents }
-            })
-            const body2 = document.querySelector('[data-stat="registered-table-body"]')
-            if (body2) {
-              if (regMiners.length === 0) {
-                body2.innerHTML = '<tr><td colspan="4" class="text-dim">no masons registered yet · awaiting first bid</td></tr>'
-              } else {
-                const rows = regMiners
-                  .sort((a, b) => {
-                    const score = (x) => x.status === 'verified' ? 0 : x.status === 'online' ? 1 : 2
-                    return score(a) - score(b) || a.uid - b.uid
-                  })
-                  .map((m, i) => {
-                    const chainRow = byUid.get(m.uid) || {}
-                    const hw = hwCards[i] || { label: '—', location: '' }
-                    const statusClass = m.status === 'verified' ? 'style="color:var(--ok)"' : m.status === 'online' ? 'style="color:var(--accent)"' : 'style="color:var(--dim)"'
-                    return `<tr>
-                      <td>uid ${m.uid}</td>
-                      <td style="color:var(--muted)">${abbrev(chainRow.hotkey || '')}</td>
-                      <td style="color:var(--fg)">${hw.label}${hw.location ? ` · <span style="color:var(--dim)">${hw.location.split('/')[1] || hw.location}</span>` : ''}</td>
-                      <td class="r" ${statusClass}>${m.status}</td>
-                    </tr>`
-                  }).join('')
-                body2.innerHTML = rows
-              }
-            }
-          }
-        } catch (e) { /* registry optional */ }
-
-        const sorted = miners.slice().sort((a, b) => (b.stake || 0) - (a.stake || 0))
-        const top = sorted.slice(0, 14)
-        const body = document.querySelector('[data-stat="permit-table-body"]')
-        if (body) {
-          const rows = top.map((m, i) => {
-            const ours = m.uid === 123
-            const pos = (i + 1).toString().padStart(2, '0')
-            return `<tr class="${ours ? 'ours' : ''}">
-              <td>${pos}</td>
-              <td>uid ${m.uid}</td>
-              <td style="color:var(--muted)">${abbrev(m.hotkey)}</td>
-              <td class="r">${fmtStake(m.stake)}α</td>
-            </tr>`
-          }).join('')
-          const ourRank = sorted.findIndex((m) => m.uid === 123) + 1
-          const ourRow = ourRank > 14
-            ? `<tr class="ours">
-                <td>${ourRank.toString().padStart(2, '0')}</td>
-                <td>uid 123</td>
-                <td>${abbrev(us?.hotkey || '')}</td>
-                <td class="r">${fmtStake(ourStake)}α</td>
-              </tr>`
-            : ''
-          body.innerHTML = rows + ourRow
-        }
-      } catch (e) { console.warn('ledger refresh failed', e) }
+    function fmtCount(n) {
+      if (n == null || !isFinite(n)) return '—'
+      return Number(n).toLocaleString()
     }
+
+    async function fetchJson(path) {
+      const ctrl = new AbortController()
+      const t = setTimeout(() => ctrl.abort(), FETCH_TIMEOUT_MS)
+      try {
+        const r = await fetch(API_BASE + path, { cache: 'no-store', signal: ctrl.signal })
+        if (!r.ok) return null
+        return await r.json()
+      } catch (e) {
+        return null
+      } finally {
+        clearTimeout(t)
+      }
+    }
+
+    function setText(sel, val) {
+      const el = document.querySelector(sel)
+      if (el && val != null) el.textContent = val
+    }
+
+    function setPipe(key, value, classHint) {
+      // value can be number, null (not yet), or '—'
+      const el = document.querySelector('[data-pipe-num="' + key + '"]')
+      if (!el) return
+      // remove previous state classes
+      el.classList.remove('live', 'empty', 'future')
+      if (value == null) {
+        el.textContent = '—'
+        if (classHint) el.classList.add(classHint)
+        return
+      }
+      if (typeof value === 'number') {
+        el.textContent = fmtCount(value)
+        if (value > 0) el.classList.add('live')
+        else el.classList.add('empty')
+      } else {
+        el.textContent = String(value)
+        if (classHint) el.classList.add(classHint)
+      }
+    }
+
+    // ---- Registered-masons table. Built with createElement/textContent to
+    // eliminate the innerHTML interpolation of backend fields. ----
+    function renderRegisteredMinersTable(regMiners, chainByUid) {
+      const body = document.querySelector('[data-stat="registered-table-body"]')
+      if (!body) return
+      // Clear
+      while (body.firstChild) body.removeChild(body.firstChild)
+
+      if (!regMiners || regMiners.length === 0) {
+        const tr = document.createElement('tr')
+        const td = document.createElement('td')
+        td.colSpan = 4
+        td.className = 'text-dim'
+        td.textContent = 'no masons registered yet · awaiting first bid'
+        tr.appendChild(td)
+        body.appendChild(tr)
+        return
+      }
+
+      const statusRank = (s) => (s === 'verified' ? 0 : s === 'online' ? 1 : 2)
+      const sorted = regMiners.slice().sort((a, b) =>
+        statusRank(a.status) - statusRank(b.status) || (a.uid || 0) - (b.uid || 0),
+      )
+
+      for (const m of sorted) {
+        const chain = chainByUid.get(m.uid) || {}
+        const tr = document.createElement('tr')
+
+        const uidTd = document.createElement('td')
+        uidTd.textContent = 'uid ' + String(m.uid)
+        tr.appendChild(uidTd)
+
+        const hkTd = document.createElement('td')
+        hkTd.style.color = 'var(--muted)'
+        hkTd.textContent = abbrev(chain.hotkey || '')
+        tr.appendChild(hkTd)
+
+        const rentalTd = document.createElement('td')
+        rentalTd.className = 'r'
+        rentalTd.textContent = m.has_rental ? 'renting' : '—'
+        if (m.has_rental) rentalTd.style.color = 'var(--accent)'
+        tr.appendChild(rentalTd)
+
+        const stTd = document.createElement('td')
+        stTd.className = 'r'
+        stTd.textContent = String(m.status || '')
+        if (m.status === 'verified') stTd.style.color = 'var(--ok)'
+        else if (m.status === 'online') stTd.style.color = 'var(--accent)'
+        else stTd.style.color = 'var(--dim)'
+        tr.appendChild(stTd)
+
+        body.appendChild(tr)
+      }
+    }
+
+    function renderHardwareSummary(machines) {
+      const el = document.querySelector('[data-stat="hardware-summary"]')
+      if (!el) return
+      if (!machines || machines.length === 0) {
+        el.textContent = 'no hardware registered'
+        return
+      }
+      // Bucket by GPU category
+      const buckets = new Map()
+      for (const m of machines) {
+        const key = m && m.is_cpu_only ? 'CPU-only' : (m && m.category ? String(m.category) : '—')
+        const prev = buckets.get(key) || { units: 0, gpus: 0 }
+        prev.units += 1
+        prev.gpus += Number(m && m.gpu_count) || 0
+        buckets.set(key, prev)
+      }
+      const parts = []
+      for (const [cat, v] of buckets) {
+        if (cat === 'CPU-only') parts.push(v.units + ' × CPU-only')
+        else parts.push(v.gpus + ' × ' + cat)
+      }
+      // textContent — no HTML interpolation
+      el.textContent = machines.length + ' machines registered · ' + parts.join(', ')
+    }
+
+    function renderPermitTable(sortedMiners, us) {
+      const top = sortedMiners.slice(0, 14)
+      const body = document.querySelector('[data-stat="permit-table-body"]')
+      if (!body) return
+      while (body.firstChild) body.removeChild(body.firstChild)
+
+      const appendRow = (rank, m, isOurs) => {
+        const tr = document.createElement('tr')
+        if (isOurs) tr.className = 'ours'
+
+        const rTd = document.createElement('td')
+        rTd.textContent = String(rank).padStart(2, '0')
+        tr.appendChild(rTd)
+
+        const uTd = document.createElement('td')
+        uTd.textContent = 'uid ' + String(m.uid)
+        tr.appendChild(uTd)
+
+        const hTd = document.createElement('td')
+        if (!isOurs) hTd.style.color = 'var(--muted)'
+        hTd.textContent = abbrev(m.hotkey || '')
+        tr.appendChild(hTd)
+
+        const sTd = document.createElement('td')
+        sTd.className = 'r'
+        sTd.textContent = fmtStake(m.stake) + 'α'
+        tr.appendChild(sTd)
+
+        body.appendChild(tr)
+      }
+
+      top.forEach((m, i) => appendRow(i + 1, m, m.uid === OUR_VALIDATOR_UID))
+
+      const ourRank = sortedMiners.findIndex((m) => m.uid === OUR_VALIDATOR_UID) + 1
+      if (ourRank > 14 && us) {
+        appendRow(ourRank, us, true)
+      }
+    }
+
+    async function refresh() {
+      const [stateData, registryData, machinesData, signupsData, rentalsData] = await Promise.all([
+        fetchJson('/api/substrate/state'),
+        fetchJson('/api/substrate/validator/registry'),
+        fetchJson('/api/v1/cathedral/machines'),
+        fetchJson('/api/v1/cathedral/signups/stats'),
+        fetchJson('/api/v1/cathedral/rentals'),
+      ])
+
+      // ---- Chain state ----
+      const miners = (stateData && stateData.miners) || []
+      const summary = (stateData && stateData.summary) || {}
+      const byUid = new Map(miners.map((m) => [m.uid, m]))
+      const us = byUid.get(OUR_VALIDATOR_UID)
+      const stakes = miners.map((m) => m.stake || 0).sort((a, b) => b - a)
+      const permitThreshold = stakes[13] || 0
+      const ourStake = (us && us.stake) || 0
+      const pct = permitThreshold > 0 ? Math.min(100, (ourStake / permitThreshold) * 100) : 0
+
+      setText('[data-stat="block"]', summary.block != null ? summary.block.toLocaleString() : '—')
+      setText('[data-stat="active"]', summary.active_miners != null ? summary.active_miners.toLocaleString() : '—')
+      setText('[data-stat="total"]', summary.total_miners != null ? summary.total_miners.toLocaleString() : '—')
+      setText('[data-stat="val-status"]', us && us.status ? String(us.status).toLowerCase() : 'unknown')
+      setText('[data-stat="our-stake"]', fmtStake(ourStake))
+      setText('[data-stat="permit-threshold"]', fmtStake(permitThreshold))
+      setText('[data-stat="permit-pct"]', pct.toFixed(2) + '%')
+      const barEl = document.querySelector('[data-stat="permit-bar"]')
+      if (barEl) barEl.style.width = pct + '%'
+
+      // ---- Registered masons + hardware ----
+      const reg = (registryData && registryData.data) || {}
+      const regMiners = Array.isArray(reg.miners) ? reg.miners : []
+      const machines = (machinesData && Array.isArray(machinesData.machines)) ? machinesData.machines : []
+      renderRegisteredMinersTable(regMiners, byUid)
+      renderHardwareSummary(machines)
+
+      // ---- Permit table ----
+      const sorted = miners.slice().sort((a, b) => (b.stake || 0) - (a.stake || 0))
+      renderPermitTable(sorted, us)
+
+      // ---- Pipeline band ----
+      // 01 Apprentice — signup count
+      if (signupsData && typeof signupsData.total === 'number') {
+        setPipe('apprentice', signupsData.total)
+      } else {
+        setPipe('apprentice', null, 'future')
+      }
+
+      // 02 Verified mason — from registry
+      if (reg && typeof reg.nodes_verified === 'number') {
+        setPipe('verified', reg.nodes_verified)
+      } else {
+        setPipe('verified', null, 'future')
+      }
+
+      // 03 Earning — masons with an active rental
+      // Prefer rentals list length; fall back to registry has_rental count.
+      let earning = null
+      if (rentalsData && typeof rentalsData.total_count === 'number') {
+        earning = rentalsData.total_count
+      } else if (regMiners.length > 0) {
+        earning = regMiners.filter((m) => m && m.has_rental).length
+      }
+      if (earning != null) {
+        setPipe('earning', earning)
+        const subEl = document.querySelector('[data-pipe-sub="earning-sub"]')
+        if (subEl) {
+          subEl.textContent = earning > 0 ? 'earning this block window' : 'no rentals yet'
+        }
+      } else {
+        setPipe('earning', null, 'future')
+      }
+
+      // 04 Ambassador — not yet measurable, stub
+      setPipe('ambassador', null, 'future')
+
+      // 05 Mentor — aggregate comments endpoint requires step param and has
+      // no aggregate total; leave as future until an aggregate is exposed.
+      setPipe('mentor', null, 'future')
+
+      // 06 Patron — no delegator endpoint yet; stub
+      setPipe('patron', null, 'future')
+
+      // 07 Clerk — future
+      setPipe('clerk', null, 'future')
+    }
+
     refresh()
     setInterval(refresh, POLL_MS)
   </script>
