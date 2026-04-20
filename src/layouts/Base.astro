@@ -35,8 +35,7 @@ const footerClass = fullHeight
       (function () {
         try {
           var saved = localStorage.getItem('theme')
-          var prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches
-          var theme = saved || (prefersLight ? 'light' : 'dark')
+          var theme = saved || 'dark'
           document.documentElement.setAttribute('data-theme', theme)
         } catch (_) {
           document.documentElement.setAttribute('data-theme', 'dark')
