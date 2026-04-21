@@ -84,7 +84,7 @@ const openCount = issues.filter((i) => i.state === 'open').length
     .issue-row a:hover .t { color: var(--accent); }
     .issue-row .tags { display: inline-flex; gap: 8px; flex-shrink: 0; font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; }
     .issue-row .tags .epic { color: var(--accent); }
-    .issue-row .tags .sec { color: var(--warn); }
+    .issue-row .tags .security { color: var(--warn); }
     .issue-row .tags .state { color: var(--dim); }
     .issue-row .tags .state.open { color: var(--muted); }
 
@@ -169,7 +169,7 @@ const openCount = issues.filter((i) => i.state === 'open').length
                       <span class="t">{i.title}</span>
                       <span class="tags">
                         {isEpic && <span class="epic">epic</span>}
-                        {isSec && <span class="sec">sec</span>}
+                        {isSec && <span class="security">sec</span>}
                         <span class={`state ${i.state}`}>{i.state}</span>
                       </span>
                     </a>
