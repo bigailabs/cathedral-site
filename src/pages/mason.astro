@@ -173,26 +173,9 @@ import RoseWindow from '../components/RoseWindow.astro'
               <div class="sub" data-mason="hardware-sub">from declared node inventory</div>
             </div>
             <div class="band">
-              <div class="k">Verified since</div>
-              <div class="v" data-mason="verified-v">—</div>
-              <div class="sub" data-mason="verified-sub">timestamp surfaces as backend exposes it</div>
-            </div>
-          </div>
-          <div class="bands mt-[1px]" style="margin-top: 12px;">
-            <div class="band">
-              <div class="k">CUs this week</div>
-              <div class="v" data-mason="cus-v">—</div>
-              <div class="sub">computing · streaming once scoring starts</div>
-            </div>
-            <div class="band">
               <div class="k">On chain</div>
               <div class="v" data-mason="chain-v">—</div>
               <div class="sub" data-mason="chain-sub">uid · stake · axon</div>
-            </div>
-            <div class="band">
-              <div class="k">Registered with us</div>
-              <div class="v" data-mason="regus-v">—</div>
-              <div class="sub" data-mason="regus-sub">bid status · rental status</div>
             </div>
           </div>
         </div>
@@ -391,13 +374,17 @@ import RoseWindow from '../components/RoseWindow.astro'
         }
         if (pillsEl) renderPills(pillsEl, pills)
 
-        // Status band
+        // Status band — merges validator status with bid/rental state
+        const regSuffix = regRow
+          ? ' · bid ' + (regRow.bid_active ? 'active' : 'inactive') +
+            ' · rental ' + (regRow.has_rental ? 'active' : 'none')
+          : ''
         if (verified) {
           setText('[data-mason="status-v"]', 'Verified')
-          setText('[data-mason="status-sub"]', 'SSH-confirmed by our validator')
+          setText('[data-mason="status-sub"]', 'SSH-confirmed by our validator' + regSuffix)
         } else if (regRow) {
           setText('[data-mason="status-v"]', 'Apprentice')
-          setText('[data-mason="status-sub"]', 'registered · awaiting first verify')
+          setText('[data-mason="status-sub"]', 'registered · awaiting first verify' + regSuffix)
         } else if (chainRow && chainRow.status === 'Active') {
           setText('[data-mason="status-v"]', 'Declared')
           setText('[data-mason="status-sub"]', 'axon on chain · not registered with us yet')
@@ -409,13 +396,6 @@ import RoseWindow from '../components/RoseWindow.astro'
         // Hardware band
         setText('[data-mason="hardware-v"]', hwSummary)
         setText('[data-mason="hardware-sub"]', 'per-mason inventory surfaces as backend exposes uid→node mapping')
-
-        // Verified-since band
-        setText('[data-mason="verified-v"]', verified ? '—' : '—')
-        setText('[data-mason="verified-sub"]', verified ? 'timestamp pending · backend does not expose it yet' : 'awaiting first verify')
-
-        // CUs this week — not yet exposed
-        setText('[data-mason="cus-v"]', '—')
 
         // On chain band
         if (chainRow) {
@@ -431,18 +411,6 @@ import RoseWindow from '../components/RoseWindow.astro'
         } else {
           setText('[data-mason="chain-v"]', '—')
           setText('[data-mason="chain-sub"]', 'not visible on SN39 yet')
-        }
-
-        // Registered-with-us band
-        if (regRow) {
-          setText('[data-mason="regus-v"]', verified ? 'Verified' : 'Registered')
-          const parts = []
-          parts.push('bid ' + (regRow.bid_active ? 'active' : 'inactive'))
-          parts.push('rental ' + (regRow.has_rental ? 'active' : 'none'))
-          setText('[data-mason="regus-sub"]', parts.join(' · '))
-        } else {
-          setText('[data-mason="regus-v"]', '—')
-          setText('[data-mason="regus-sub"]', 'no RegisterBid on file')
         }
       }
 
