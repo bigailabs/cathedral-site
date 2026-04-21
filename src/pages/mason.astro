@@ -122,8 +122,7 @@ import RoseWindow from '../components/RoseWindow.astro'
       <div>
         <div class="eyebrow"><span class="num">00</span><span>Register entry</span></div>
         <p class="text-[11px] text-muted mt-4 leading-relaxed max-w-[28ch]">
-          A permanent per-mason page. Link to it. Put it in your bio.
-          It follows the stone, not the person.
+          A permanent per-mason page. Follows the stone, not the person.
         </p>
       </div>
       <div>
@@ -141,7 +140,9 @@ import RoseWindow from '../components/RoseWindow.astro'
           </div>
         </div>
         <div data-mason="missing" class="err mt-6 hidden">
-          No hotkey supplied. Use <code style="color:var(--fg)">/mason?h=…</code> with a full hotkey to open a register entry.
+          No hotkey supplied. Use <code style="color:var(--fg)">/mason?h=…</code> with a full hotkey, or see
+          <a href="/masons" style="color:var(--fg);text-decoration:underline;text-decoration-color:var(--dim);text-underline-offset:2px;">/masons</a>
+          for the full register.
         </div>
         <div data-mason="notfound" class="err mt-6 hidden">
           No register entry found for this hotkey. The mason may not be on SN39, or hasn't declared yet.
@@ -150,89 +151,86 @@ import RoseWindow from '../components/RoseWindow.astro'
     </div>
   </section>
 
-  <section class="sec">
-    <div class="wrap">
-      <div>
-        <div class="eyebrow"><span class="num">01</span><span>Evidence</span></div>
-        <p class="text-[11px] text-muted mt-4 leading-relaxed max-w-[30ch]">
-          What our validator sees for this mason, right now.
-        </p>
-      </div>
-      <div>
-        <div class="bands">
-          <div class="band">
-            <div class="k">Mining status</div>
-            <div class="v" data-mason="status-v">—</div>
-            <div class="sub" data-mason="status-sub">reading registry</div>
+  <div data-mason-body>
+    <section class="sec">
+      <div class="wrap">
+        <div>
+          <div class="eyebrow"><span class="num">01</span><span>Evidence</span></div>
+          <p class="text-[11px] text-muted mt-4 leading-relaxed max-w-[30ch]">
+            What our validator sees for this mason, right now.
+          </p>
+        </div>
+        <div>
+          <div class="bands">
+            <div class="band">
+              <div class="k">Mining status</div>
+              <div class="v" data-mason="status-v">—</div>
+              <div class="sub" data-mason="status-sub">reading registry</div>
+            </div>
+            <div class="band">
+              <div class="k">Hardware</div>
+              <div class="v" data-mason="hardware-v">—</div>
+              <div class="sub" data-mason="hardware-sub">from declared node inventory</div>
+            </div>
+            <div class="band">
+              <div class="k">Verified since</div>
+              <div class="v" data-mason="verified-v">—</div>
+              <div class="sub" data-mason="verified-sub">timestamp surfaces as backend exposes it</div>
+            </div>
           </div>
-          <div class="band">
-            <div class="k">Hardware</div>
-            <div class="v" data-mason="hardware-v">—</div>
-            <div class="sub" data-mason="hardware-sub">from declared node inventory</div>
-          </div>
-          <div class="band">
-            <div class="k">Verified since</div>
-            <div class="v" data-mason="verified-v">—</div>
-            <div class="sub" data-mason="verified-sub">timestamp surfaces as backend exposes it</div>
+          <div class="bands mt-[1px]" style="margin-top: 12px;">
+            <div class="band">
+              <div class="k">CUs this week</div>
+              <div class="v" data-mason="cus-v">—</div>
+              <div class="sub">computing · streaming once scoring starts</div>
+            </div>
+            <div class="band">
+              <div class="k">On chain</div>
+              <div class="v" data-mason="chain-v">—</div>
+              <div class="sub" data-mason="chain-sub">uid · stake · axon</div>
+            </div>
+            <div class="band">
+              <div class="k">Registered with us</div>
+              <div class="v" data-mason="regus-v">—</div>
+              <div class="sub" data-mason="regus-sub">bid status · rental status</div>
+            </div>
           </div>
         </div>
-        <div class="bands mt-[1px]" style="margin-top: 12px;">
-          <div class="band">
-            <div class="k">CUs this week</div>
-            <div class="v" data-mason="cus-v">—</div>
-            <div class="sub">computing · streaming once scoring starts</div>
-          </div>
-          <div class="band">
-            <div class="k">On chain</div>
-            <div class="v" data-mason="chain-v">—</div>
-            <div class="sub" data-mason="chain-sub">uid · stake · axon</div>
-          </div>
-          <div class="band">
-            <div class="k">Registered with us</div>
-            <div class="v" data-mason="regus-v">—</div>
-            <div class="sub" data-mason="regus-sub">bid status · rental status</div>
-          </div>
-        </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <section class="sec">
-    <div class="wrap">
-      <div>
-        <div class="eyebrow"><span class="num">02</span><span>Embed</span></div>
-        <p class="text-[11px] text-muted mt-4 leading-relaxed max-w-[28ch]">
-          Drop this into a README, blog, or profile. It points back at your
-          register entry — a shareable, permanent receipt.
-        </p>
-      </div>
-      <div>
-        <div class="badge-box">
-          <div class="label">Markdown</div>
-          <pre data-mason="embed-md">—</pre>
-          <div class="label mt-4">HTML</div>
-          <pre data-mason="embed-html">—</pre>
-          <div class="hint">
-            A real badge image endpoint is on the roadmap. Until then, the link
-            itself is the badge — a URL your verifier can click.
+    <section class="sec">
+      <div class="wrap">
+        <div>
+          <div class="eyebrow"><span class="num">02</span><span>Embed</span></div>
+          <p class="text-[11px] text-muted mt-4 leading-relaxed max-w-[28ch]">
+            A shareable, permanent receipt. Drop this into a README or profile.
+          </p>
+        </div>
+        <div>
+          <div class="badge-box">
+            <div class="label">Markdown</div>
+            <pre data-mason="embed-md">—</pre>
+            <div class="label mt-4">HTML</div>
+            <pre data-mason="embed-html">—</pre>
           </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <section class="sec">
-    <div class="wrap">
-      <div>
-        <div class="eyebrow"><span class="num">03</span><span>Elsewhere</span></div>
+    <section class="sec">
+      <div class="wrap">
+        <div>
+          <div class="eyebrow"><span class="num">03</span><span>Elsewhere</span></div>
+        </div>
+        <div class="foot-links">
+          <a href="/masons">← all masons</a>
+          <a href="/">cathedral.computer</a>
+          <a href="/afrotensor">become a mason</a>
+        </div>
       </div>
-      <div class="foot-links">
-        <a href="/masons">← all masons</a>
-        <a href="/">cathedral.computer</a>
-        <a href="/afrotensor">become a mason</a>
-      </div>
-    </div>
-  </section>
+    </section>
+  </div>
 
   <section class="py-8 flex justify-center text-dim">
     <RoseWindow size={28} airy={true} class="opacity-40" />
@@ -326,12 +324,15 @@ import RoseWindow from '../components/RoseWindow.astro'
       async function boot() {
         const hotkey = getHotkey()
         const pillsEl = document.querySelector('[data-mason="pills"]')
+        const body = document.querySelector('[data-mason-body]')
 
         if (!hotkey) {
           setHidden('[data-mason="missing"]', false)
           if (pillsEl) renderPills(pillsEl, [{ text: 'no hotkey', cls: 'unknown' }])
           setText('[data-mason="abbrev"]', '—')
           setText('[data-mason="full"]', '/mason?h=<hotkey>')
+          // Hide the evidence/embed/elsewhere scaffolding — nothing to show.
+          if (body) body.setAttribute('hidden', '')
           return
         }
 
@@ -356,6 +357,8 @@ import RoseWindow from '../components/RoseWindow.astro'
         if (!chainRow && !regRow) {
           setHidden('[data-mason="notfound"]', false)
           if (pillsEl) renderPills(pillsEl, [{ text: 'not found', cls: 'unknown' }])
+          // Hide the evidence/embed scaffolding — nothing to show.
+          if (body) body.setAttribute('hidden', '')
           return
         }
 

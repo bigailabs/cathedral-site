@@ -144,17 +144,12 @@ const CPU_TIERS = [
       <div>
         <p class="lede">Bring your stone.<br/><em>Cathedral is for home-ownable compute.</em></p>
         <p class="text-[12px] text-muted leading-relaxed max-w-[56ch] mt-4">
-          Consumer GPUs, workstations, Apple Silicon, DGX Spark, and plain CPUs. Each a stone in the wall.
-          Our validator — the master mason — inspects the hardware over SSH. You register, we verify, you earn.
+          Consumer GPUs, workstations, Apple Silicon, DGX Spark, plain CPUs. Our validator inspects the hardware over SSH. You register, we verify, you earn.
           <span class="tag beta">beta</span>
         </p>
-        <p class="text-[12px] text-muted leading-relaxed max-w-[56ch] mt-3">
-          If you're laying stone, you're a mason. Send a PR, write docs, carve a tool —
-          the fine work shows up on your ledger too.
-        </p>
         <p class="text-[11px] text-dim leading-relaxed mt-3">
-          New to this? The full arc, in plain language, lives on <a href="/afrotensor" class="text-muted hover:text-fg underline underline-offset-2 decoration-dim">/afrotensor</a>.
-          Looking to rent compute instead? <a href="https://polaris.computer" class="text-muted hover:text-fg underline underline-offset-2 decoration-dim">polaris.computer</a>.
+          New? Start on <a href="/afrotensor" class="text-muted hover:text-fg underline underline-offset-2 decoration-dim">/afrotensor</a>.
+          Renting compute? <a href="https://polaris.computer" class="text-muted hover:text-fg underline underline-offset-2 decoration-dim">polaris.computer</a>.
         </p>
       </div>
     </div>
@@ -234,16 +229,23 @@ btcli wallet new-hotkey  --wallet.name cathedral --wallet.hotkey default</pre>
             {GPU_TIERS.map((t) => (
               <tr>
                 <td class="name">{t.name}</td>
-                <td class="ex">{t.examples}<br/><span class="slug">{t.slug}</span></td>
+                <td class="ex">{t.examples}</td>
                 <td class="vram">{t.vram}</td>
                 <td class="price">{t.price}</td>
               </tr>
             ))}
           </tbody>
         </table>
+        <details class="mt-4">
+          <summary class="text-[10px] text-dim uppercase tracking-[0.18em] cursor-pointer hover:text-muted">Template keys</summary>
+          <div class="text-[10.5px] text-dim leading-relaxed mt-3" style="font-family: 'JetBrains Mono', monospace;">
+            {GPU_TIERS.map((t) => (
+              <div>{t.name} — {t.slug}</div>
+            ))}
+          </div>
+        </details>
         <p class="text-[11px] text-dim leading-relaxed mt-4 max-w-[64ch]">
-          A100, H100, H200, B200, MI300 etc. are rejected at registration. Operate one at home and want an exception?
-          <a href="https://github.com/bigailabs/cathedral/issues" class="text-muted hover:text-fg underline underline-offset-2 decoration-dim">Open an issue</a>.
+          A100, H100, H200, B200, MI300 etc. are rejected at registration. Operate one at home? <a href="https://github.com/bigailabs/cathedral/issues" class="text-muted hover:text-fg underline underline-offset-2 decoration-dim">Open an issue</a>.
         </p>
         <p class="text-[11px] text-warn leading-relaxed mt-2">Minimum VRAM floor: 7 GB.</p>
       </div>
@@ -265,15 +267,14 @@ btcli wallet new-hotkey  --wallet.name cathedral --wallet.hotkey default</pre>
             {CPU_TIERS.map((t) => (
               <tr>
                 <td class="name">{t.name}</td>
-                <td class="ex" colspan="2">{t.examples}<br/><span class="slug">{t.slug}</span></td>
+                <td class="ex" colspan="2">{t.examples}</td>
                 <td class="price">{t.price}</td>
               </tr>
             ))}
           </tbody>
         </table>
         <p class="text-[11px] text-muted leading-relaxed mt-4 max-w-[64ch]">
-          The validator probes CPU nodes with <code class="text-muted">lscpu</code> + <code class="text-muted">free -m</code> + <code class="text-muted">nproc</code>.
-          No <code class="text-muted">nvidia-smi</code>, no CUDA, no Docker required. Any cheap VPS with SSH access works.
+          The validator probes CPU nodes with <code class="text-muted">lscpu</code>, <code class="text-muted">free -m</code>, <code class="text-muted">nproc</code>. Any cheap VPS with SSH access works.
         </p>
       </div>
     </div>

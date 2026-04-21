@@ -126,8 +126,10 @@ import RoseWindow from '../components/RoseWindow.astro'
       .state-grid > * { min-height: 320px; }
     }
 
-    /* Honest numbers register */
-    .register { width: 100%; border-collapse: collapse; font-size: 12px; }
+    /* Honest numbers register. Overflow wrapper lets long value columns
+       scroll on narrow viewports instead of clipping. */
+    .register-wrap { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .register { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 560px; }
     .register th {
       text-align: left; padding: 10px 12px 10px 0;
       font-weight: 400; font-size: 9px;
@@ -201,13 +203,11 @@ import RoseWindow from '../components/RoseWindow.astro'
             A cathedral is a <span class="accent">commons</span>.
           </p>
           <p>
-            Walls you didn't build,<br/>
-            kept by hands you'll never meet.<br/>
             <em>The masons who laid the first stones<br/>knew they wouldn't see the spire.</em>
           </p>
           <p>
             We're building compute the same way.<br/>
-            In public, over time, for whoever needs it.
+            In public, for whoever needs it.
           </p>
         </div>
       </aside>
@@ -231,7 +231,7 @@ import RoseWindow from '../components/RoseWindow.astro'
           What's true today.<br/>Nothing more.
         </p>
       </div>
-      <div>
+      <div class="register-wrap">
         <table class="register">
           <thead>
             <tr>
@@ -267,19 +267,15 @@ import RoseWindow from '../components/RoseWindow.astro'
               <td class="r">—</td>
             </tr>
             <tr>
-              <td class="label">Masons declared on SN39</td>
-              <td class="status-ok">
-                On chain
-                <span class="ml-2 text-[9px] text-dim uppercase tracking-[0.12em] cursor-help" title="Declared = has an axon endpoint on chain. Cheap signal — doesn't mean the mason has ever contacted our validator.">· chain only</span>
-              </td>
+              <td class="label">Masons on chain</td>
+              <td class="status-ok" title="Declared = has an axon endpoint on chain. Cheap signal — doesn't mean the mason has contacted our validator.">Declared</td>
               <td class="r" data-val="miners-active">—</td>
               <td class="r">live</td>
             </tr>
             <tr>
-              <td class="label">Masons registered with us</td>
-              <td class="status-pending" data-val="miners-registered-status">
+              <td class="label">Registered with us</td>
+              <td class="status-pending" data-val="miners-registered-status" title="Mason has called RegisterBid on our validator with at least one node still active.">
                 <span data-val="miners-registered-label">—</span>
-                <span class="ml-2 text-[9px] text-dim uppercase tracking-[0.12em] cursor-help" title="Mason has called RegisterBid on our validator with at least one node still active (bid_active=1 or under rental).">· registered</span>
               </td>
               <td class="r" data-val="miners-registered">—</td>
               <td class="r">live</td>
@@ -287,17 +283,14 @@ import RoseWindow from '../components/RoseWindow.astro'
             <tr>
               <td class="label">Verified GPU nodes</td>
               <td class="status-pending" data-val="nodes-verified-status">
-                <span data-val="nodes-verified-label">0 — awaiting first</span>
+                <span data-val="nodes-verified-label">awaiting first</span>
               </td>
               <td class="r" data-val="nodes-verified">0</td>
               <td class="r">live</td>
             </tr>
             <tr>
-              <td class="label">GPU categories live</td>
-              <td class="status-pending">
-                Draft
-                <span class="ml-2 text-[9px] text-dim uppercase tracking-[0.12em]" title="Allow-list is a string match on nvidia-smi. Spoofable. See issue #24.">· spoofable</span>
-              </td>
+              <td class="label">GPU categories</td>
+              <td class="status-pending" title="Allow-list is a string match on nvidia-smi. Spoofable. See issue #24.">Draft</td>
               <td class="r">consumer + workstation</td>
               <td class="r">2026-04-18</td>
             </tr>

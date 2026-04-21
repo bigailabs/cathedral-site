@@ -116,9 +116,6 @@ import RoseWindow from '../components/RoseWindow.astro'
           The master mason's ledger.<br/>
           <em>Block, stake, masons, weights — what the validator sees, right now.</em>
         </p>
-        <p class="text-[11px] text-dim mt-4">
-          Raw log tape on <a href="/" class="text-muted hover:text-fg underline underline-offset-2 decoration-dim">the home page</a>.
-        </p>
       </div>
     </div>
   </section>
@@ -128,8 +125,7 @@ import RoseWindow from '../components/RoseWindow.astro'
       <div>
         <div class="eyebrow"><span class="num">01</span><span>Pipeline</span></div>
         <p class="text-[11px] text-muted mt-4 leading-relaxed max-w-[32ch]">
-          How a visitor becomes a mason, and a mason becomes a patron.
-          Aggregate across the subnet — not per account.
+          How a visitor becomes a mason. Aggregate, not per account. Refreshes every 10s.
         </p>
       </div>
       <div>
@@ -138,7 +134,6 @@ import RoseWindow from '../components/RoseWindow.astro'
             <div class="idx">01</div>
             <div>
               <span class="stage">Apprentice · signed up for Afrotensor</span>
-              <div class="note">A name and a country on the roster. The first commitment the work asks for.</div>
             </div>
             <div class="num-cell" data-pipe-num="apprentice">—</div>
           </div>
@@ -147,7 +142,6 @@ import RoseWindow from '../components/RoseWindow.astro'
             <div class="idx">02</div>
             <div>
               <span class="stage">Mason · SSH-verified by our validator</span>
-              <div class="note">Our validator has SSH'd the node and confirmed the hardware. The bid is real.</div>
             </div>
             <div class="num-cell" data-pipe-num="verified">—</div>
           </div>
@@ -155,8 +149,7 @@ import RoseWindow from '../components/RoseWindow.astro'
           <div class="pipeline-row" data-pipe-row="earning">
             <div class="idx">03</div>
             <div>
-              <span class="stage">Mason · earning CUs</span>
-              <div class="note">First rental received. Income has started. <span data-pipe-sub="earning-sub" class="sub"></span></div>
+              <span class="stage">Mason · earning CUs <span data-pipe-sub="earning-sub" class="sub" style="display:inline;margin:0"></span></span>
             </div>
             <div class="num-cell" data-pipe-num="earning">—</div>
           </div>
@@ -164,8 +157,7 @@ import RoseWindow from '../components/RoseWindow.astro'
           <div class="pipeline-row" data-pipe-row="ambassador">
             <div class="idx">04</div>
             <div>
-              <span class="stage">Ambassador · referred three apprentices</span>
-              <div class="note">Bringing others in. <span class="sub" style="display:inline;margin:0">not yet measurable</span></div>
+              <span class="stage">Ambassador · referred three apprentices <span class="sub" style="display:inline;margin:0">not yet measurable</span></span>
             </div>
             <div class="num-cell future" data-pipe-num="ambassador">—</div>
           </div>
@@ -173,8 +165,7 @@ import RoseWindow from '../components/RoseWindow.astro'
           <div class="pipeline-row" data-pipe-row="mentor">
             <div class="idx">05</div>
             <div>
-              <span class="stage">Mentor · answered in the Afrotensor threads</span>
-              <div class="note">Reading the comment history to find who helps whom. <span class="sub" style="display:inline;margin:0">rolling up</span></div>
+              <span class="stage">Mentor · answered in the Afrotensor threads <span class="sub" style="display:inline;margin:0">rolling up</span></span>
             </div>
             <div class="num-cell future" data-pipe-num="mentor">—</div>
           </div>
@@ -182,8 +173,7 @@ import RoseWindow from '../components/RoseWindow.astro'
           <div class="pipeline-row" data-pipe-row="patron">
             <div class="idx">06</div>
             <div>
-              <span class="stage">Patron · stake delegated to our validator</span>
-              <div class="note">Putting TAO behind the work. <span class="sub" style="display:inline;margin:0">awaiting delegator feed</span></div>
+              <span class="stage">Patron · stake delegated to our validator <span class="sub" style="display:inline;margin:0">awaiting delegator feed</span></span>
             </div>
             <div class="num-cell future" data-pipe-num="patron">—</div>
           </div>
@@ -191,17 +181,11 @@ import RoseWindow from '../components/RoseWindow.astro'
           <div class="pipeline-row" data-pipe-row="clerk">
             <div class="idx">07</div>
             <div>
-              <span class="stage">Clerk · running own validator, trusting ours</span>
-              <div class="note">Operators extending the cathedral. <span class="sub" style="display:inline;margin:0">future stage</span></div>
+              <span class="stage">Clerk · running own validator, trusting ours <span class="sub" style="display:inline;margin:0">future stage</span></span>
             </div>
             <div class="num-cell future" data-pipe-num="clerk">—</div>
           </div>
         </div>
-        <p class="text-[11px] text-dim mt-6 leading-relaxed max-w-[54ch]">
-          Counts refresh every 10 seconds. Figures in slate are live.
-          Figures in amber mean the stage is measurable but empty today.
-          Figures in grey are stages we haven't instrumented yet.
-        </p>
       </div>
     </div>
   </section>
@@ -241,8 +225,7 @@ import RoseWindow from '../components/RoseWindow.astro'
       <div>
         <div class="eyebrow"><span class="num">03</span><span>Permit progress</span></div>
         <p class="lede mt-4 text-[15px]">
-          Top 14 by stake set weights.<br/>
-          <em>We're not there yet.</em>
+          <em>Top 14 by stake set weights.</em>
         </p>
       </div>
       <div>
@@ -267,9 +250,7 @@ import RoseWindow from '../components/RoseWindow.astro'
       <div>
         <div class="eyebrow"><span class="num">04</span><span>Registered masons</span></div>
         <p class="text-[11px] text-muted mt-4 leading-relaxed max-w-[32ch]">
-          Masons currently registered with our validator — not just declared
-          on chain. Verified means our validator has SSH'd in and confirmed
-          the hardware; registered means bid accepted, awaiting first verify.
+          Registered with our validator — not just declared on chain. Verified means SSH-confirmed.
         </p>
       </div>
       <div>

@@ -25,18 +25,19 @@ import RoseWindow from '../../components/RoseWindow.astro'
     }
     .lede em { font-style: italic; color: var(--muted); }
 
-    /* Stat triptych */
-    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border: 1px solid var(--border); }
-    .stats > div { padding: 16px; border-right: 1px solid var(--border); }
-    .stats > div:last-child { border-right: 0; }
-    @media (max-width: 700px) {
-      .stats { grid-template-columns: 1fr; }
-      .stats > div { border-right: 0; border-bottom: 1px solid var(--border); }
-      .stats > div:last-child { border-bottom: 0; }
+    /* One-line tally — no triple-card when all figures are zero/dashes. */
+    .tally {
+      margin-top: 20px;
+      font-size: 12px;
+      color: var(--muted);
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.02em;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
     }
-    .stats .k { font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.15em; }
-    .stats .v { font-size: 22px; color: var(--fg); font-weight: 300; font-variant-numeric: tabular-nums; margin-top: 4px; }
-    .stats .sub { font-size: 10px; color: var(--dim); margin-top: 2px; }
+    .tally .n { color: var(--fg); }
+    .tally .sep { color: var(--dim); }
 
     /* Mason cards — a register, not a showroom */
     .mason-grid {
@@ -77,27 +78,6 @@ import RoseWindow from '../../components/RoseWindow.astro'
     }
     .mason a.permalink:hover { color: var(--fg); }
 
-    /* Evidence strip — three streams across the bottom */
-    .evidence {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px;
-      background: var(--border-soft); border: 1px solid var(--border-soft);
-    }
-    @media (max-width: 800px) { .evidence { grid-template-columns: 1fr; } }
-    .evidence .stream { background: var(--bg); padding: 20px; min-height: 160px; }
-    .evidence .stream .head {
-      font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--dim);
-      display: flex; align-items: center; gap: 8px; margin-bottom: 14px;
-    }
-    .evidence .stream .head .tag {
-      font-size: 9px; color: var(--muted); border: 1px solid var(--border);
-      padding: 1px 6px; letter-spacing: 0.1em;
-    }
-    .evidence .stream .tiers { display: flex; flex-direction: column; gap: 6px; }
-    .evidence .stream .tier { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; font-size: 11px; }
-    .evidence .stream .tier .label { color: var(--muted); }
-    .evidence .stream .tier .val { color: var(--fg); font-variant-numeric: tabular-nums; }
-    .evidence .stream .tier.dim .val { color: var(--dim); }
-
     .cta-band { padding: 36px 0; text-align: center; }
     .cta-band a {
       display: inline-block; border: 1px solid var(--accent); color: var(--accent);
@@ -122,23 +102,13 @@ import RoseWindow from '../../components/RoseWindow.astro'
           The register of masons laying stone on cathedral.<br/>
           <em>Each entry a verified hand, named on chain.</em>
         </p>
-        <div class="stats mt-6">
-          <div>
-            <div class="k">Verified</div>
-            <div class="v" data-stat="verified-count">—</div>
-            <div class="sub">SSH-confirmed by our validator</div>
-          </div>
-          <div>
-            <div class="k">Apprentices</div>
-            <div class="v" data-stat="apprentice-count">—</div>
-            <div class="sub">registered · awaiting first verify</div>
-          </div>
-          <div>
-            <div class="k">Countries</div>
-            <div class="v" data-stat="country-count">—</div>
-            <div class="sub">where stones are being laid</div>
-          </div>
-        </div>
+        <p class="tally">
+          <span><span class="n" data-stat="verified-count">—</span> verified</span>
+          <span class="sep">·</span>
+          <span><span class="n" data-stat="apprentice-count">—</span> apprentices</span>
+          <span class="sep">·</span>
+          <span><span class="n" data-stat="country-count">—</span> countries</span>
+        </p>
       </div>
     </div>
   </section>
@@ -148,8 +118,7 @@ import RoseWindow from '../../components/RoseWindow.astro'
       <div>
         <div class="eyebrow"><span class="num">01</span><span>Founding masons</span></div>
         <p class="text-[11px] text-muted mt-4 leading-relaxed max-w-[32ch]">
-          The first ten to verify. A permanent designation — the hands that
-          laid the first stones. Order by verification timestamp, ascending.
+          The first ten to verify. A permanent designation.
         </p>
       </div>
       <div>
@@ -171,8 +140,7 @@ import RoseWindow from '../../components/RoseWindow.astro'
       <div>
         <div class="eyebrow"><span class="num">02</span><span>All masons</span></div>
         <p class="text-[11px] text-muted mt-4 leading-relaxed max-w-[32ch]">
-          Verified masons first, apprentices below. Each entry links to a
-          permanent per-mason page at /mason?h=…
+          Verified first, apprentices below. Each entry links to its register page.
         </p>
       </div>
       <div>
@@ -182,86 +150,6 @@ import RoseWindow from '../../components/RoseWindow.astro'
               <span class="uid">loading…</span>
             </div>
             <div class="meta">Reading from the validator registry.</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="sec">
-    <div class="wrap">
-      <div>
-        <div class="eyebrow"><span class="num">03</span><span>Evidence</span></div>
-        <p class="text-[11px] text-muted mt-4 leading-relaxed max-w-[32ch]">
-          Three streams of proof, aggregated across the register.
-          No marketing numbers. If we don't have it, it reads " — ".
-        </p>
-      </div>
-      <div>
-        <div class="evidence">
-          <div class="stream">
-            <div class="head">
-              <span>Mining</span>
-              <span class="tag" data-stat="mining-tag">live</span>
-            </div>
-            <div class="tiers">
-              <div class="tier">
-                <span class="label">declared on chain</span>
-                <span class="val" data-stat="tier-declared">—</span>
-              </div>
-              <div class="tier">
-                <span class="label">registered with us</span>
-                <span class="val" data-stat="tier-registered">—</span>
-              </div>
-              <div class="tier">
-                <span class="label">verified</span>
-                <span class="val" data-stat="tier-verified">—</span>
-              </div>
-              <div class="tier dim">
-                <span class="label">scoring</span>
-                <span class="val">parked · below permit</span>
-              </div>
-            </div>
-          </div>
-          <div class="stream">
-            <div class="head">
-              <span>Work</span>
-              <span class="tag" data-stat="work-tag">computing</span>
-            </div>
-            <div class="tiers">
-              <div class="tier">
-                <span class="label">nodes live</span>
-                <span class="val" data-stat="work-nodes">—</span>
-              </div>
-              <div class="tier">
-                <span class="label">GPU count</span>
-                <span class="val" data-stat="work-gpus">—</span>
-              </div>
-              <div class="tier dim">
-                <span class="label">CUs this week</span>
-                <span class="val" data-stat="work-cus">—</span>
-              </div>
-            </div>
-          </div>
-          <div class="stream">
-            <div class="head">
-              <span>Community</span>
-              <span class="tag" data-stat="community-tag">computing</span>
-            </div>
-            <div class="tiers">
-              <div class="tier">
-                <span class="label">apprentices</span>
-                <span class="val" data-stat="community-apprentices">—</span>
-              </div>
-              <div class="tier">
-                <span class="label">verified masons</span>
-                <span class="val" data-stat="community-verified">—</span>
-              </div>
-              <div class="tier dim">
-                <span class="label">conversion</span>
-                <span class="val" data-stat="community-conversion">—</span>
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -502,28 +390,11 @@ import RoseWindow from '../../components/RoseWindow.astro'
           }
         }
 
-        // Evidence strip
-        setText('[data-stat="tier-declared"]', (summary.active_miners != null ? summary.active_miners : '—').toString())
-        setText('[data-stat="tier-registered"]', (regData.miners_with_nodes != null ? regData.miners_with_nodes : '—').toString())
-        setText('[data-stat="tier-verified"]', (regData.nodes_verified != null ? regData.nodes_verified : '—').toString())
-
-        const nodesRegistered = regData.nodes_registered != null ? regData.nodes_registered : (machList.length || 0)
-        const gpuCount = machList.reduce((acc, x) => acc + (x.is_cpu_only ? 0 : (x.gpu_count || 0)), 0)
-        setText('[data-stat="work-nodes"]', nodesRegistered ? nodesRegistered.toString() : '—')
-        setText('[data-stat="work-gpus"]', gpuCount ? gpuCount.toString() : '—')
-        setText('[data-stat="work-cus"]', '—')
-
-        const apprenticeCount = apprenticeEnriched.length
-        const verifiedCount = verifiedEnriched.length
-        setText('[data-stat="community-apprentices"]', apprenticeCount.toString())
-        setText('[data-stat="community-verified"]', verifiedCount.toString())
-        const denom = apprenticeCount + verifiedCount
-        if (denom > 0) {
-          const pct = Math.round((verifiedCount / denom) * 100)
-          setText('[data-stat="community-conversion"]', pct + '%')
-        } else {
-          setText('[data-stat="community-conversion"]', '—')
-        }
+        // Evidence strip removed — the all-masons cards carry the signal.
+        // Suppress unused lint warnings for now-dormant locals.
+        void summary
+        void regData
+        void machList
       }
 
       refresh()
