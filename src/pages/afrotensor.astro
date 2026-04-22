@@ -286,17 +286,40 @@ try {
        Signup form — sits inside the numbered hero block.
        All colours via tokens so both themes read right.
        ----------------------------------------------------------- */
-    .signup { max-width: 520px; }
+    .signup { max-width: 520px; margin: 0 auto; }
     .signup .lede-form {
       font-family: var(--font-serif, 'Newsreader', serif);
-      font-size: 22px; font-weight: 300; line-height: 1.4;
+      font-size: 20px; font-weight: 300; line-height: 1.35;
       color: var(--fg); margin: 0 0 6px 0;
     }
     .signup .lede-form em { color: var(--muted); font-style: italic; }
     .signup .intro {
-      font-size: 12.5px; line-height: 1.7; color: var(--muted);
-      margin: 6px 0 22px 0; max-width: min(60ch, 100%);
+      font-size: 12px; line-height: 1.6; color: var(--muted);
+      margin: 4px 0 20px 0; max-width: min(62ch, 100%);
+      text-wrap: balance;
     }
+    .signup .lede-form,
+    .signup .intro { text-align: center; }
+    .signup .reveal-wrap {
+      display: flex; justify-content: center; margin: 8px 0 22px 0;
+    }
+    .signup .reveal-signup {
+      display: inline-block;
+      padding: 12px 20px;
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+      background: transparent; color: var(--accent);
+      border: 1px solid var(--accent);
+      border-radius: 2px;
+      cursor: pointer;
+      transition: background 120ms ease, color 120ms ease;
+    }
+    .signup .reveal-signup:hover {
+      background: var(--accent-dim); color: var(--fg);
+    }
+    .signup[data-signup-collapsed="true"] form { display: none; }
+    .signup[data-signup-collapsed="true"] .reveal-wrap { display: flex; }
+    .signup[data-signup-collapsed="false"] .reveal-wrap { display: none; }
 
     .signup form { display: block; }
     .signup .field { display: block; margin-bottom: 16px; }
@@ -420,6 +443,20 @@ try {
       text-decoration-color: var(--dim); text-underline-offset: 2px;
     }
     .signup .thanks a:hover { text-decoration-color: var(--accent); }
+    .signup .signed-in-state {
+      display: none; margin-top: 14px; padding: 12px 14px;
+      border-left: 2px solid var(--ok); background: var(--ok-dim);
+      font-size: 12px; line-height: 1.6; color: var(--fg);
+    }
+    .signup .signed-in-state.show { display: block; }
+    .signup .signed-in-state .who {
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--dim); margin-bottom: 4px;
+    }
+    .signup .signed-in-state a {
+      color: var(--accent); text-decoration: underline; text-underline-offset: 2px;
+    }
 
     .callout { border-left: 2px solid var(--accent); background: var(--accent-dim); padding: 14px 16px; font-size: 13px; color: var(--fg); line-height: 1.7; max-width: min(60ch, 100%); }
     .callout.ok { border-color: var(--ok); background: var(--ok-dim); }
@@ -487,10 +524,7 @@ try {
     /* Journal — one place to read/leave notes, keyed by stage. Replaces
        the per-stage note affordance which was repetitive by step 03. */
     .journal { max-width: min(60ch, 100%); }
-    .journal .tabs {
-      display: flex; flex-wrap: wrap; gap: 6px;
-      margin-bottom: 16px;
-    }
+    .journal .tabs { display: none; }
     .journal .tab {
       font: inherit; cursor: pointer;
       padding: 6px 10px;
@@ -568,6 +602,120 @@ try {
     wouldn't match them.
   -->
   <style is:global>
+    html[data-afro-journey="locked"] .sec {
+      padding-top: 22px;
+      padding-bottom: 22px;
+    }
+    html[data-afro-journey="locked"] #intro .wrap {
+      grid-template-columns: 1fr;
+      gap: 8px;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    html[data-afro-journey="locked"] #intro { border-bottom: 0; padding-bottom: 6px; }
+    html[data-afro-journey="locked"] #intro .eyebrow-stack {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 8px;
+    }
+    html[data-afro-journey="locked"] #intro .eyebrow {
+      display: none;
+    }
+    html[data-afro-journey="locked"] #intro .plate.wide {
+      margin: 0 auto 10px auto;
+      max-width: 640px;
+    }
+    html[data-afro-journey="locked"] #intro .plate.wide img {
+      max-height: 280px;
+      object-fit: cover;
+      filter: saturate(0.82) contrast(0.94) brightness(0.86);
+    }
+    html[data-afro-journey="locked"] #intro .plate.wide .cap {
+      text-align: center;
+      color: var(--muted);
+    }
+    html[data-afro-journey="locked"] #intro .prose,
+    html[data-afro-journey="locked"] #intro .live-masons {
+      display: none;
+    }
+    html[data-afro-journey="locked"] #intro .lede {
+      text-align: center;
+      margin: 0 auto;
+      font-size: 34px;
+      line-height: 1.28;
+    }
+    html[data-afro-journey="locked"] #signup {
+      padding-top: 0;
+      padding-bottom: 26px;
+    }
+    html[data-afro-journey="locked"] #signup .wrap {
+      grid-template-columns: 1fr;
+      gap: 4px;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    html[data-afro-journey="locked"] #signup .wrap > div:first-child {
+      display: none;
+    }
+    html[data-afro-journey="locked"] #signup .signup {
+      margin-top: 0;
+    }
+    html[data-afro-journey="locked"] [data-locked-stepbar] {
+      display: flex;
+    }
+    [data-locked-stepbar] {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      margin: 0 0 12px 0;
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    html[data-afro-journey="locked"] [data-journey-locked-hide] {
+      display: none;
+    }
+    html[data-afro-journey="locked"] #work .stage-indicator .pip:not([data-stage-link="1"]) {
+      opacity: 0.35; pointer-events: none;
+    }
+    html[data-afro-journey="locked"] #work .stage-nav .next {
+      opacity: 0.5; pointer-events: none;
+    }
+    html[data-afro-journey="locked"] #journal {
+      display: none;
+    }
+    html[data-afro-journey="locked"] .auth-widget {
+      color: var(--fg);
+      opacity: 0.95;
+    }
+    html[data-afro-journey="locked"] .auth-widget .sign-in {
+      color: var(--fg);
+      border-color: var(--accent);
+      background: var(--accent-dim);
+    }
+    html[data-afro-journey="locked"] .auth-widget .sign-in:hover {
+      color: var(--fg);
+      border-color: var(--accent);
+      filter: brightness(1.05);
+    }
+    html[data-afro-journey="locked"] #signup .signup .lede-form {
+      color: var(--fg);
+    }
+    html[data-afro-journey="locked"] #signup .signup .lede-form em {
+      color: var(--fg);
+      opacity: 0.82;
+    }
+    html[data-afro-journey="locked"] #signup .signup .intro {
+      color: var(--muted);
+      opacity: 0.95;
+    }
+    html[data-afro-journey="locked"] #signup .signup .reveal-signup {
+      color: var(--fg);
+      border-color: var(--accent);
+      background: var(--accent-dim);
+    }
     .auth-widget {
       display: flex; align-items: center; gap: 10px;
       font-size: 11px; color: var(--muted);
@@ -671,24 +819,33 @@ try {
     .login-card .status.err { color: var(--err); }
   </style>
 
+  <script is:inline>
+    (function () {
+      var signed = false
+      try { signed = localStorage.getItem('afrotensor_signed_up_v1') === '1' } catch (_) {}
+      document.documentElement.setAttribute('data-afro-journey', signed ? 'open' : 'locked')
+    })()
+  </script>
+
   <!-- 00 — Hero -->
-  <section class="sec">
+  <section class="sec" id="intro">
     <div class="wrap">
       <div class="eyebrow-stack">
         <div class="eyebrow"><span class="num">00</span><span>Afrotensor</span></div>
         <div id="auth-widget" class="auth-widget" data-state="loading">
-          <span>checking…</span>
+          <span>sign in with Polaris</span>
         </div>
       </div>
       <div>
         <figure class="plate wide">
           <img
+            id="afro-hero-image"
             src="/images/lalibela-hero.jpg"
-            alt="Bete Giyorgis — the rock-hewn Church of Saint George, Lalibela, Ethiopia — seen from the northeast"
-            width="1200" height="830"
+            alt="Bete Giyorgis, Lalibela, Ethiopia, seen from the northeast"
+            width="1200" height="793"
             loading="eager" decoding="async"
           />
-          <figcaption class="cap">
+          <figcaption class="cap" id="afro-hero-caption">
             Bete Giyorgis, Lalibela — carved down into the rock, one chisel-stroke at a time.
           </figcaption>
         </figure>
@@ -727,11 +884,17 @@ try {
         </p>
       </div>
       <div>
+        <div data-locked-stepbar aria-hidden="true">
+          step 1 of 2
+        </div>
         <div class="signup" data-api-base={API_BASE}>
-          <p class="lede-form">Leave your mark.<br/><em>Sign the ledger and take up a chisel.</em></p>
+          <p class="lede-form">Start here.<br/><em>Sign the ledger in one minute.</em></p>
           <p class="intro">
-            No spam. We'll get back to you with the next steps.
+            We save your place and unlock the full journey immediately.
           </p>
+          <div class="reveal-wrap">
+            <button type="button" class="reveal-signup" data-signup-reveal>Start now</button>
+          </div>
 
           <form id="cathedral-signup-form" novalidate>
             <div class="field" data-field="name">
@@ -775,20 +938,27 @@ try {
               <div class="err-msg">One sentence is enough.</div>
             </div>
 
-            <button type="submit">Take up a chisel</button>
+            <button type="submit">Sign the ledger</button>
             <div class="form-error" role="alert"></div>
           </form>
 
           <div class="thanks" role="status" aria-live="polite">
             <p>Your mark is on the ledger.<br/><em>Welcome, mason.</em></p>
             <p style="font-size: 13px; line-height: 1.7; color: var(--muted); font-family: inherit; margin-top: 14px;">
-              We'll be in touch with the next steps. In the meantime:
+              Journey start. Do these now, in order:
             </p>
             <ul>
-              <li>Read <a href="#work">the work</a> — the eight stones you'll lay.</li>
-              <li>Browse <a href={LINKS.mine}>the mine page</a> for hardware specs and the cut list.</li>
-              <li>Open <a href={LINKS.polaris}>polaris.computer</a> to claim a guild ledger.</li>
+              <li><strong>Open <a href={LINKS.polaris}>polaris.computer</a></strong> and set your handle.</li>
+              <li><strong>Start <a href="#work">stone 1</a></strong> and complete one task in under 10 minutes.</li>
+              <li><strong>Open <a href={LINKS.mine}>the mine page</a></strong> and copy the setup commands for stones 2 to 6.</li>
             </ul>
+          </div>
+          <div class="signed-in-state" data-signup-authed aria-live="polite">
+            <div class="who">signed in</div>
+            <div>
+              <span data-signup-name>mason</span>, your journey is unlocked.
+              Continue with <a href="#work">stone 1</a> or jump to <a href="#journal">the journal</a>.
+            </div>
           </div>
         </div>
       </div>
@@ -796,7 +966,7 @@ try {
   </section>
 
   <!-- 02 — How they meet: yard + guild + flow of work and pay. -->
-  <section class="sec">
+  <section class="sec" data-journey-locked-hide>
     <div class="wrap">
       <div>
         <div class="eyebrow"><span class="num">02</span><span>How they meet</span></div>
@@ -835,7 +1005,7 @@ try {
   </section>
 
   <!-- 03 — The work: eight stones, stepped through one at a time. -->
-  <section class="sec" id="work">
+  <section class="sec" id="work" data-journey-locked-hide>
     <div class="wrap">
       <div>
         <div class="eyebrow"><span class="num">03</span><span>The work</span></div>
@@ -861,108 +1031,110 @@ try {
         <div class="stage" data-stage="1">
           <div class="n">01</div>
           <div>
-            <h3>Open a guild ledger on Polaris.</h3>
-            <p class="body">Your identity, balance, and access to every yard — free to join.</p>
+            <h3>Claim identity on Polaris.</h3>
+            <p class="body"><strong>Task:</strong> open Polaris, sign in, and set your handle. <strong>Done when:</strong> your handle appears on profile.</p>
             <div class="block link">
-              <span class="label">walk in</span>
+              <span class="label">open ledger</span>
               <a href={LINKS.polaris}>polaris.computer →</a>
             </div>
+            <p class="body" style="margin-top: 10px; font-size: 12px; color: var(--muted);"><strong>Artifact:</strong> your <code>@handle</code>.</p>
           </div>
         </div>
 
         <div class="stage" data-stage="2" data-stage-hidden="true">
           <div class="n">02</div>
           <div>
-            <h3>Cut your mark — create a wallet.</h3>
-            <p class="body">A wallet is your mason's mark; the subnet recognises your work by it.</p>
+            <h3>Prepare your toolchain.</h3>
+            <p class="body"><strong>Task:</strong> install <code>btcli</code> and create coldkey + hotkey. <strong>Done when:</strong> <code>btcli --version</code> works and keys are created.</p>
             <div class="block">
-              <span class="label">btcli · install first</span>
+              <span class="label">run these</span>
+              <code>btcli --version</code><br/>
               <code>btcli wallet new-coldkey --wallet.name cathedral</code><br/>
               <code>btcli wallet new-hotkey --wallet.name cathedral --wallet.hotkey default</code>
             </div>
             <div class="block link">
-              <span class="label">docs</span>
+              <span class="label">install docs</span>
               <a href={LINKS.btcliDocs}>installing btcli →</a>
             </div>
-            <p class="body" style="margin-top: 10px; font-size: 12px; color: var(--muted);">Write the mnemonic down. Lose it and your mark is gone.</p>
+            <p class="body" style="margin-top: 10px; font-size: 12px; color: var(--muted);"><strong>Artifact:</strong> keypair created and mnemonic stored offline.</p>
           </div>
         </div>
 
         <div class="stage" data-stage="3" data-stage-hidden="true">
           <div class="n">03</div>
           <div>
-            <h3>Take stone from the yard — claim test TAO.</h3>
-            <p class="body">Test TAO is free; about <code>0.001 τ</code> is plenty to register.</p>
+            <h3>Join the testnet path.</h3>
+            <p class="body"><strong>Task:</strong> fund your coldkey from faucet. <strong>Done when:</strong> balance is non-zero.</p>
             <div class="block link">
               <span class="label">faucet</span>
               <a href={LINKS.faucet}>app.minersunion.ai/testnet-faucet →</a>
             </div>
-            <p class="body" style="margin-top: 10px; font-size: 12px; color: var(--muted);">Paste the coldkey address from step 02; TAO arrives inside a minute.</p>
+            <p class="body" style="margin-top: 10px; font-size: 12px; color: var(--muted);"><strong>Artifact:</strong> faucet tx plus wallet balance output.</p>
           </div>
         </div>
 
         <div class="stage" data-stage="4" data-stage-hidden="true">
           <div class="n">04</div>
           <div>
-            <h3>Enter your name on the testnet roll.</h3>
-            <p class="body">Cathedral's apprentice yard is testnet SN292 — register your hotkey to prove your hands are steady.</p>
+            <h3>Register on testnet.</h3>
+            <p class="body"><strong>Task:</strong> register hotkey on SN292. <strong>Done when:</strong> you get a UID from btcli.</p>
             <div class="block">
               <span class="label">btcli</span>
               <code>btcli subnet register --wallet.name cathedral --wallet.hotkey default --netuid 292 --subtensor.network test</code>
             </div>
-            <p class="body" style="margin-top: 10px; font-size: 12px; color: var(--muted);">Costs ~0.0005 τ from the test TAO above. You receive a UID — your place on the roll.</p>
+            <p class="body" style="margin-top: 10px; font-size: 12px; color: var(--muted);"><strong>Artifact:</strong> UID + successful register output.</p>
           </div>
         </div>
 
         <div class="stage" data-stage="5" data-stage-hidden="true">
           <div class="n">05</div>
           <div>
-            <h3>Choose a stone — the hardware you'll run.</h3>
-            <p class="body">A humble stone — a laptop, cheap VPS, or desktop — is a full contribution; you don't need marble.</p>
+            <h3>Choose your hardware lane.</h3>
+            <p class="body"><strong>Task:</strong> pick one lane now: laptop, desktop GPU, VPS/cloud, or phone-only assistant flow. <strong>Done when:</strong> lane is chosen and specs are recorded.</p>
             <div class="block link">
-              <span class="label">the cut list</span>
+              <span class="label">tiers and specs</span>
               <a href={LINKS.minePath}>tiers and specs →</a>
             </div>
-            <p class="body" style="margin-top: 10px; font-size: 12px; color: var(--muted);">Any Ubuntu 22.04+ box with SSH works. Polaris can also rent you one by the hour while you learn.</p>
+            <p class="body" style="margin-top: 10px; font-size: 12px; color: var(--muted);"><strong>Artifact:</strong> chosen lane plus machine spec note.</p>
           </div>
         </div>
 
         <div class="stage" data-stage="6" data-stage-hidden="true">
           <div class="n">06</div>
           <div>
-            <h3>Raise the stone — run cathedral-miner.</h3>
-            <p class="body">Point the miner at testnet SN292 and start it; verification follows within ~15 min.</p>
+            <h3>Run your first miner action.</h3>
+            <p class="body"><strong>Task:</strong> start cathedral miner on SN292. <strong>Done when:</strong> first healthy miner logs appear.</p>
             <div class="block link">
-              <span class="label">build steps</span>
+              <span class="label">runbook</span>
               <a href={LINKS.mine}>the mine page →</a>
             </div>
-            <p class="body" style="margin-top: 10px; font-size: 12px; color: var(--muted);">You appear on the register as <strong style="color: var(--accent);">recognised</strong>, then marked <strong style="color: var(--ok);">verified</strong> once the master mason inspects the work.</p>
+            <p class="body" style="margin-top: 10px; font-size: 12px; color: var(--muted);"><strong>Artifact:</strong> first 5 to 10 miner log lines.</p>
           </div>
         </div>
 
         <div class="stage" data-stage="7" data-stage-hidden="true">
           <div class="n">07</div>
           <div>
-            <h3>Step up to the main yard.</h3>
-            <p class="body">When your testnet stone holds, register the same hotkey on SN39 mainnet — real burn around <code>0.004 τ</code>.</p>
+            <h3>Verify in registry and step to mainnet.</h3>
+            <p class="body"><strong>Task:</strong> confirm testnet presence, then register same hotkey on SN39 when ready. <strong>Done when:</strong> your key is visible and mainnet register command succeeds.</p>
             <div class="block">
               <span class="label">btcli · mainnet</span>
               <code>btcli subnet register --wallet.name cathedral --wallet.hotkey default --netuid 39 --subtensor.network finney</code>
             </div>
-            <p class="body" style="margin-top: 10px; font-size: 12px; color: var(--muted);">Emissions are parked below the permit stake; your compute units accrue from the moment you're verified and convert to flow when the gate opens.</p>
+            <p class="body" style="margin-top: 10px; font-size: 12px; color: var(--muted);"><strong>Artifact:</strong> explorer or register proof link.</p>
           </div>
         </div>
 
         <div class="stage" data-stage="8" data-stage-hidden="true">
           <div class="n">08</div>
           <div>
-            <h3>Build on what others have built.</h3>
-            <p class="body">Once a mason, also a user — rent a GPU, deploy an agent, run inference on another mason's stone.</p>
+            <h3>Leave a mason note and build upward.</h3>
+            <p class="body"><strong>Task:</strong> post one note about what worked and what blocked you, then launch one Polaris workload. <strong>Done when:</strong> note is public and first workload is live.</p>
             <div class="block link">
-              <span class="label">build above</span>
+              <span class="label">launch on polaris</span>
               <a href={LINKS.polaris}>polaris.computer →</a>
             </div>
-            <p class="body" style="margin-top: 10px; font-size: 12px; color: var(--muted);">Cathedral is the base course; Polaris is everything built above.</p>
+            <p class="body" style="margin-top: 10px; font-size: 12px; color: var(--muted);"><strong>Artifact:</strong> public journal note plus one deployment URL or id.</p>
           </div>
         </div>
 
@@ -970,7 +1142,7 @@ try {
              whichever stage is currently active. -->
         <div class="stage-nav" data-stage-nav>
           <button type="button" data-stage-prev>&larr; previous</button>
-          <button type="button" class="next" data-stage-next>mark complete + next &rarr;</button>
+          <button type="button" class="next" data-stage-next>complete task + next &rarr;</button>
           <span class="spacer"></span>
           <span class="progress" data-stage-progress>stage 1 of 8</span>
         </div>
@@ -979,7 +1151,7 @@ try {
   </section>
 
   <!-- 04 — Mason's journal. One place for notes, not one per stage. -->
-  <section class="sec" id="journal">
+  <section class="sec" id="journal" data-journey-locked-hide>
     <div class="wrap">
       <div>
         <div class="eyebrow"><span class="num">04</span><span>Mason's journal</span></div>
@@ -1024,7 +1196,7 @@ try {
   </section>
 
   <!-- 05 — The yard & the guild (cards left untouched per brief). -->
-  <section class="sec">
+  <section class="sec" data-journey-locked-hide>
     <div class="wrap">
       <div>
         <div class="eyebrow"><span class="num">05</span><span>The yard &amp; the guild</span></div>
@@ -1070,7 +1242,7 @@ try {
   </section>
 
   <!-- 06 — Support & community. -->
-  <section class="sec">
+  <section class="sec" data-journey-locked-hide>
     <div class="wrap">
       <div>
         <div class="eyebrow"><span class="num">06</span><span>Support &amp; community</span></div>
@@ -1091,7 +1263,7 @@ try {
 
   <!-- 07 — Image attributions. Every photograph on this site ships with
        a source and a license. If we can't verify it, we don't use it. -->
-  <section class="sec">
+  <section class="sec" data-journey-locked-hide>
     <div class="wrap">
       <div>
         <div class="eyebrow"><span class="num">07</span><span>Image credits</span></div>
@@ -1120,7 +1292,21 @@ try {
       var apiBase = root.getAttribute('data-api-base') || 'https://api.polaris.computer'
       var formError = root.querySelector('.form-error')
       var thanks = root.querySelector('.thanks')
+      var revealBtn = root.querySelector('[data-signup-reveal]')
       var submitBtn = form.querySelector('button[type="submit"]')
+
+      function setCollapsed(on) {
+        root.setAttribute('data-signup-collapsed', on ? 'true' : 'false')
+      }
+
+      if (!root.hasAttribute('data-signup-collapsed')) setCollapsed(true)
+      if (revealBtn) {
+        revealBtn.addEventListener('click', function () {
+          setCollapsed(false)
+          var first = form.querySelector('input[name="name"]')
+          if (first) first.focus()
+        })
+      }
 
       // Required text fields. Hardware is validated separately (radio group).
       var TEXT_FIELDS = ['name', 'email', 'country', 'excites', 'blocker']
@@ -1214,7 +1400,13 @@ try {
             return
           }
 
-          // Success — swap the form for the thank-you panel.
+          // Success — persist "signed up" and swap form for thank-you panel.
+          try {
+            localStorage.setItem('afrotensor_signed_up_v1', '1')
+            document.documentElement.setAttribute('data-afro-journey', 'open')
+            window.dispatchEvent(new CustomEvent('afro:signup-complete'))
+          } catch (_) {}
+          setCollapsed(false)
           form.style.display = 'none'
           if (thanks) thanks.classList.add('show')
           if (thanks && 'scrollIntoView' in thanks) {
@@ -1248,6 +1440,7 @@ try {
     (function () {
       var STAGE_COUNT = 8
       var LOCAL_PROGRESS_KEY = 'afrotensor_progress_v1' // same key as progression script
+      var locked = document.documentElement.getAttribute('data-afro-journey') === 'locked'
       var stages = document.querySelectorAll('#work [data-stage]')
       if (!stages.length) return
       var pips = document.querySelectorAll('[data-stage-link]')
@@ -1265,6 +1458,7 @@ try {
       }
 
       function pickDefaultStage() {
+        if (locked) return 1
         var params = new URLSearchParams(window.location.search)
         var requested = parseInt(params.get('s') || '0', 10)
         if (requested >= 1 && requested <= STAGE_COUNT) return requested
@@ -1281,6 +1475,8 @@ try {
         var done = loadProgress()
         pips.forEach(function (pip) {
           var s = parseInt(pip.getAttribute('data-stage-link'), 10)
+          if (locked && s > 1) pip.setAttribute('disabled', 'true')
+          else pip.removeAttribute('disabled')
           if (s === activeStage) pip.setAttribute('aria-current', 'step')
           else pip.removeAttribute('aria-current')
           pip.classList.toggle('is-complete', done.has(s))
@@ -1290,10 +1486,11 @@ try {
       function syncNavButtons() {
         if (prevBtn) prevBtn.disabled = activeStage <= 1
         if (nextBtn) {
+          nextBtn.disabled = !!locked
           if (activeStage >= STAGE_COUNT) {
-            nextBtn.textContent = 'mark complete ✓'
+            nextBtn.textContent = 'complete task ✓'
           } else {
-            nextBtn.textContent = 'mark complete + next →'
+            nextBtn.textContent = 'complete task + next →'
           }
         }
         if (progressLbl) progressLbl.textContent = 'stage ' + activeStage + ' of ' + STAGE_COUNT
@@ -1309,6 +1506,7 @@ try {
 
       function setActive(step, opts) {
         opts = opts || {}
+        if (locked && step > 1) step = 1
         if (step < 1) step = 1
         if (step > STAGE_COUNT) step = STAGE_COUNT
         activeStage = step
@@ -1339,6 +1537,11 @@ try {
       pips.forEach(function (pip) {
         pip.addEventListener('click', function () {
           var s = parseInt(pip.getAttribute('data-stage-link'), 10)
+          if (locked && s > 1) {
+            var signup = document.getElementById('signup')
+            if (signup && 'scrollIntoView' in signup) signup.scrollIntoView({ behavior: 'smooth', block: 'start' })
+            return
+          }
           if (s) setActive(s)
         })
       })
@@ -1385,6 +1588,11 @@ try {
       window.__afroStep = {
         setActive: setActive,
         syncIndicator: syncIndicator,
+        setLocked: function (v) {
+          locked = !!v
+          if (locked && activeStage > 1) activeStage = 1
+          setActive(activeStage, { scroll: false })
+        },
         get activeStage() { return activeStage },
       }
 
@@ -1447,8 +1655,48 @@ try {
     const $$ = (sel, root) => Array.from((root || document).querySelectorAll(sel))
 
     const authWidget = $('#auth-widget')
+    const signupRoot = $('.signup')
+    const signupForm = signupRoot ? signupRoot.querySelector('#cathedral-signup-form') : null
+    const signupThanks = signupRoot ? signupRoot.querySelector('.thanks') : null
+    const signupAuthed = signupRoot ? signupRoot.querySelector('[data-signup-authed]') : null
+    const signupAuthedName = signupRoot ? signupRoot.querySelector('[data-signup-name]') : null
+    const signupReveal = signupRoot ? signupRoot.querySelector('[data-signup-reveal]') : null
     const loginModal = $('#login-modal')
     const loginStatus = $('#login-status')
+
+    function hasSignedMarker() {
+      try { return localStorage.getItem('afrotensor_signed_up_v1') === '1' } catch (_) { return false }
+    }
+
+    function applyJourneyGate(locked) {
+      document.documentElement.setAttribute('data-afro-journey', locked ? 'locked' : 'open')
+      if (window.__afroStep && typeof window.__afroStep.setLocked === 'function') {
+        window.__afroStep.setLocked(locked)
+      }
+    }
+
+    function setSignupState(mode, displayName) {
+      if (!signupRoot) return
+      if (signupAuthedName) signupAuthedName.textContent = displayName || 'mason'
+      if (signupReveal) signupReveal.hidden = true
+      signupRoot.setAttribute('data-signup-collapsed', 'false')
+      if (mode === 'authed') {
+        if (signupForm) signupForm.style.display = 'none'
+        if (signupThanks) signupThanks.classList.remove('show')
+        if (signupAuthed) signupAuthed.classList.add('show')
+        return
+      }
+      if (signupAuthed) signupAuthed.classList.remove('show')
+      if (mode === 'signed') {
+        if (signupForm) signupForm.style.display = 'none'
+        if (signupThanks) signupThanks.classList.add('show')
+      } else {
+        if (signupForm) signupForm.style.display = 'block'
+        if (signupThanks) signupThanks.classList.remove('show')
+        if (signupReveal) signupReveal.hidden = false
+        signupRoot.setAttribute('data-signup-collapsed', 'true')
+      }
+    }
 
     function escapeHtml(s) {
       return String(s == null ? '' : s)
@@ -1491,6 +1739,9 @@ try {
       btn.addEventListener('click', openLoginModal)
       authWidget.appendChild(btn)
       setComposeAuthUI()
+      const signed = hasSignedMarker()
+      applyJourneyGate(!signed)
+      setSignupState(signed ? 'signed' : 'form')
     }
 
     function setAuthUnavailable() {
@@ -1509,6 +1760,9 @@ try {
       })
       authWidget.appendChild(btn)
       setComposeAuthUI()
+      const signed = hasSignedMarker()
+      applyJourneyGate(!signed)
+      setSignupState(signed ? 'signed' : 'form')
     }
 
     function setAuthLoggedIn(me) {
@@ -1532,6 +1786,8 @@ try {
       const out = $('#sign-out-btn')
       if (out) out.addEventListener('click', signOut)
       setComposeAuthUI()
+      applyJourneyGate(false)
+      setSignupState('authed', display)
     }
 
     // ------------ Supabase client (lazy, CDN) -------------------------
@@ -1907,6 +2163,11 @@ try {
         setAuthLoggedOut()
       }
     })()
+
+    window.addEventListener('afro:signup-complete', function () {
+      applyJourneyGate(false)
+      setSignupState('signed')
+    })
 
     async function hydrateFromMe() {
       try {
