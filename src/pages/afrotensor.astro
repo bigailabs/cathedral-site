@@ -35,6 +35,10 @@ const LINKS = {
 const API_BASE = (import.meta.env.PUBLIC_POLARIS_API_BASE as string | undefined)
   ?? 'https://api.polaris.computer'
 
+// When false: hide full signup, show waitlist + "new slots soon". Mirror on API with
+// CATHEDRAL_SIGNUPS_ENABLED=true to reopen POST /api/v1/cathedral/signup.
+const AFTROTENSOR_REGISTRATIONS_OPEN = false
+
 // Build-time fetch of live mason roster.
 // We pull registered miners from the validator registry and cross-reference
 // with the machines endpoint to pull a city/country for the emotional hook.
@@ -458,6 +462,34 @@ try {
       color: var(--accent); text-decoration: underline; text-underline-offset: 2px;
     }
 
+    /* Closed cohort: waitlist replaces full signup (see AFTROTENSOR_REGISTRATIONS_OPEN). */
+    .signup [data-waitlist-only] { display: none; }
+    .signup[data-registrations="closed"][data-already-signed="false"] [data-full-signup-only] {
+      display: none !important;
+    }
+    .signup[data-registrations="closed"][data-already-signed="false"] [data-waitlist-only] {
+      display: block;
+    }
+    .signup[data-registrations="closed"][data-already-signed="true"] [data-waitlist-only],
+    .signup[data-registrations="closed"][data-already-signed="true"] [data-full-signup-only] {
+      display: none !important;
+    }
+    .signup .waitlist-thanks {
+      display: none; margin-top: 18px; padding-top: 8px;
+      border-top: 1px solid var(--border-soft);
+    }
+    .signup .waitlist-thanks.show { display: block; }
+    .signup .waitlist-thanks p {
+      font-family: var(--font-serif, 'Newsreader', serif);
+      font-size: 20px; line-height: 1.45; font-weight: 300;
+      color: var(--fg); margin: 0; max-width: 36ch;
+    }
+    .signup .waitlist-thanks p em { color: var(--muted); font-style: italic; }
+    .signup .wl-opt {
+      font-size: 10px; letter-spacing: 0.08em; text-transform: none; color: var(--dim);
+      font-weight: 400;
+    }
+
     .callout { border-left: 2px solid var(--accent); background: var(--accent-dim); padding: 14px 16px; font-size: 13px; color: var(--fg); line-height: 1.7; max-width: min(60ch, 100%); }
     .callout.ok { border-color: var(--ok); background: var(--ok-dim); }
 
@@ -824,6 +856,20 @@ try {
       var signed = false
       try { signed = localStorage.getItem('afrotensor_signed_up_v1') === '1' } catch (_) {}
       document.documentElement.setAttribute('data-afro-journey', signed ? 'open' : 'locked')
+      function markSignupRoot() {
+        var su = document.querySelector('.signup')
+        if (!su) return
+        su.setAttribute('data-already-signed', signed ? 'true' : 'false')
+        if (signed && su.getAttribute('data-registrations') === 'closed') {
+          var th = su.querySelector('.thanks')
+          if (th) th.classList.add('show')
+        }
+      }
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', markSignupRoot)
+      } else {
+        markSignupRoot()
+      }
     })()
   </script>
 
@@ -887,7 +933,48 @@ try {
         <div data-locked-stepbar aria-hidden="true">
           step 1 of 2
         </div>
-        <div class="signup" data-api-base={API_BASE}>
+        <div
+          class="signup"
+          data-api-base={API_BASE}
+          data-registrations={AFTROTENSOR_REGISTRATIONS_OPEN ? 'open' : 'closed'}
+        >
+          <div data-waitlist-only>
+            <p class="lede-form">This cohort is full.<br/><em>New slots opening soon.</em></p>
+            <p class="intro">
+              Leave your email. We will tell you when the door opens again.
+            </p>
+            <form id="cathedral-waitlist-form" novalidate>
+              <div class="field" data-field="wl-email">
+                <label for="wl-email">Email</label>
+                <input
+                  id="wl-email"
+                  name="email"
+                  type="email"
+                  autocomplete="email"
+                  required
+                  maxlength="320"
+                />
+                <div class="err-msg">An email we can reach you at.</div>
+              </div>
+              <div class="field" data-field="wl-name">
+                <label for="wl-name">Name <span class="wl-opt">(optional)</span></label>
+                <input
+                  id="wl-name"
+                  name="name"
+                  type="text"
+                  autocomplete="name"
+                  maxlength="200"
+                />
+              </div>
+              <button type="submit">Join the waitlist</button>
+              <div class="form-error wl-form-error" role="alert"></div>
+            </form>
+            <div class="waitlist-thanks" id="cathedral-waitlist-thanks" role="status" aria-live="polite">
+              <p>You are on the list.<br/><em>We will be in touch when doors open again.</em></p>
+            </div>
+          </div>
+
+          <div data-full-signup-only>
           <p class="lede-form">Start here.<br/><em>Sign the ledger in one minute.</em></p>
           <p class="intro">
             We save your place and unlock the full journey immediately.
@@ -941,6 +1028,7 @@ try {
             <button type="submit">Sign the ledger</button>
             <div class="form-error" role="alert"></div>
           </form>
+          </div>
 
           <div class="thanks" role="status" aria-live="polite">
             <p>Your mark is on the ledger.<br/><em>Welcome, mason.</em></p>
@@ -1287,6 +1375,7 @@ try {
     (function () {
       var root = document.querySelector('.signup')
       if (!root) return
+      if (root.getAttribute('data-registrations') === 'closed') return
       var form = root.querySelector('#cathedral-signup-form')
       if (!form) return
       var apiBase = root.getAttribute('data-api-base') || 'https://api.polaris.computer'
@@ -1417,6 +1506,78 @@ try {
         } finally {
           submitBtn.disabled = false
           submitBtn.textContent = originalLabel
+        }
+      })
+    })()
+  </script>
+
+  <script is:inline>
+    (function () {
+      var root = document.querySelector('.signup')
+      if (!root || root.getAttribute('data-registrations') !== 'closed') return
+      var form = root.querySelector('#cathedral-waitlist-form')
+      if (!form) return
+      var apiBase = root.getAttribute('data-api-base') || 'https://api.polaris.computer'
+      var errEl = form.querySelector('.wl-form-error')
+      var thanks = root.querySelector('#cathedral-waitlist-thanks')
+      var submitBtn = form.querySelector('button[type="submit"]')
+      var EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/
+
+      function fieldEl(key) {
+        return root.querySelector('[data-field="' + key + '"]')
+      }
+      function markErr(key, on) {
+        var el = fieldEl(key)
+        if (!el) return
+        if (on) el.classList.add('err')
+        else el.classList.remove('err')
+      }
+      function showErr(msg) {
+        if (!errEl) return
+        errEl.textContent = msg
+        errEl.classList.add('show')
+      }
+      function hideErr() {
+        if (!errEl) return
+        errEl.textContent = ''
+        errEl.classList.remove('show')
+      }
+
+      form.addEventListener('submit', async function (e) {
+        e.preventDefault()
+        hideErr()
+        var email = (form.querySelector('[name="email"]') && String(form.querySelector('[name="email"]').value || '').trim().toLowerCase()) || ''
+        var nameRaw = form.querySelector('[name="name"]')
+        var name = nameRaw ? String(nameRaw.value || '').trim() : ''
+        if (!email || !EMAIL_RE.test(email)) {
+          markErr('wl-email', true)
+          showErr('Add a valid email.')
+          return
+        }
+        markErr('wl-email', false)
+        submitBtn.disabled = true
+        var orig = submitBtn.textContent
+        submitBtn.textContent = 'Sending...'
+        try {
+          var res = await fetch(apiBase + '/api/v1/cathedral/waitlist', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: email, name: name || undefined }),
+          })
+          var data = null
+          try { data = await res.json() } catch (_) { data = null }
+          if (!res.ok || !data || !data.ok) {
+            var msg = (data && (data.detail || data.error)) || 'Could not join the waitlist. Try again shortly.'
+            showErr(typeof msg === 'string' ? msg : 'Could not join the waitlist. Try again shortly.')
+            return
+          }
+          form.style.display = 'none'
+          if (thanks) thanks.classList.add('show')
+        } catch (_) {
+          showErr('Network error. Check your connection and try again.')
+        } finally {
+          submitBtn.disabled = false
+          submitBtn.textContent = orig
         }
       })
     })()
@@ -1678,6 +1839,37 @@ try {
     function setSignupState(mode, displayName) {
       if (!signupRoot) return
       if (signupAuthedName) signupAuthedName.textContent = displayName || 'mason'
+
+      const regClosed = signupRoot.getAttribute('data-registrations') === 'closed'
+      const wlPanel = signupRoot.querySelector('[data-waitlist-only]')
+      if (regClosed && wlPanel) {
+        wlPanel.style.display = mode === 'authed' || mode === 'signed' ? 'none' : 'block'
+      }
+
+      if (regClosed) {
+        if (mode === 'authed') {
+          if (signupReveal) signupReveal.hidden = true
+          signupRoot.setAttribute('data-signup-collapsed', 'false')
+          if (signupForm) signupForm.style.display = 'none'
+          if (signupThanks) signupThanks.classList.remove('show')
+          if (signupAuthed) signupAuthed.classList.add('show')
+          return
+        }
+        if (mode === 'signed') {
+          if (signupReveal) signupReveal.hidden = true
+          signupRoot.setAttribute('data-signup-collapsed', 'false')
+          if (signupForm) signupForm.style.display = 'none'
+          if (signupAuthed) signupAuthed.classList.remove('show')
+          if (signupThanks) signupThanks.classList.add('show')
+          return
+        }
+        if (signupAuthed) signupAuthed.classList.remove('show')
+        if (signupThanks) signupThanks.classList.remove('show')
+        if (signupReveal) signupReveal.hidden = true
+        if (signupForm) signupForm.style.display = 'none'
+        return
+      }
+
       if (signupReveal) signupReveal.hidden = true
       signupRoot.setAttribute('data-signup-collapsed', 'false')
       if (mode === 'authed') {
