@@ -35,20 +35,31 @@ import RoseWindow from '../components/RoseWindow.astro'
       .sec .wrap { grid-template-columns: 1fr; gap: 24px; }
     }
 
-    /* Thesis — vertical stack at top of hero (commons first, like a pull quote). */
+    /* Thesis — two vertical columns at top of hero. */
     .hero-thesis {
-      max-width: min(40ch, 100%);
-      margin: 0 auto;
+      max-width: 100%;
+      margin: 0;
       padding: 0 0 8px 0;
       text-align: left;
     }
+    .thesis.thesis-cols {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: clamp(28px, 5vw, 64px);
+      max-width: min(72ch, 100%);
+      margin: 0 auto;
+      align-items: start;
+    }
+    @media (max-width: 700px) {
+      .thesis.thesis-cols { grid-template-columns: 1fr; gap: 28px; }
+    }
+    .thesis-col { min-width: 0; }
     .thesis p {
       font-family: var(--font-serif, 'Newsreader', ui-serif, Georgia, serif);
       font-weight: 300;
       line-height: 1.55;
       color: var(--muted);
       margin: 0;
-      max-width: 38ch;
       font-size: 16px;
     }
     .thesis p.thesis-lede {
@@ -56,16 +67,11 @@ import RoseWindow from '../components/RoseWindow.astro'
       line-height: 1.28;
       font-weight: 500;
       color: var(--fg);
-      margin-bottom: 20px;
-      max-width: 22ch;
+      margin-bottom: 18px;
     }
-    .thesis p + p { margin-top: 16px; }
+    .thesis-col p + p { margin-top: 16px; }
     .thesis p em { font-style: italic; color: var(--muted); }
     .thesis p .accent { color: var(--accent); font-style: normal; font-weight: 500; }
-    @media (max-width: 900px) {
-      .hero-thesis { max-width: 100%; }
-      .thesis p.thesis-lede { max-width: 100%; }
-    }
 
     /* Hero — thesis band first; live state + terminals sit below with air. */
     .sec.hero { padding-top: 40px; }
@@ -103,14 +109,13 @@ import RoseWindow from '../components/RoseWindow.astro'
     .hero-left .proof-meta .stats .k { color: var(--dim); }
     .hero-left .proof-meta .stats .v { color: var(--fg); }
 
-    /* Fade in on first paint for the thesis only */
+    /* Fade in on first paint for the thesis columns */
     .thesis-fade { animation: fade-in 900ms ease-out both; }
-    .thesis-fade p:nth-child(1) { animation: fade-in 700ms 80ms ease-out both; }
-    .thesis-fade p:nth-child(2) { animation: fade-in 700ms 280ms ease-out both; }
-    .thesis-fade p:nth-child(3) { animation: fade-in 700ms 480ms ease-out both; }
+    .thesis-fade .thesis-col:nth-child(1) { animation: fade-in 700ms 80ms ease-out both; }
+    .thesis-fade .thesis-col:nth-child(2) { animation: fade-in 700ms 260ms ease-out both; }
     @keyframes fade-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
     @media (prefers-reduced-motion: reduce) {
-      .thesis-fade, .thesis-fade p { animation: none !important; }
+      .thesis-fade, .thesis-fade .thesis-col { animation: none !important; }
     }
 
     /* State section — the two panes */
@@ -188,17 +193,21 @@ import RoseWindow from '../components/RoseWindow.astro'
        validator stats + terminals sit below, separated by a soft rule. -->
   <section class="sec hero">
     <div class="hero-thesis">
-      <div class="thesis thesis-fade">
-        <p class="thesis-lede">
-          A cathedral is a <span class="accent">commons</span>.
-        </p>
-        <p>
-          <em>The masons who laid the first stones<br/>knew they wouldn't see the spire.</em>
-        </p>
-        <p>
-          We're building compute the same way.<br/>
-          In public, for whoever needs it.
-        </p>
+      <div class="thesis thesis-fade thesis-cols">
+        <div class="thesis-col">
+          <p class="thesis-lede">
+            A cathedral is a <span class="accent">commons</span>.
+          </p>
+          <p>
+            <em>The masons who laid the first stones<br/>knew they wouldn't see the spire.</em>
+          </p>
+        </div>
+        <div class="thesis-col">
+          <p>
+            We're building compute the same way.<br/>
+            In public, for whoever needs it.
+          </p>
+        </div>
       </div>
     </div>
     <div class="hero-live">
