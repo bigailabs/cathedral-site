@@ -531,6 +531,29 @@ try {
        into a narrow strip. */
     .plate.wide img { aspect-ratio: 12 / 7; object-fit: cover; }
 
+    /* Mandela hero — pull quote sits under the plate, same measure as prose. */
+    .afro-hero-quote {
+      max-width: min(60ch, 100%);
+      margin: 0 0 28px 0;
+      padding: 0 0 0 16px;
+      border-left: 2px solid var(--border-soft);
+      font-family: var(--font-serif, 'Newsreader', ui-serif, Georgia, serif);
+      font-size: clamp(1rem, 1.15vw + 0.85rem, 1.125rem);
+      font-weight: 300;
+      line-height: 1.55;
+      color: var(--muted);
+    }
+    .afro-hero-quote p { margin: 0; }
+    .afro-hero-quote cite {
+      display: block;
+      margin-top: 12px;
+      font-family: inherit;
+      font-size: 11px;
+      font-style: normal;
+      letter-spacing: 0.06em;
+      color: var(--dim);
+    }
+
     /* A thin banner image for pages that can't afford a full photo. */
     .banner {
       width: 100%; height: 80px; margin-bottom: 20px;
@@ -665,6 +688,12 @@ try {
     html[data-afro-journey="locked"] #intro .plate.wide .cap {
       text-align: center;
       color: var(--muted);
+    }
+    html[data-afro-journey="locked"] #intro .afro-hero-quote {
+      margin-left: auto;
+      margin-right: auto;
+      text-align: left;
+      border-left-color: var(--border);
     }
     html[data-afro-journey="locked"] #intro .prose,
     html[data-afro-journey="locked"] #intro .live-masons {
@@ -886,15 +915,21 @@ try {
         <figure class="plate wide">
           <img
             id="afro-hero-image"
-            src="/images/lalibela-hero.jpg"
-            alt="Bete Giyorgis, Lalibela, Ethiopia, seen from the northeast"
-            width="1200" height="793"
+            src="/images/nelson-mandela-1994.jpg"
+            alt="Nelson Mandela, Washington, D.C., October 1994"
+            width="1500" height="1940"
             loading="eager" decoding="async"
           />
           <figcaption class="cap" id="afro-hero-caption">
-            Bete Giyorgis, Lalibela — carved down into the rock, one chisel-stroke at a time.
+            Nelson Mandela, 1994 · photo: Kingkongphoto &amp; celebrity-photos.com · CC BY-SA 2.0 · Wikimedia Commons
           </figcaption>
         </figure>
+        <blockquote class="afro-hero-quote" cite="https://en.wikiquote.org/wiki/Nelson_Mandela">
+          <p>
+            There is no passion to be found playing small—in settling for a life that is less than the one you are capable of living.
+          </p>
+          <cite>Nelson Mandela</cite>
+        </blockquote>
         <p class="lede">Lay a stone.<br/><em>Become a mason of the cathedral.</em></p>
 
         <p class="prose" style="margin-top: 20px;">
