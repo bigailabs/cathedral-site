@@ -291,6 +291,41 @@ try {
        All colours via tokens so both themes read right.
        ----------------------------------------------------------- */
     .signup { max-width: 520px; margin: 0 auto; }
+    /* Polaris entry when the journey is locked (journal sign-in is hidden). */
+    .signup .signup-login-aux {
+      display: none;
+      margin: 0 0 16px 0;
+      font-size: 10px;
+      letter-spacing: 0.06em;
+      color: var(--dim);
+      text-align: center;
+      line-height: 1.5;
+    }
+    html[data-afro-journey="locked"] .signup[data-already-signed="false"] .signup-login-aux {
+      display: block;
+    }
+    .signup:has(.waitlist-thanks.show) .signup-login-aux,
+    .signup:has(.thanks.show) .signup-login-aux {
+      display: none;
+    }
+    .signup .signup-login-aux__btn {
+      background: none;
+      border: 0;
+      padding: 0;
+      cursor: pointer;
+      color: var(--accent);
+      font: inherit;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+      text-decoration-color: var(--border);
+    }
+    .signup .signup-login-aux__btn:hover {
+      color: var(--fg);
+      text-decoration-color: var(--accent);
+    }
+    .signup .signup-login-aux__hint { color: var(--dim); }
     .signup .lede-form {
       font-family: var(--font-serif, 'Newsreader', serif);
       font-size: 20px; font-weight: 300; line-height: 1.35;
@@ -454,6 +489,20 @@ try {
       font-size: 12px; line-height: 1.6; color: var(--fg);
     }
     .signup .signed-in-state.show { display: block; }
+    .signup .signed-in-state .sign-out {
+      display: block;
+      margin-top: 14px;
+      background: none;
+      border: 0;
+      padding: 0;
+      cursor: pointer;
+      color: var(--dim);
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-family: inherit;
+    }
+    .signup .signed-in-state .sign-out:hover { color: var(--fg); }
     .signup .signed-in-state .who {
       font-family: 'JetBrains Mono', ui-monospace, monospace;
       font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
@@ -592,10 +641,6 @@ try {
        Authenticated progression layer (login + stage checkoffs + notes).
        Additive — the rest of the page works without it.
        ----------------------------------------------------------- */
-    /* Auth widget lives in the eyebrow column, below the "00 Afrotensor"
-       label. Keeps the hero content unencumbered by a floating button. */
-    .eyebrow-stack { display: flex; flex-direction: column; gap: 18px; }
-
     .stage.is-complete h3 { color: var(--ok); }
 
     /* Journal — one place to read/leave notes, keyed by stage. Replaces
@@ -674,8 +719,8 @@ try {
   <!--
     Styles for JS-injected elements live in a global block. Astro's
     scoped-CSS attribute is added at build time to elements present in
-    the static markup — runtime-created nodes (stage-check, auth-widget
-    contents, login modal) don't receive it, so scoped selectors
+    the static markup — runtime-created nodes (stage-check, login modal)
+    don't receive it, so scoped selectors
     wouldn't match them.
   -->
   <style is:global>
@@ -690,11 +735,6 @@ try {
       margin: 0 auto;
     }
     html[data-afro-journey="locked"] #intro { border-bottom: 0; padding-bottom: 6px; }
-    html[data-afro-journey="locked"] #intro .eyebrow-stack {
-      display: flex;
-      justify-content: center;
-      margin-bottom: 8px;
-    }
     html[data-afro-journey="locked"] #intro .eyebrow {
       display: none;
     }
@@ -754,20 +794,6 @@ try {
     html[data-afro-journey="locked"] #journal {
       display: none;
     }
-    html[data-afro-journey="locked"] .auth-widget {
-      color: var(--fg);
-      opacity: 0.95;
-    }
-    html[data-afro-journey="locked"] .auth-widget .sign-in {
-      color: var(--fg);
-      border-color: var(--accent);
-      background: var(--accent-dim);
-    }
-    html[data-afro-journey="locked"] .auth-widget .sign-in:hover {
-      color: var(--fg);
-      border-color: var(--accent);
-      filter: brightness(1.05);
-    }
     html[data-afro-journey="locked"] #signup .signup .lede-form {
       color: var(--fg);
     }
@@ -784,42 +810,6 @@ try {
       border-color: var(--accent);
       background: var(--accent-dim);
     }
-    .auth-widget {
-      display: flex; align-items: center; gap: 10px;
-      font-size: 11px; color: var(--muted);
-      padding-top: 4px;
-    }
-    .auth-widget .sign-in {
-      font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
-      padding: 8px 14px; background: transparent; color: var(--fg);
-      border: 1px solid var(--border); border-radius: 2px; cursor: pointer;
-      font-family: inherit;
-    }
-    .auth-widget .sign-in:hover { border-color: var(--accent); color: var(--accent); }
-    .auth-widget .mason {
-      display: flex; align-items: center; gap: 10px;
-      padding: 6px 10px; border: 1px solid var(--border-soft); background: var(--surface);
-    }
-    .auth-widget .mason .avatar {
-      width: 24px; height: 24px; border-radius: 50%;
-      background: var(--accent-dim); color: var(--accent);
-      display: inline-flex; align-items: center; justify-content: center;
-      font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase;
-      flex-shrink: 0;
-    }
-    .auth-widget .mason .meta { display: flex; flex-direction: column; line-height: 1.2; }
-    .auth-widget .mason .name { color: var(--fg); font-size: 11.5px; }
-    .auth-widget .mason .since { color: var(--dim); font-size: 10px; letter-spacing: 0.06em; }
-    .auth-widget .sign-out {
-      background: none; border: 0; padding: 0; cursor: pointer;
-      color: var(--dim); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
-      font-family: inherit;
-    }
-    .auth-widget .sign-out:hover { color: var(--fg); }
-    .auth-widget[data-state="loading"], .auth-widget[data-state="unavailable"] {
-      font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--dim);
-    }
-
     /* Checkbox sits inline in the .n column (not floating). */
     .stage .stage-check {
       appearance: none; -webkit-appearance: none;
@@ -912,12 +902,7 @@ try {
   <!-- 00 — Hero -->
   <section class="sec" id="intro">
     <div class="wrap">
-      <div class="eyebrow-stack">
-        <div class="eyebrow"><span class="num">00</span><span>Afrotensor</span></div>
-        <div id="auth-widget" class="auth-widget" data-state="loading">
-          <span>sign in with Polaris</span>
-        </div>
-      </div>
+      <div class="eyebrow"><span class="num">00</span><span>Afrotensor</span></div>
       <div class="intro-body">
         <blockquote class="afro-hero-quote" cite="https://en.wikiquote.org/wiki/Nelson_Mandela">
           <p>
@@ -968,6 +953,10 @@ try {
           data-api-base={API_BASE}
           data-registrations={AFTROTENSOR_REGISTRATIONS_OPEN ? 'open' : 'closed'}
         >
+          <p class="signup-login-aux" id="afro-login-aux">
+            <button type="button" class="signup-login-aux__btn" id="afro-open-login">Sign in with Polaris</button>
+            <span class="signup-login-aux__hint"> if you already have an account.</span>
+          </p>
           <div data-waitlist-only>
             <p class="lede-form">This cohort is full.<br/><em>New slots opening soon.</em></p>
             <p class="intro">
@@ -1077,6 +1066,7 @@ try {
               <span data-signup-name>mason</span>, your journey is unlocked.
               Continue with <a href="#work">stone 1</a> or jump to <a href="#journal">the journal</a>.
             </div>
+            <button type="button" class="sign-out" id="afro-sign-out">sign out</button>
           </div>
         </div>
       </div>
@@ -1950,16 +1940,18 @@ try {
       nEl.insertBefore(check, nEl.firstChild)
     })
 
-    // ------------ Auth widget rendering -------------------------------
+    // ------------ Auth UI (Polaris session) -------------------------
     function setAuthLoggedOut() {
-      authWidget.setAttribute('data-state', 'logged-out')
-      authWidget.innerHTML = ''
-      const btn = document.createElement('button')
-      btn.type = 'button'
-      btn.className = 'sign-in'
-      btn.textContent = 'Sign in with Polaris'
-      btn.addEventListener('click', openLoginModal)
-      authWidget.appendChild(btn)
+      if (authWidget) {
+        authWidget.setAttribute('data-state', 'logged-out')
+        authWidget.innerHTML = ''
+        const btn = document.createElement('button')
+        btn.type = 'button'
+        btn.className = 'sign-in'
+        btn.textContent = 'Sign in with Polaris'
+        btn.addEventListener('click', openLoginModal)
+        authWidget.appendChild(btn)
+      }
       setComposeAuthUI()
       const signed = hasSignedMarker()
       applyJourneyGate(!signed)
@@ -1967,20 +1959,20 @@ try {
     }
 
     function setAuthUnavailable() {
-      // Auth backend not yet configured for this deploy. Still show a
-      // recognisable "Sign in" affordance so the page reads like a product,
-      // not a doc. Clicking it surfaces a friendly placeholder.
-      authWidget.setAttribute('data-state', 'unavailable')
-      authWidget.innerHTML = ''
-      const btn = document.createElement('button')
-      btn.type = 'button'
-      btn.className = 'sign-in'
-      btn.textContent = 'Sign in with Polaris'
-      btn.title = 'Login setting up — check back soon'
-      btn.addEventListener('click', () => {
-        alert('Sign in with Polaris is coming soon. For now, follow the steps below and your progress is saved locally.')
-      })
-      authWidget.appendChild(btn)
+      // Auth backend not yet configured for this deploy.
+      if (authWidget) {
+        authWidget.setAttribute('data-state', 'unavailable')
+        authWidget.innerHTML = ''
+        const btn = document.createElement('button')
+        btn.type = 'button'
+        btn.className = 'sign-in'
+        btn.textContent = 'Sign in with Polaris'
+        btn.title = 'Login setting up — check back soon'
+        btn.addEventListener('click', () => {
+          alert('Sign in with Polaris is coming soon. For now, follow the steps below and your progress is saved locally.')
+        })
+        authWidget.appendChild(btn)
+      }
       setComposeAuthUI()
       const signed = hasSignedMarker()
       applyJourneyGate(!signed)
@@ -1988,25 +1980,27 @@ try {
     }
 
     function setAuthLoggedIn(me) {
-      authWidget.setAttribute('data-state', 'logged-in')
-      const display = me.display_name || me.handle || 'mason'
-      const initials = display.slice(0, 2)
-      let since = '—'
-      try {
-        since = new Date(me.mason_since).toLocaleDateString(undefined, { month: 'short', year: 'numeric' })
-      } catch (_) {}
-      authWidget.innerHTML = `
-        <div class="mason">
-          <span class="avatar">${escapeHtml(initials)}</span>
-          <span class="meta">
-            <span class="name">${escapeHtml(display)}</span>
-            <span class="since">mason since ${escapeHtml(since)}</span>
-          </span>
-        </div>
-        <button type="button" class="sign-out" id="sign-out-btn">sign out</button>
-      `
-      const out = $('#sign-out-btn')
-      if (out) out.addEventListener('click', signOut)
+      if (authWidget) {
+        authWidget.setAttribute('data-state', 'logged-in')
+        const display = me.display_name || me.handle || 'mason'
+        const initials = display.slice(0, 2)
+        let since = '—'
+        try {
+          since = new Date(me.mason_since).toLocaleDateString(undefined, { month: 'short', year: 'numeric' })
+        } catch (_) {}
+        authWidget.innerHTML = `
+          <div class="mason">
+            <span class="avatar">${escapeHtml(initials)}</span>
+            <span class="meta">
+              <span class="name">${escapeHtml(display)}</span>
+              <span class="since">mason since ${escapeHtml(since)}</span>
+            </span>
+          </div>
+          <button type="button" class="sign-out" id="sign-out-btn">sign out</button>
+        `
+        const out = $('#sign-out-btn')
+        if (out) out.addEventListener('click', signOut)
+      }
       setComposeAuthUI()
       applyJourneyGate(false)
       setSignupState('authed', display)
@@ -2131,6 +2125,11 @@ try {
       renderProgressAndNotes()
       setAuthLoggedOut()
     }
+
+    const afroOpenLogin = $('#afro-open-login')
+    if (afroOpenLogin) afroOpenLogin.addEventListener('click', openLoginModal)
+    const afroSignOut = $('#afro-sign-out')
+    if (afroSignOut) afroSignOut.addEventListener('click', () => { void signOut() })
 
     // ------------ State + rendering -----------------------------------
     let completedSteps = new Set()
