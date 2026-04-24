@@ -82,10 +82,9 @@ const AFTROTENSOR_REGISTRATIONS_OPEN = false
     }
     /* Hero band — home-like: tight to nav, quote reads as thesis lines. */
     #intro.afro-hero-sec {
-      padding-top: clamp(2px, 0.8vw, 10px);
+      padding-top: 0;
       padding-bottom: 48px;
-      /* Pull the band up toward the nav; quote nudges a bit further (see .afro-hero-quote). */
-      margin-top: clamp(-32px, -4.5vw, -14px);
+      margin-top: clamp(-40px, -5.5vw, -18px);
     }
     #intro .afro-intro-wrap {
       display: grid;
@@ -589,35 +588,52 @@ const AFTROTENSOR_REGISTRATIONS_OPEN = false
     #intro .afro-hero-eyebrow {
       align-self: stretch;
       width: 100%;
-      margin-bottom: clamp(4px, 1vw, 10px);
+      margin-bottom: 2px;
     }
+    /* One-line lineprinter strip: mono, paper band, horizontal scroll on narrow viewports. */
     .afro-hero-quote {
       position: relative;
       z-index: 0;
-      margin: clamp(-22px, -3vw, -8px) 0 0 0;
-      padding: 0;
-      border: 0;
-      max-width: min(52ch, 100%);
-      font-family: var(--font-serif, 'Newsreader', ui-serif, Georgia, serif);
-      font-size: clamp(0.92rem, 1.05vw + 0.52rem, 1.12rem);
-      font-weight: 300;
-      line-height: 1.4;
-      color: var(--muted);
-    }
-    .afro-hero-quote p { margin: 0; }
-    .afro-hero-quote cite {
-      display: block;
-      margin-top: clamp(8px, 1.2vw, 12px);
-      font-family: inherit;
-      font-size: 10px;
+      align-self: stretch;
+      width: 100%;
+      max-width: 100%;
+      margin: clamp(-10px, -1.2vw, -2px) 0 0 0;
+      padding: 7px 10px;
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: clamp(0.62rem, 0.22vw + 0.58rem, 0.72rem);
       font-weight: 400;
+      line-height: 1.35;
+      letter-spacing: 0.03em;
+      color: var(--fg);
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+    }
+    .afro-hero-quote__line {
+      margin: 0;
+      white-space: nowrap;
+    }
+    .afro-hero-quote cite {
+      display: inline;
+      margin: 0;
+      font-family: inherit;
+      font-size: 0.88em;
+      font-weight: 500;
       font-style: normal;
-      letter-spacing: 0.14em;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
       color: var(--dim);
     }
+    .afro-hero-quote cite::before {
+      content: '  ·  ';
+      letter-spacing: 0.06em;
+      color: var(--border);
+    }
     #intro .intro-body .lede {
-      margin-top: clamp(14px, 2.5vw, 22px);
+      margin-top: 6px;
       margin-left: auto;
       margin-right: auto;
       text-align: center;
@@ -634,14 +650,24 @@ const AFTROTENSOR_REGISTRATIONS_OPEN = false
       width: 100%;
       max-width: min(62ch, 100%);
     }
+    #intro .intro-body .afro-intro-prose {
+      margin-top: clamp(14px, 2.5vw, 22px);
+    }
     #intro .intro-body .afro-mission {
       align-self: center;
       width: 100%;
       max-width: min(52ch, 100%);
       text-align: center;
-      margin-top: clamp(16px, 2.8vw, 26px);
+      margin-top: clamp(22px, 3.5vw, 32px);
       padding-top: clamp(16px, 2.2vw, 24px);
       border-top: 1px solid var(--border-soft);
+    }
+
+    /* Same accent signal as home thesis "commons". */
+    #intro .accent {
+      color: var(--accent);
+      font-style: normal;
+      font-weight: 500;
     }
 
     /* Mission stack — same rhythm as home .thesis.thesis-stack */
@@ -794,12 +820,13 @@ const AFTROTENSOR_REGISTRATIONS_OPEN = false
       display: none;
     }
     html[data-afro-journey="locked"] #intro .afro-hero-quote {
-      font-size: clamp(0.95rem, 1.2vw + 0.55rem, 1.2rem);
-      font-weight: 300;
-      color: var(--muted);
-      max-width: min(44ch, 94vw);
+      font-size: clamp(0.58rem, 0.2vw + 0.54rem, 0.7rem);
+      font-weight: 400;
+      color: var(--fg);
+      max-width: 100%;
     }
     html[data-afro-journey="locked"] #intro .prose,
+    html[data-afro-journey="locked"] #intro .afro-intro-prose,
     html[data-afro-journey="locked"] #intro .live-masons {
       display: none;
     }
@@ -962,19 +989,26 @@ const AFTROTENSOR_REGISTRATIONS_OPEN = false
       <div class="intro-body">
         <div class="eyebrow afro-hero-eyebrow"><span class="num">00</span><span>Afrotensor</span><span class="rule" aria-hidden="true"></span></div>
         <blockquote class="afro-hero-quote" cite="https://en.wikiquote.org/wiki/Nelson_Mandela">
-          <p>
+          <p class="afro-hero-quote__line">
             There is no passion to be found playing small—in settling for a life that is less than the one you are capable of living.
+            <cite>Nelson Mandela</cite>
           </p>
-          <cite>Nelson Mandela</cite>
         </blockquote>
         <p class="lede">Lay a stone.<br/><em>Become a mason of the cathedral.</em></p>
+
+        <p class="prose afro-intro-prose">
+          An invitation to builders, students, and cooperatives across Africa to pick up
+          a chisel. No GPU required — a laptop, cheap VPS, or spare desktop is a stone.
+          Three stages: <strong>apprentice</strong> on testnet, <strong>journeyman</strong>
+          on mainnet, <strong>build</strong> on top.
+        </p>
 
         <div class="afro-mission" aria-labelledby="afro-mission-label">
           <div id="afro-mission-label" class="afro-mission__kicker">Mission</div>
           <div class="afro-mission-stack">
             <p class="afro-mission-line">Intelligence is evenly distributed, infrastructure is not.</p>
             <p class="afro-mission-line">
-              <span class="brand">Cathedral</span> pays for intelligence.
+              <span class="accent">Cathedral</span> pays for intelligence.
               <span class="brand">Polaris</span> provides infrastructure.
             </p>
             <p class="afro-mission-line">
@@ -984,13 +1018,6 @@ const AFTROTENSOR_REGISTRATIONS_OPEN = false
             </p>
           </div>
         </div>
-
-        <p class="prose" style="margin-top: 20px;">
-          An invitation to builders, students, and cooperatives across Africa to pick up
-          a chisel. No GPU required — a laptop, cheap VPS, or spare desktop is a stone.
-          Three stages: <strong>apprentice</strong> on testnet, <strong>journeyman</strong>
-          on mainnet, <strong>build</strong> on top.
-        </p>
 
         <p
           class="live-masons"
