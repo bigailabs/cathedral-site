@@ -85,6 +85,17 @@ try {
       color: var(--dim); display: flex; align-items: baseline; gap: 10px;
     }
     .eyebrow .num { font-variant-numeric: tabular-nums; color: var(--accent); }
+    /* Intro label: title voice (Newsreader), not body mono. Keeps caps rhythm readable. */
+    #intro .eyebrow {
+      font-family: var(--font-serif, 'Newsreader', ui-serif, Georgia, serif);
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 0.14em;
+    }
+    #intro .eyebrow .num {
+      font-family: var(--font-serif, 'Newsreader', ui-serif, Georgia, serif);
+      font-weight: 500;
+    }
     .sec { padding: 48px 0; border-bottom: 1px solid var(--border-soft); }
     .sec:last-of-type { border-bottom: 0; }
     .sec .wrap { display: grid; grid-template-columns: 160px 1fr; gap: 48px; }
