@@ -80,14 +80,17 @@ const AFTROTENSOR_REGISTRATIONS_OPEN = false
       .sec { padding: 56px 0; }
       .sec .wrap { grid-template-columns: 1fr; gap: 24px; }
     }
-    /* Hero band — home-like: tight to nav, quote reads as thesis lines. */
+    /* Hero band — home-like: breathing room under the nav, single-column grid. */
     #intro.afro-hero-sec {
-      padding-top: 0;
+      padding-top: clamp(18px, 2.5vw, 28px);
       padding-bottom: 48px;
-      margin-top: clamp(-40px, -5.5vw, -18px);
+      margin-top: 0;
     }
-    #intro .afro-intro-wrap {
-      display: grid;
+    /* Override the default .sec .wrap two-column grid so the hero fills the
+       narrow main column ("inch" margins) edge-to-edge. */
+    #intro .wrap {
+      display: block;
+      max-width: 100%;
       grid-template-columns: 1fr;
       gap: 0;
     }
@@ -319,6 +322,12 @@ const AFTROTENSOR_REGISTRATIONS_OPEN = false
     .signup[data-signup-collapsed="true"] form { display: none; }
     .signup[data-signup-collapsed="true"] .reveal-wrap { display: flex; }
     .signup[data-signup-collapsed="false"] .reveal-wrap { display: none; }
+
+    /* Waitlist reveal — mirror the full signup collapse/expand pattern. */
+    [data-waitlist-collapsed="true"] #cathedral-waitlist-form,
+    [data-waitlist-collapsed="true"] .waitlist-thanks { display: none; }
+    [data-waitlist-collapsed="true"] [data-waitlist-reveal-wrap] { display: flex; }
+    [data-waitlist-collapsed="false"] [data-waitlist-reveal-wrap] { display: none; }
 
     .signup form { display: block; }
     .signup .field { display: block; margin-bottom: 16px; }
@@ -555,20 +564,25 @@ const AFTROTENSOR_REGISTRATIONS_OPEN = false
       width: 100%;
       margin-bottom: 2px;
     }
-    /* One-line lineprinter strip: mono, paper band, horizontal scroll on narrow viewports. */
+    /* One-line lineprinter strip: mono, paper band, stretches to container edges.
+       Font scales with container width so the line never has to scroll on
+       reasonable desktop widths. */
     .afro-hero-quote {
       position: relative;
       z-index: 0;
       align-self: stretch;
       width: 100%;
       max-width: 100%;
-      margin: clamp(-10px, -1.2vw, -2px) 0 0 0;
+      margin: 0;
       padding: 7px 10px;
       font-family: 'JetBrains Mono', ui-monospace, monospace;
-      font-size: clamp(0.62rem, 0.22vw + 0.58rem, 0.72rem);
+      /* Shrink font slightly on narrower widths so it still fits in one line;
+         on main we have ~920px inside the main column which comfortably holds
+         the quote + attribution at ~11px mono. */
+      font-size: clamp(0.58rem, 0.9vw, 0.78rem);
       font-weight: 400;
       line-height: 1.35;
-      letter-spacing: 0.03em;
+      letter-spacing: 0.02em;
       color: var(--fg);
       background: var(--surface-2);
       border: 1px solid var(--border);
@@ -580,6 +594,7 @@ const AFTROTENSOR_REGISTRATIONS_OPEN = false
     .afro-hero-quote__line {
       margin: 0;
       white-space: nowrap;
+      text-align: center;
     }
     .afro-hero-quote cite {
       display: inline;
@@ -598,7 +613,7 @@ const AFTROTENSOR_REGISTRATIONS_OPEN = false
       color: var(--border);
     }
     #intro .intro-body .lede {
-      margin-top: 6px;
+      margin-top: clamp(80px, 16vh, 180px);
       margin-left: auto;
       margin-right: auto;
       text-align: center;
@@ -623,9 +638,11 @@ const AFTROTENSOR_REGISTRATIONS_OPEN = false
       width: 100%;
       max-width: min(52ch, 100%);
       text-align: center;
-      margin-top: clamp(22px, 3.5vw, 32px);
-      padding-top: clamp(16px, 2.2vw, 24px);
-      border-top: 1px solid var(--border-soft);
+      margin-top: clamp(28px, 4.5vw, 44px);
+      padding: clamp(20px, 3vw, 28px) clamp(18px, 3vw, 28px);
+      border: 1px solid var(--border-soft);
+      border-radius: 6px;
+      background: var(--surface);
     }
 
     /* Same accent signal as home thesis "commons". */
@@ -817,19 +834,8 @@ const AFTROTENSOR_REGISTRATIONS_OPEN = false
     html[data-afro-journey="locked"] #signup .signup {
       margin-top: 0;
     }
-    html[data-afro-journey="locked"] [data-locked-stepbar] {
-      display: flex;
-    }
     [data-locked-stepbar] {
       display: none;
-      align-items: center;
-      justify-content: center;
-      margin: 0 0 12px 0;
-      font-family: 'JetBrains Mono', ui-monospace, monospace;
-      font-size: 10px;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--muted);
     }
     html[data-afro-journey="locked"] [data-journey-locked-hide] {
       display: none;
@@ -1102,11 +1108,14 @@ const AFTROTENSOR_REGISTRATIONS_OPEN = false
           data-api-base={API_BASE}
           data-registrations={AFTROTENSOR_REGISTRATIONS_OPEN ? 'open' : 'closed'}
         >
-          <div data-waitlist-only>
+          <div data-waitlist-only data-waitlist-collapsed="true">
             <p class="lede-form">This cohort is full.<br/><em>New slots opening soon.</em></p>
             <p class="intro">
               Leave your email. We will tell you when the door opens again.
             </p>
+            <div class="reveal-wrap" data-waitlist-reveal-wrap>
+              <button type="button" class="reveal-signup" data-waitlist-reveal>Join the waitlist</button>
+            </div>
             <form id="cathedral-waitlist-form" novalidate>
               <div class="field" data-field="wl-email">
                 <label for="wl-email">Email</label>
@@ -1687,6 +1696,16 @@ const AFTROTENSOR_REGISTRATIONS_OPEN = false
       var thanks = root.querySelector('#cathedral-waitlist-thanks')
       var submitBtn = form.querySelector('button[type="submit"]')
       var EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/
+      // Reveal form on click of the "Join the waitlist" button; keep collapsed otherwise.
+      var waitlistRoot = root.querySelector('[data-waitlist-only]')
+      var revealBtn = root.querySelector('[data-waitlist-reveal]')
+      if (waitlistRoot && revealBtn) {
+        revealBtn.addEventListener('click', function () {
+          waitlistRoot.setAttribute('data-waitlist-collapsed', 'false')
+          var first = form.querySelector('input[name="email"]')
+          if (first) first.focus()
+        })
+      }
 
       function fieldEl(key) {
         return root.querySelector('[data-field="' + key + '"]')
