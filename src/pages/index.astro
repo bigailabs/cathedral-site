@@ -49,7 +49,7 @@ import RoseWindow from '../components/RoseWindow.astro'
       flex-direction: column;
       align-items: center;
       text-align: center;
-      gap: clamp(12px, 2vw, 20px);
+      gap: clamp(4px, 0.8vw, 10px);
       width: 100%;
     }
     .thesis-stack .thesis-line {
@@ -79,40 +79,61 @@ import RoseWindow from '../components/RoseWindow.astro'
     }
 
     /* Hero — thesis band first; live state + terminals sit below with air. */
-    .sec.hero { padding-top: 40px; }
+    .sec.hero { padding-top: 32px; padding-bottom: 48px; }
     .hero-live {
-      display: grid;
-      grid-template-columns: 280px 1fr;
-      gap: 28px;
-      align-items: start;
-      margin-top: clamp(40px, 5vw, 64px);
-      padding-top: clamp(28px, 3vw, 40px);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-top: clamp(24px, 3vw, 36px);
+      padding-top: clamp(18px, 2vw, 26px);
       border-top: 1px solid var(--border-soft);
     }
     .hero-live > * { min-width: 0; }
-    @media (max-width: 900px) {
-      .hero-live { grid-template-columns: 1fr; gap: 32px; }
+
+    /* Header row: "01 LIVE STATE — blurb" on a single line, with wrap fallback. */
+    .proof-meta--lead { padding: 0; border: 0; }
+    .proof-head {
+      display: flex;
+      align-items: baseline;
+      gap: 14px;
+      flex-wrap: wrap;
     }
-    .hero-left { display: flex; flex-direction: column; gap: 0; }
-    .hero-left .proof-meta {
-      border-top: 0;
-      padding-top: 0;
+    .proof-head .eyebrow { flex: 0 0 auto; }
+    .proof-head .cap {
+      margin: 0;
+      font-size: 13px;
+      line-height: 1.5;
+      color: var(--muted);
+      font-family: var(--font-serif, 'Newsreader', ui-serif, Georgia, serif);
+      font-style: italic;
+      font-weight: 300;
     }
-    .hero-left .proof-meta.proof-meta--lead {
-      border-top: 0;
-      padding-top: 0;
+
+    /* Compact stats row: pills of key/value pairs, no stacked list. */
+    .proof-stats {
+      margin-top: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 20px;
+      font-variant-numeric: tabular-nums;
+      line-height: 1.4;
     }
-    .hero-left .proof-meta .cap {
-      font-size: 12px; color: var(--muted);
-      max-width: 32ch; line-height: 1.55; margin: 8px 0 0 0;
+    .proof-stats .stat {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 6px;
     }
-    .hero-left .proof-meta .stats {
-      margin-top: 14px; font-size: 11px; color: var(--dim);
-      font-variant-numeric: tabular-nums; line-height: 1.7;
+    .proof-stats .k {
+      font-size: 9px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--dim);
     }
-    .hero-left .proof-meta .stats .line { display: block; }
-    .hero-left .proof-meta .stats .k { color: var(--dim); }
-    .hero-left .proof-meta .stats .v { color: var(--fg); }
+    .proof-stats .v {
+      font-size: 12px;
+      color: var(--fg);
+    }
+    .proof-stats .sep { color: var(--border); }
 
     /* Fade in on first paint for the thesis lines */
     .thesis-fade { animation: fade-in 900ms ease-out both; }
@@ -124,14 +145,17 @@ import RoseWindow from '../components/RoseWindow.astro'
       .thesis-fade, .thesis-fade .thesis-line { animation: none !important; }
     }
 
-    /* State section — the two panes */
+    /* State section — the two panes, centered under the header. */
     .state-grid {
       display: grid;
       grid-template-columns: 1.5fr 1fr;
       gap: 12px;
-      height: 480px;
-      min-height: 400px;
+      height: 420px;
+      min-height: 360px;
       min-width: 0;
+      width: 100%;
+      max-width: 1040px;
+      margin: 0 auto;
     }
     .state-grid > * { min-width: 0; }
     @media (max-width: 900px) {
@@ -210,17 +234,17 @@ import RoseWindow from '../components/RoseWindow.astro'
       </div>
     </div>
     <div class="hero-live">
-      <aside class="hero-left">
-        <div class="proof-meta proof-meta--lead">
+      <div class="proof-meta proof-meta--lead">
+        <div class="proof-head">
           <div class="eyebrow"><span class="num">01</span><span>Live state</span></div>
           <p class="cap">The validator, verifying. Masons on chain, as we see them.</p>
-          <p class="stats">
-            <span class="line"><span class="k">sn39 · finney</span></span>
-            <span class="line"><span class="k">block </span><span class="v" data-val="block">—</span></span>
-            <span class="line"><span class="k">stake </span><span class="v">131.82α</span><span class="k"> / ~14k α permit</span></span>
-          </p>
         </div>
-      </aside>
+        <div class="proof-stats">
+          <span class="stat"><span class="k">subnet</span><span class="v">sn39 · finney</span></span>
+          <span class="stat"><span class="k">block</span><span class="v" data-val="block">—</span></span>
+          <span class="stat"><span class="k">stake</span><span class="v">131.82α</span><span class="k">/ ~14k α permit</span></span>
+        </div>
+      </div>
       <div class="state-grid">
         <LogStream id="validator" label="validator" host="vps · fin" role="VERIFY" terminalIndex="T1" />
         <MinersRegister />
