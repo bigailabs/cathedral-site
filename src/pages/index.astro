@@ -35,59 +35,61 @@ import RoseWindow from '../components/RoseWindow.astro'
       .sec .wrap { grid-template-columns: 1fr; gap: 24px; }
     }
 
-    /* Thesis band — sits inside the hero alongside the live proof. */
+    /* Thesis — vertical stack at top of hero (commons first, like a pull quote). */
+    .hero-thesis {
+      max-width: min(40ch, 100%);
+      margin: 0 auto;
+      padding: 0 0 8px 0;
+      text-align: left;
+    }
     .thesis p {
       font-family: var(--font-serif, 'Newsreader', ui-serif, Georgia, serif);
       font-weight: 300;
-      line-height: 1.45;
+      line-height: 1.55;
       color: var(--muted);
       margin: 0;
-      max-width: 30ch;
-      font-size: 15px;
+      max-width: 38ch;
+      font-size: 16px;
     }
     .thesis p.thesis-lede {
-      font-size: 22px;
-      line-height: 1.35;
+      font-size: clamp(1.5rem, 2.4vw + 0.5rem, 2.125rem);
+      line-height: 1.28;
+      font-weight: 500;
       color: var(--fg);
-      margin-bottom: 18px;
+      margin-bottom: 20px;
+      max-width: 22ch;
     }
-    .thesis p + p { margin-top: 12px; }
-    .thesis p em { font-style: italic; color: var(--dim); }
-    .thesis p .accent { color: var(--accent); font-style: normal; }
+    .thesis p + p { margin-top: 16px; }
+    .thesis p em { font-style: italic; color: var(--muted); }
+    .thesis p .accent { color: var(--accent); font-style: normal; font-weight: 500; }
     @media (max-width: 900px) {
-      .thesis p.thesis-lede { font-size: 24px; }
-      .thesis p { font-size: 16px; }
+      .hero-thesis { max-width: 100%; }
+      .thesis p.thesis-lede { max-width: 100%; }
     }
 
-    /* Hero — thesis left, live proof right. Spans the full shell
-       (no 160px eyebrow gutter) so the copy doesn't feel squeezed.
-       Collapses to stacked below 1100px. */
-    .sec.hero { padding-top: 48px; }
-    .hero-grid {
+    /* Hero — thesis band first; live state + terminals sit below with air. */
+    .sec.hero { padding-top: 40px; }
+    .hero-live {
       display: grid;
       grid-template-columns: 280px 1fr;
       gap: 28px;
       align-items: start;
-    }
-    .hero-grid > * { min-width: 0; }
-    @media (max-width: 900px) {
-      .hero-grid { grid-template-columns: 1fr; gap: 40px; }
-    }
-    .hero-left { display: flex; flex-direction: column; gap: 28px; }
-    .hero-left .proof-meta {
+      margin-top: clamp(40px, 5vw, 64px);
+      padding-top: clamp(28px, 3vw, 40px);
       border-top: 1px solid var(--border-soft);
-      padding-top: 20px;
     }
-    /* When proof-meta leads the column, drop the top border — the
-       stats ARE the headline, not a continuation. The thesis below
-       gets the soft separator instead, as the quiet reflection. */
-    .hero-left .proof-meta.proof-meta--lead {
+    .hero-live > * { min-width: 0; }
+    @media (max-width: 900px) {
+      .hero-live { grid-template-columns: 1fr; gap: 32px; }
+    }
+    .hero-left { display: flex; flex-direction: column; gap: 0; }
+    .hero-left .proof-meta {
       border-top: 0;
       padding-top: 0;
     }
-    .hero-left .proof-meta.proof-meta--lead + .thesis {
-      border-top: 1px solid var(--border-soft);
-      padding-top: 24px;
+    .hero-left .proof-meta.proof-meta--lead {
+      border-top: 0;
+      padding-top: 0;
     }
     .hero-left .proof-meta .cap {
       font-size: 12px; color: var(--muted);
@@ -181,13 +183,25 @@ import RoseWindow from '../components/RoseWindow.astro'
     }
   </style>
 
-  <!-- ═══════════════ Hero — thesis + live proof ═══════════════ -->
-  <!-- No numbered eyebrow on the hero; the thesis leads, and "01 Live
-       state" rides under the copy as the left column's own eyebrow.
-       The hero spans the full shell width so the copy lands visually
-       balanced instead of pinned right of a 160px gutter. -->
+  <!-- ═══════════════ Hero — thesis (vertical) then live proof ═══════════════ -->
+  <!-- Commons copy leads full-width so it reads like the spine of the page;
+       validator stats + terminals sit below, separated by a soft rule. -->
   <section class="sec hero">
-    <div class="hero-grid">
+    <div class="hero-thesis">
+      <div class="thesis thesis-fade">
+        <p class="thesis-lede">
+          A cathedral is a <span class="accent">commons</span>.
+        </p>
+        <p>
+          <em>The masons who laid the first stones<br/>knew they wouldn't see the spire.</em>
+        </p>
+        <p>
+          We're building compute the same way.<br/>
+          In public, for whoever needs it.
+        </p>
+      </div>
+    </div>
+    <div class="hero-live">
       <aside class="hero-left">
         <div class="proof-meta proof-meta--lead">
           <div class="eyebrow"><span class="num">01</span><span>Live state</span></div>
@@ -196,18 +210,6 @@ import RoseWindow from '../components/RoseWindow.astro'
             <span class="line"><span class="k">sn39 · finney</span></span>
             <span class="line"><span class="k">block </span><span class="v" data-val="block">—</span></span>
             <span class="line"><span class="k">stake </span><span class="v">131.82α</span><span class="k"> / ~14k α permit</span></span>
-          </p>
-        </div>
-        <div class="thesis thesis-fade">
-          <p class="thesis-lede">
-            A cathedral is a <span class="accent">commons</span>.
-          </p>
-          <p>
-            <em>The masons who laid the first stones<br/>knew they wouldn't see the spire.</em>
-          </p>
-          <p>
-            We're building compute the same way.<br/>
-            In public, for whoever needs it.
           </p>
         </div>
       </aside>
