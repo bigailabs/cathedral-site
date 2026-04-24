@@ -39,43 +39,9 @@ const API_BASE = (import.meta.env.PUBLIC_POLARIS_API_BASE as string | undefined)
 // CATHEDRAL_SIGNUPS_ENABLED=true to reopen POST /api/v1/cathedral/signup.
 const AFTROTENSOR_REGISTRATIONS_OPEN = false
 
-// Build-time fetch of live mason roster.
-// We pull registered miners from the validator registry and cross-reference
-// with the machines endpoint to pull a city/country for the emotional hook.
-// Fails silently — if either endpoint is down, the line disappears rather
-// than breaking the build.
-type LiveMason = { uid: number; location: string }
-let liveMasons: LiveMason[] = []
-try {
-  const controller = new AbortController()
-  const timeout = setTimeout(() => controller.abort(), 4000)
-  const [regRes, machRes] = await Promise.all([
-    fetch('https://api.polaris.computer/api/substrate/validator/registry', { signal: controller.signal }),
-    fetch('https://api.polaris.computer/api/v1/cathedral/machines', { signal: controller.signal }),
-  ])
-  clearTimeout(timeout)
-  const reg = regRes.ok ? await regRes.json() : null
-  const mach = machRes.ok ? await machRes.json() : null
-  const miners = (reg?.data?.miners ?? []).filter((m: any) => m?.status === 'verified')
-  const machines = (mach?.machines ?? []) as Array<{ location?: string }>
-  // Prettify "Kryvyy Rih/Dnipropetrovsk/UA" → "Kryvyy Rih, UA".
-  const pretty = (loc?: string) => {
-    if (!loc) return ''
-    const parts = loc.split('/').map((s) => s.trim()).filter(Boolean)
-    if (parts.length >= 2) return `${parts[0]}, ${parts[parts.length - 1]}`
-    return parts[0] || ''
-  }
-  // Pair miners to machines by index. The registry gives the authoritative
-  // UID ordering; machines arrive in the same order in practice. If lengths
-  // differ we use whatever overlaps.
-  const pairCount = Math.min(miners.length, machines.length)
-  for (let i = 0; i < pairCount; i++) {
-    const loc = pretty(machines[i]?.location)
-    if (loc) liveMasons.push({ uid: miners[i].uid, location: loc })
-  }
-} catch (_) {
-  liveMasons = []
-}
+// Live mason roster used to be fetched here at build/request time (blocking
+// dev + static builds for up to several seconds). It now hydrates client-side
+// after first paint — see inline script after #intro.
 ---
 
 <Base title="afrotensor · cathedral">
@@ -85,6 +51,11 @@ try {
       color: var(--dim); display: flex; align-items: baseline; gap: 10px;
     }
     .eyebrow .num { font-variant-numeric: tabular-nums; color: var(--accent); }
+    .eyebrow .rule {
+      flex: 1;
+      height: 1px;
+      background: var(--border-soft);
+    }
     /* Intro label: title voice (Newsreader), not body mono. Keeps caps rhythm readable. */
     #intro .eyebrow {
       font-family: var(--font-serif, 'Newsreader', ui-serif, Georgia, serif);
@@ -96,7 +67,8 @@ try {
       font-family: var(--font-serif, 'Newsreader', ui-serif, Georgia, serif);
       font-weight: 500;
     }
-    .sec { padding: 48px 0; border-bottom: 1px solid var(--border-soft); }
+    /* Section rhythm — match home (index) */
+    .sec { padding: 72px 0; border-bottom: 1px solid var(--border-soft); }
     .sec:last-of-type { border-bottom: 0; }
     .sec .wrap { display: grid; grid-template-columns: 160px 1fr; gap: 48px; }
     /* min-width: 0 on grid children lets the 1fr track actually shrink
@@ -105,7 +77,12 @@ try {
        expands the track and causes horizontal body overflow on mobile. */
     .sec .wrap > * { min-width: 0; }
     @media (max-width: 900px) {
-      .sec { padding: 36px 0; } .sec .wrap { grid-template-columns: 1fr; gap: 20px; }
+      .sec { padding: 56px 0; }
+      .sec .wrap { grid-template-columns: 1fr; gap: 24px; }
+    }
+    /* First band: less top air under the global nav (same idea as home .sec.hero). */
+    #intro {
+      padding-top: 32px;
     }
 
     /* Prose defaults — promote body to --fg, breathe at 1.7, cap at 60ch. */
@@ -920,7 +897,7 @@ try {
   <!-- 00 — Hero -->
   <section class="sec" id="intro">
     <div class="wrap">
-      <div class="eyebrow"><span class="num">00</span><span>Afrotensor</span></div>
+      <div class="eyebrow"><span class="num">00</span><span>Afrotensor</span><span class="rule" aria-hidden="true"></span></div>
       <div class="intro-body">
         <blockquote class="afro-hero-quote" cite="https://en.wikiquote.org/wiki/Nelson_Mandela">
           <p>
@@ -937,27 +914,111 @@ try {
           on mainnet, <strong>build</strong> on top.
         </p>
 
-        {liveMasons.length >= 1 && (
-          <p class="live-masons">
-            Right now, <span class="uid">UID {liveMasons[0].uid}</span> lays stone from {liveMasons[0].location}.
-            {liveMasons[1] && (
-              <>{' '}<span class="uid">UID {liveMasons[1].uid}</span> from {liveMasons[1].location}.</>
-            )}
-            {liveMasons[2] && (
-              <>{' '}<span class="uid">UID {liveMasons[2].uid}</span> from {liveMasons[2].location}.</>
-            )}
-            {' '}<span class="you">you're next</span>.
-          </p>
-        )}
+        <p
+          class="live-masons"
+          id="afro-live-masons"
+          hidden
+          aria-live="polite"
+          data-registry-url={`${API_BASE}/api/substrate/validator/registry`}
+          data-machines-url={`${API_BASE}/api/v1/cathedral/machines`}
+        ></p>
       </div>
     </div>
   </section>
+
+  <script is:inline>
+    (function () {
+      function pretty(loc) {
+        if (!loc) return ''
+        var parts = String(loc).split('/').map(function (s) { return s.trim() }).filter(Boolean)
+        if (parts.length >= 2) return parts[0] + ', ' + parts[parts.length - 1]
+        return parts[0] || ''
+      }
+      function fillLiveMasons() {
+        var el = document.getElementById('afro-live-masons')
+        if (!el) return
+        var regUrl = el.getAttribute('data-registry-url')
+        var machUrl = el.getAttribute('data-machines-url')
+        if (!regUrl || !machUrl) return
+        var ctrl = new AbortController()
+        var t = setTimeout(function () { ctrl.abort() }, 2500)
+        Promise.all([
+          fetch(regUrl, { signal: ctrl.signal, cache: 'no-store' }),
+          fetch(machUrl, { signal: ctrl.signal, cache: 'no-store' }),
+        ])
+          .then(function (rs) {
+            clearTimeout(t)
+            return Promise.all(rs.map(function (r) { return r.ok ? r.json() : null }))
+          })
+          .then(function (payloads) {
+            var reg = payloads[0]
+            var mach = payloads[1]
+            var miners = (reg && reg.data && reg.data.miners ? reg.data.miners : []).filter(function (m) {
+              return m && m.status === 'verified'
+            })
+            var machines = mach && mach.machines ? mach.machines : []
+            var n = Math.min(miners.length, machines.length)
+            var masons = []
+            for (var i = 0; i < n; i++) {
+              var loc = pretty(machines[i] && machines[i].location)
+              if (loc) masons.push({ uid: miners[i].uid, location: loc })
+            }
+            if (masons.length < 1) return
+            var html =
+              'Right now, <span class="uid">UID ' +
+              masons[0].uid +
+              '</span> lays stone from ' +
+              masons[0].location +
+              '.'
+            if (masons[1]) {
+              html +=
+                ' <span class="uid">UID ' +
+                masons[1].uid +
+                '</span> from ' +
+                masons[1].location +
+                '.'
+            }
+            if (masons[2]) {
+              html +=
+                ' <span class="uid">UID ' +
+                masons[2].uid +
+                '</span> from ' +
+                masons[2].location +
+                '.'
+            }
+            html += ' <span class="you">you\'re next</span>.'
+            el.innerHTML = html
+            el.removeAttribute('hidden')
+          })
+          .catch(function () {
+            clearTimeout(t)
+          })
+      }
+      function schedule() {
+        if (typeof requestIdleCallback === 'function') {
+          requestIdleCallback(
+            function () {
+              fillLiveMasons()
+            },
+            { timeout: 1500 },
+          )
+        } else {
+          setTimeout(fillLiveMasons, 0)
+        }
+      }
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', schedule)
+      } else {
+        schedule()
+      }
+    })()
+  </script>
 
   <!-- 01 — Signup. Becoming a mason is a public act; the form is the door. -->
   <section class="sec" id="signup">
     <div class="wrap">
       <div>
-        <div class="eyebrow"><span class="num">01</span><span>Become a mason</span></div>
+        <div class="eyebrow"><span class="num">01</span><span>Become a mason</span><span class="rule" aria-hidden="true"></span></div>
         <p class="caption" style="margin-top: 14px;">
           A name on the ledger. Nothing more to start.
         </p>
@@ -1095,7 +1156,7 @@ try {
   <section class="sec" data-journey-locked-hide>
     <div class="wrap">
       <div>
-        <div class="eyebrow"><span class="num">02</span><span>How they meet</span></div>
+        <div class="eyebrow"><span class="num">02</span><span>How they meet</span><span class="rule" aria-hidden="true"></span></div>
         <p class="caption" style="margin-top: 14px;">
           One commission, two sides of the house.
         </p>
@@ -1134,7 +1195,7 @@ try {
   <section class="sec" id="work" data-journey-locked-hide>
     <div class="wrap">
       <div>
-        <div class="eyebrow"><span class="num">03</span><span>The work</span></div>
+        <div class="eyebrow"><span class="num">03</span><span>The work</span><span class="rule" aria-hidden="true"></span></div>
         <p class="caption" style="margin-top: 14px;">
           Eight stones. One at a time. Your progress is kept.
         </p>
@@ -1280,7 +1341,7 @@ try {
   <section class="sec" id="journal" data-journey-locked-hide>
     <div class="wrap">
       <div>
-        <div class="eyebrow"><span class="num">04</span><span>Mason's journal</span></div>
+        <div class="eyebrow"><span class="num">04</span><span>Mason's journal</span><span class="rule" aria-hidden="true"></span></div>
         <p class="caption" style="margin-top: 14px;">
           Notes from the yard, kept by stone. What got you unstuck.
         </p>
@@ -1325,7 +1386,7 @@ try {
   <section class="sec" data-journey-locked-hide>
     <div class="wrap">
       <div>
-        <div class="eyebrow"><span class="num">05</span><span>The yard &amp; the guild</span></div>
+        <div class="eyebrow"><span class="num">05</span><span>The yard &amp; the guild</span><span class="rule" aria-hidden="true"></span></div>
         <p class="caption" style="margin-top: 14px;">
           Two buildings. One cathedral.
         </p>
@@ -1371,7 +1432,7 @@ try {
   <section class="sec" data-journey-locked-hide>
     <div class="wrap">
       <div>
-        <div class="eyebrow"><span class="num">06</span><span>Support &amp; community</span></div>
+        <div class="eyebrow"><span class="num">06</span><span>Support &amp; community</span><span class="rule" aria-hidden="true"></span></div>
       </div>
       <div>
         <p class="prose">
@@ -1392,7 +1453,7 @@ try {
   <section class="sec" data-journey-locked-hide>
     <div class="wrap">
       <div>
-        <div class="eyebrow"><span class="num">07</span><span>Image credits</span></div>
+        <div class="eyebrow"><span class="num">07</span><span>Image credits</span><span class="rule" aria-hidden="true"></span></div>
         <p class="caption" style="margin-top: 14px;">
           Public-domain and Creative-Commons photographs. Links out to each source.
         </p>
