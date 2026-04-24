@@ -145,22 +145,38 @@ import RoseWindow from '../components/RoseWindow.astro'
       .thesis-fade, .thesis-fade .thesis-line { animation: none !important; }
     }
 
-    /* State section — the two panes, centered under the header. */
+    /* State section — the two panes, full width under the header so edges line up. */
     .state-grid {
       display: grid;
       grid-template-columns: 1.5fr 1fr;
       gap: 12px;
-      height: 420px;
-      min-height: 360px;
+      height: 340px;
+      min-height: 280px;
       min-width: 0;
       width: 100%;
-      max-width: 1040px;
-      margin: 0 auto;
     }
     .state-grid > * { min-width: 0; }
     @media (max-width: 900px) {
       .state-grid { grid-template-columns: 1fr; height: auto; }
-      .state-grid > * { min-height: 320px; }
+      .state-grid > * { min-height: 260px; }
+    }
+    /* Center the "connecting…" / "loading…" empty states so panels don't look broken. */
+    .state-grid [data-log-body]:has(> [data-empty]:only-child),
+    .state-grid [data-miners-list]:has(> .miners-placeholder:only-child),
+    .state-grid [data-miners-list]:has(> .miners-error:only-child) {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .state-grid [data-empty],
+    .state-grid .miners-placeholder,
+    .state-grid .miners-error {
+      font-family: var(--font-serif, 'Newsreader', ui-serif, Georgia, serif);
+      font-style: italic;
+      font-weight: 300;
+      font-size: 13px;
+      letter-spacing: 0.01em;
+      opacity: 0.7;
     }
 
     /* Honest numbers register. Overflow wrapper lets long value columns
