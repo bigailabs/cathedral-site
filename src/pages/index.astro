@@ -145,10 +145,12 @@ import RoseWindow from '../components/RoseWindow.astro'
       .thesis-fade, .thesis-fade .thesis-line { animation: none !important; }
     }
 
-    /* State section — the two panes, full width under the header so edges line up. */
+    /* State section — the two panes, full width under the header so edges line up.
+       Miners column is anchored at a tight fixed range so the validator (left)
+       absorbs any width reduction, not the already-tight miners register. */
     .state-grid {
       display: grid;
-      grid-template-columns: 1.5fr 1fr;
+      grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
       gap: 12px;
       height: 340px;
       min-height: 280px;

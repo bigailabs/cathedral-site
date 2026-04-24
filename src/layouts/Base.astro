@@ -12,12 +12,16 @@ const { title = 'cathedral', fullHeight = false } = Astro.props
 const shellClass = fullHeight
   ? 'mx-auto max-w-[1180px] h-screen flex flex-col px-5 py-4'
   : 'mx-auto max-w-[1180px] min-h-screen flex flex-col px-5 py-5'
+/* Top nav keeps the full shell width (breathing, airy). The body of the
+   page (everything under the nav) sits in a narrower column — roughly
+   Word "Normal" margins (≈1in each side) — so content doesn't feel like
+   it's running off the page. */
 const mainClass = fullHeight
-  ? 'flex-1 min-h-0 flex flex-col'
-  : 'flex-1 flex flex-col'
+  ? 'flex-1 min-h-0 flex flex-col w-full max-w-[960px] mx-auto'
+  : 'flex-1 flex flex-col w-full max-w-[960px] mx-auto'
 const footerClass = fullHeight
-  ? 'mt-3 pt-2 text-[10px] text-dim flex items-center gap-3 shrink-0'
-  : 'mt-8 pt-3 text-[10px] text-dim flex items-center gap-3'
+  ? 'mt-3 pt-2 text-[10px] text-dim flex items-center gap-3 shrink-0 w-full max-w-[960px] mx-auto'
+  : 'mt-8 pt-3 text-[10px] text-dim flex items-center gap-3 w-full max-w-[960px] mx-auto'
 ---
 
 <!doctype html>
