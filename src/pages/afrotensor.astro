@@ -609,10 +609,46 @@ const AFTROTENSOR_REGISTRATIONS_OPEN = false
       max-width: 36ch;
     }
     #intro .intro-body .prose,
-    #intro .intro-body .live-masons {
+    #intro .intro-body .live-masons,
+    #intro .intro-body .afro-mission {
       text-align: left;
       width: 100%;
-      max-width: min(60ch, 100%);
+      max-width: min(62ch, 100%);
+    }
+
+    /* Mission — thesis from the call: distribution vs infrastructure. */
+    .afro-mission {
+      margin-top: clamp(24px, 4vw, 36px);
+      padding: clamp(20px, 3vw, 28px) clamp(18px, 3vw, 28px);
+      background: var(--surface);
+      border: 1px solid var(--border-soft);
+      border-left: 2px solid var(--accent);
+      border-radius: 0 10px 10px 0;
+    }
+    .afro-mission__label {
+      margin: 0 0 14px 0;
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 9px;
+      font-weight: 400;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--dim);
+    }
+    .afro-mission p {
+      margin: 0;
+      font-family: var(--font-serif, 'Newsreader', ui-serif, Georgia, serif);
+      font-size: clamp(1rem, 0.55vw + 0.9rem, 1.125rem);
+      font-weight: 300;
+      line-height: 1.62;
+      color: var(--fg);
+    }
+    .afro-mission p + p {
+      margin-top: 12px;
+    }
+    .afro-mission .brand {
+      color: var(--accent);
+      font-weight: 400;
+      font-style: normal;
     }
 
     /* A thin banner image for pages that can't afford a full photo. */
@@ -906,6 +942,20 @@ const AFTROTENSOR_REGISTRATIONS_OPEN = false
           <cite>Nelson Mandela</cite>
         </blockquote>
         <p class="lede">Lay a stone.<br/><em>Become a mason of the cathedral.</em></p>
+
+        <div class="afro-mission" aria-labelledby="afro-mission-label">
+          <div id="afro-mission-label" class="afro-mission__label">Mission</div>
+          <p>Intelligence is evenly distributed, infrastructure is not.</p>
+          <p>
+            <span class="brand">Bittensor</span> pays for intelligence.
+            <span class="brand">Polaris</span> provides infrastructure.
+          </p>
+          <p>
+            <span class="brand">AfroTensor</span> is the bridge that connects people who can think, code, and learn
+            to an on-chain economy that will pay them for it, without requiring them to already have money, hardware,
+            or a CS degree from a Western university.
+          </p>
+        </div>
 
         <p class="prose" style="margin-top: 20px;">
           An invitation to builders, students, and cooperatives across Africa to pick up
