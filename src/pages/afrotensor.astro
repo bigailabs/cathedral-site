@@ -80,19 +80,18 @@ const AFTROTENSOR_REGISTRATIONS_OPEN = false
       .sec { padding: 56px 0; }
       .sec .wrap { grid-template-columns: 1fr; gap: 24px; }
     }
-    /* Hero band — home-like: breathing room under the nav, single-column grid. */
+    /* Hero band — home-like: breathing room under the nav, single column edge-to-edge. */
     #intro.afro-hero-sec {
-      padding-top: clamp(18px, 2.5vw, 28px);
-      padding-bottom: 48px;
+      padding-top: clamp(56px, 9vw, 112px);
+      padding-bottom: clamp(24px, 3vw, 36px);
       margin-top: 0;
+      border-bottom: 0;
     }
-    /* Override the default .sec .wrap two-column grid so the hero fills the
-       narrow main column ("inch" margins) edge-to-edge. */
-    #intro .wrap {
+    /* No `.wrap` on this section — we want the content to fill the main column
+       directly without the default 160/1fr sidebar grid. */
+    #intro .afro-intro-wrap {
       display: block;
-      max-width: 100%;
-      grid-template-columns: 1fr;
-      gap: 0;
+      width: 100%;
     }
 
     /* Prose defaults — promote body to --fg, breathe at 1.7, cap at 60ch. */
@@ -564,37 +563,41 @@ const AFTROTENSOR_REGISTRATIONS_OPEN = false
       width: 100%;
       margin-bottom: 2px;
     }
-    /* One-line lineprinter strip: mono, paper band, stretches to container edges.
-       Font scales with container width so the line never has to scroll on
-       reasonable desktop widths. */
+    /* Lineprinter strip — one centered line across the main column.
+       Uses a container query so the font shrinks to fit whatever width
+       the strip actually renders at, instead of relying on viewport width. */
     .afro-hero-quote {
       position: relative;
       z-index: 0;
-      align-self: stretch;
+      display: block;
       width: 100%;
       max-width: 100%;
       margin: 0;
-      padding: 7px 10px;
+      padding: 8px 14px;
       font-family: 'JetBrains Mono', ui-monospace, monospace;
-      /* Shrink font slightly on narrower widths so it still fits in one line;
-         on main we have ~920px inside the main column which comfortably holds
-         the quote + attribution at ~11px mono. */
-      font-size: clamp(0.58rem, 0.9vw, 0.78rem);
       font-weight: 400;
-      line-height: 1.35;
+      line-height: 1.4;
       letter-spacing: 0.02em;
       color: var(--fg);
       background: var(--surface-2);
       border: 1px solid var(--border);
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: thin;
+      overflow: hidden;
+      container-type: inline-size;
     }
     .afro-hero-quote__line {
       margin: 0;
       white-space: nowrap;
       text-align: center;
+      /* 920px container @ ~10.5px → full line ≈ 900px. Clamp so the text
+         never overflows its strip, even on narrower windows. */
+      font-size: clamp(0.55rem, 1.15cqw, 0.72rem);
+    }
+    @container (max-width: 620px) {
+      .afro-hero-quote__line {
+        white-space: normal;
+        font-size: clamp(0.62rem, 2.2cqw, 0.78rem);
+      }
     }
     .afro-hero-quote cite {
       display: inline;
@@ -613,7 +616,7 @@ const AFTROTENSOR_REGISTRATIONS_OPEN = false
       color: var(--border);
     }
     #intro .intro-body .lede {
-      margin-top: clamp(80px, 16vh, 180px);
+      margin-top: clamp(24px, 3.3vw, 38px);
       margin-left: auto;
       margin-right: auto;
       text-align: center;
@@ -634,12 +637,12 @@ const AFTROTENSOR_REGISTRATIONS_OPEN = false
       margin-top: clamp(14px, 2.5vw, 22px);
     }
     #intro .intro-body .afro-mission {
-      align-self: center;
+      align-self: stretch;
       width: 100%;
-      max-width: min(52ch, 100%);
+      max-width: 100%;
       text-align: center;
-      margin-top: clamp(28px, 4.5vw, 44px);
-      padding: clamp(20px, 3vw, 28px) clamp(18px, 3vw, 28px);
+      margin-top: clamp(24px, 3.3vw, 38px);
+      padding: clamp(18px, 2.6vw, 26px) clamp(20px, 3vw, 32px);
       border: 1px solid var(--border-soft);
       border-radius: 6px;
       background: var(--surface);
@@ -679,6 +682,17 @@ const AFTROTENSOR_REGISTRATIONS_OPEN = false
     }
     .afro-mission-line .brand {
       color: var(--accent);
+      font-weight: 500;
+      font-style: normal;
+    }
+    .afro-mission-line--break {
+      margin-top: clamp(14px, 2vw, 22px);
+    }
+    .afro-mission-line--tail {
+      margin-bottom: clamp(6px, 1vw, 10px);
+    }
+    .afro-mission-em {
+      color: var(--fg);
       font-weight: 500;
       font-style: normal;
     }
@@ -782,27 +796,30 @@ const AFTROTENSOR_REGISTRATIONS_OPEN = false
     wouldn't match them.
   -->
   <style is:global>
+    /* Locked-journey landing — single-viewport layout:
+       - Quote sits ~1 inch below the top nav, stretched across the main column
+       - Large gap between quote and "Lay a stone" lede
+       - Mission + signup reveal compact enough to avoid scrolling */
     html[data-afro-journey="locked"] .sec {
-      padding-top: 22px;
-      padding-bottom: 22px;
+      padding-top: 0;
+      padding-bottom: 0;
     }
-    html[data-afro-journey="locked"] #intro .wrap.afro-intro-wrap {
-      grid-template-columns: 1fr;
-      gap: 8px;
-      max-width: 720px;
-      margin: 0 auto;
+    html[data-afro-journey="locked"] #intro .afro-intro-wrap {
+      display: block;
+      width: 100%;
+      max-width: 100%;
+      margin: 0;
     }
     html[data-afro-journey="locked"] #intro.afro-hero-sec {
       border-bottom: 0;
-      padding-bottom: 6px;
-      padding-top: clamp(12px, 2vw, 24px);
-      margin-top: clamp(-28px, -4vw, -12px);
+      padding-top: clamp(24px, 3.3vw, 38px);
+      padding-bottom: 0;
+      margin-top: 0;
     }
     html[data-afro-journey="locked"] #intro .eyebrow {
       display: none;
     }
     html[data-afro-journey="locked"] #intro .afro-hero-quote {
-      font-size: clamp(0.58rem, 0.2vw + 0.54rem, 0.7rem);
       font-weight: 400;
       color: var(--fg);
       max-width: 100%;
@@ -814,19 +831,22 @@ const AFTROTENSOR_REGISTRATIONS_OPEN = false
     }
     html[data-afro-journey="locked"] #intro .lede {
       text-align: center;
-      margin: 0 auto;
-      font-size: 34px;
-      line-height: 1.28;
+      margin-left: auto;
+      margin-right: auto;
+      margin-top: clamp(24px, 3.3vw, 38px);
+      font-size: clamp(1.5rem, 2vw + 0.6rem, 2rem);
+      line-height: 1.25;
     }
     html[data-afro-journey="locked"] #signup {
-      padding-top: 0;
-      padding-bottom: 26px;
+      padding-top: clamp(24px, 3.3vw, 38px);
+      padding-bottom: clamp(20px, 3vw, 32px);
     }
     html[data-afro-journey="locked"] #signup .wrap {
+      display: block;
       grid-template-columns: 1fr;
-      gap: 4px;
-      max-width: 720px;
-      margin: 0 auto;
+      gap: 0;
+      max-width: 100%;
+      margin: 0;
     }
     html[data-afro-journey="locked"] #signup .wrap > div:first-child {
       display: none;
@@ -956,7 +976,7 @@ const AFTROTENSOR_REGISTRATIONS_OPEN = false
 
   <!-- 00 — Hero (single column like home thesis band; quote rides up under the nav chrome) -->
   <section class="sec afro-hero-sec" id="intro">
-    <div class="wrap afro-intro-wrap">
+    <div class="afro-intro-wrap">
       <div class="intro-body">
         <div class="eyebrow afro-hero-eyebrow"><span class="num">00</span><span>Afrotensor</span><span class="rule" aria-hidden="true"></span></div>
         <blockquote class="afro-hero-quote" cite="https://en.wikiquote.org/wiki/Nelson_Mandela">
@@ -982,10 +1002,14 @@ const AFTROTENSOR_REGISTRATIONS_OPEN = false
               <span class="accent">Cathedral</span> pays for intelligence.
               <span class="brand">Polaris</span> provides infrastructure.
             </p>
+            <p class="afro-mission-line afro-mission-line--break">
+              <span class="brand">AfroTensor</span> is the bridge.
+            </p>
             <p class="afro-mission-line">
-              <span class="brand">AfroTensor</span> is the bridge that connects people who can think, code, and learn
-              to an on-chain economy that will pay them for it, without requiring them to already have money, hardware,
-              or a CS degree from a Western university.
+              It connects people who can <strong class="afro-mission-em">think, code, and learn</strong> to an on-chain economy that will pay them for it.
+            </p>
+            <p class="afro-mission-line afro-mission-line--tail">
+              No money, no hardware, no CS degree required.
             </p>
           </div>
         </div>
@@ -1110,9 +1134,6 @@ const AFTROTENSOR_REGISTRATIONS_OPEN = false
         >
           <div data-waitlist-only data-waitlist-collapsed="true">
             <p class="lede-form">This cohort is full.<br/><em>New slots opening soon.</em></p>
-            <p class="intro">
-              Leave your email. We will tell you when the door opens again.
-            </p>
             <div class="reveal-wrap" data-waitlist-reveal-wrap>
               <button type="button" class="reveal-signup" data-waitlist-reveal>Join the waitlist</button>
             </div>
