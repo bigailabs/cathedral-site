@@ -1062,9 +1062,9 @@ import RoseWindow from '../components/RoseWindow.astro'
       title: 'Our validator (UID 123) on SN39.',
     }
     if (m.uid === OUR_MINER_UID) return {
-      text: 'ours · orphaned',
+      text: 'ours · orphaned · pending re-host',
       cls: 'text-warn border-warn',
-      title: 'Our old mason (UID 115). Registered on chain but the GPU node is gone; pending re-host.',
+      title: 'Our first mason (UID 115). On-chain slot still registered; GPU node pending re-host — Act 2 consumer-hardware track.',
     }
     if (m.status === 'Active') return {
       text: 'declared',
