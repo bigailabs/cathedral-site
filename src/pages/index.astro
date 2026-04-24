@@ -35,22 +35,22 @@ import RoseWindow from '../components/RoseWindow.astro'
       .sec .wrap { grid-template-columns: 1fr; gap: 24px; }
     }
 
-    /* Thesis — three centered lines, stacked (hero only). */
+    /* Thesis — three single lines, left-aligned, full measure (hero only). */
     .hero-thesis {
       width: 100%;
       margin: 0;
       padding: 0 0 8px 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
     }
     .thesis.thesis-stack {
       display: flex;
       flex-direction: column;
-      align-items: center;
-      text-align: center;
-      gap: clamp(12px, 2vw, 20px);
-      max-width: min(44ch, 100%);
+      align-items: flex-start;
+      text-align: left;
+      gap: clamp(10px, 1.5vw, 16px);
+      width: max-content;
+      max-width: none;
     }
     .thesis-stack .thesis-line {
       font-family: var(--font-serif, 'Newsreader', ui-serif, Georgia, serif);
@@ -59,14 +59,14 @@ import RoseWindow from '../components/RoseWindow.astro'
       color: var(--muted);
       margin: 0;
       font-size: 16px;
-      max-width: 38ch;
+      white-space: nowrap;
     }
     .thesis-stack .thesis-line--lede {
       font-size: clamp(1.45rem, 2.2vw + 0.45rem, 1.95rem);
       font-weight: 500;
       color: var(--fg);
       line-height: 1.25;
-      max-width: 22ch;
+      white-space: nowrap;
     }
     .thesis-stack .thesis-line em { font-style: italic; color: var(--muted); }
     .thesis-stack .thesis-line .accent {
