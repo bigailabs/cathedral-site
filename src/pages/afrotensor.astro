@@ -286,41 +286,6 @@ const AFTROTENSOR_REGISTRATIONS_OPEN = false
        All colours via tokens so both themes read right.
        ----------------------------------------------------------- */
     .signup { max-width: 520px; margin: 0 auto; }
-    /* Polaris entry when the journey is locked (journal sign-in is hidden). */
-    .signup .signup-login-aux {
-      display: none;
-      margin: 0 0 16px 0;
-      font-size: 10px;
-      letter-spacing: 0.06em;
-      color: var(--dim);
-      text-align: center;
-      line-height: 1.5;
-    }
-    html[data-afro-journey="locked"] .signup[data-already-signed="false"] .signup-login-aux {
-      display: block;
-    }
-    .signup:has(.waitlist-thanks.show) .signup-login-aux,
-    .signup:has(.thanks.show) .signup-login-aux {
-      display: none;
-    }
-    .signup .signup-login-aux__btn {
-      background: none;
-      border: 0;
-      padding: 0;
-      cursor: pointer;
-      color: var(--accent);
-      font: inherit;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      text-decoration: underline;
-      text-underline-offset: 2px;
-      text-decoration-color: var(--border);
-    }
-    .signup .signup-login-aux__btn:hover {
-      color: var(--fg);
-      text-decoration-color: var(--accent);
-    }
-    .signup .signup-login-aux__hint { color: var(--dim); }
     .signup .lede-form {
       font-family: var(--font-serif, 'Newsreader', serif);
       font-size: 20px; font-weight: 300; line-height: 1.35;
@@ -1137,10 +1102,6 @@ const AFTROTENSOR_REGISTRATIONS_OPEN = false
           data-api-base={API_BASE}
           data-registrations={AFTROTENSOR_REGISTRATIONS_OPEN ? 'open' : 'closed'}
         >
-          <p class="signup-login-aux" id="afro-login-aux">
-            <button type="button" class="signup-login-aux__btn" id="afro-open-login">Sign in with Polaris</button>
-            <span class="signup-login-aux__hint"> if you already have an account.</span>
-          </p>
           <div data-waitlist-only>
             <p class="lede-form">This cohort is full.<br/><em>New slots opening soon.</em></p>
             <p class="intro">
@@ -2310,8 +2271,6 @@ const AFTROTENSOR_REGISTRATIONS_OPEN = false
       setAuthLoggedOut()
     }
 
-    const afroOpenLogin = $('#afro-open-login')
-    if (afroOpenLogin) afroOpenLogin.addEventListener('click', openLoginModal)
     const afroSignOut = $('#afro-sign-out')
     if (afroSignOut) afroSignOut.addEventListener('click', () => { void signOut() })
 
