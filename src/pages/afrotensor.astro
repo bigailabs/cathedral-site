@@ -290,8 +290,12 @@ const AFTROTENSOR_REGISTRATIONS_OPEN = false
     .signup { max-width: 520px; margin: 0 auto; }
     .signup .lede-form {
       font-family: var(--font-serif, 'Newsreader', serif);
-      font-size: 20px; font-weight: 300; line-height: 1.35;
-      color: var(--fg); margin: 0 0 6px 0;
+      font-size: clamp(1.05rem, 3.8vw + 0.45rem, 1.25rem);
+      font-weight: 300;
+      line-height: 1.35;
+      color: var(--fg);
+      margin: 0 0 6px 0;
+      text-wrap: balance;
     }
     .signup .lede-form em { color: var(--muted); font-style: italic; }
     .signup .intro {
@@ -305,8 +309,11 @@ const AFTROTENSOR_REGISTRATIONS_OPEN = false
       display: flex; justify-content: center; margin: 8px 0 22px 0;
     }
     .signup .reveal-signup {
-      display: inline-block;
-      padding: 12px 20px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      padding: 10px 20px;
       font-family: 'JetBrains Mono', ui-monospace, monospace;
       font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
       background: transparent; color: var(--accent);
@@ -314,6 +321,7 @@ const AFTROTENSOR_REGISTRATIONS_OPEN = false
       border-radius: 2px;
       cursor: pointer;
       transition: background 120ms ease, color 120ms ease;
+      -webkit-tap-highlight-color: transparent;
     }
     .signup .reveal-signup:hover {
       background: var(--accent-dim); color: var(--fg);
@@ -403,9 +411,14 @@ const AFTROTENSOR_REGISTRATIONS_OPEN = false
     }
 
     .signup button[type="submit"] {
-      display: block;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      width: 100%;
+      max-width: 320px;
       margin: 18px auto 0;
-      padding: 12px 20px;
+      padding: 10px 20px;
       font-family: 'JetBrains Mono', ui-monospace, monospace;
       font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase;
       color: var(--fg); background: var(--surface);
@@ -413,6 +426,7 @@ const AFTROTENSOR_REGISTRATIONS_OPEN = false
       border-radius: 2px;
       cursor: pointer;
       transition: background 120ms ease, color 120ms ease;
+      -webkit-tap-highlight-color: transparent;
     }
     .signup button[type="submit"]:hover:not(:disabled) {
       background: var(--accent-dim); color: var(--fg);
@@ -679,6 +693,7 @@ const AFTROTENSOR_REGISTRATIONS_OPEN = false
       line-height: 1.42;
       color: var(--muted);
       max-width: 100%;
+      overflow-wrap: anywhere;
     }
     .afro-mission-line .brand {
       color: var(--accent);
@@ -695,6 +710,33 @@ const AFTROTENSOR_REGISTRATIONS_OPEN = false
       color: var(--fg);
       font-weight: 500;
       font-style: normal;
+    }
+
+    @media (max-width: 640px) {
+      #intro.afro-hero-sec {
+        padding-top: clamp(28px, 7vw, 52px);
+        padding-bottom: clamp(20px, 4vw, 32px);
+      }
+      html[data-afro-journey="locked"] #intro.afro-hero-sec {
+        padding-top: clamp(18px, 5vw, 30px);
+      }
+      html[data-afro-journey="locked"] #intro .lede {
+        font-size: clamp(1.25rem, 5vw + 0.4rem, 1.65rem);
+      }
+      #intro .intro-body .afro-mission {
+        padding: 14px 12px;
+        margin-top: clamp(18px, 4vw, 28px);
+      }
+      .afro-hero-quote {
+        padding: 8px 10px;
+      }
+      html[data-afro-journey="locked"] #signup {
+        padding-top: clamp(18px, 4vw, 28px);
+      }
+      .signup input[type="text"],
+      .signup input[type="email"] {
+        min-height: 48px;
+      }
     }
 
     /* A thin banner image for pages that can't afford a full photo. */

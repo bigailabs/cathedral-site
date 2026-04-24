@@ -162,6 +162,13 @@ import RoseWindow from '../components/RoseWindow.astro'
       .state-grid { grid-template-columns: 1fr; height: auto; }
       .state-grid > * { min-height: 260px; }
     }
+    @media (max-width: 640px) {
+      .sec.hero { padding-top: 24px; padding-bottom: 40px; }
+      .hero-live { margin-top: 20px; padding-top: 16px; gap: 12px; }
+      .state-grid > * { min-height: 220px; }
+      .proof-head { gap: 8px 12px; }
+      .proof-stats { gap: 4px 14px; }
+    }
     /* Empty states: let the body flex-column and float the placeholder to center
        via margin:auto. When real rows land, JS removes the placeholder and the
        log lines stack top-down as usual. */

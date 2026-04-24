@@ -10,8 +10,8 @@ interface Props {
 const { title = 'cathedral', fullHeight = false } = Astro.props
 
 const shellClass = fullHeight
-  ? 'mx-auto max-w-[1180px] h-screen flex flex-col px-5 py-4'
-  : 'mx-auto max-w-[1180px] min-h-screen flex flex-col px-5 py-5'
+  ? 'mx-auto max-w-[1180px] h-screen flex flex-col px-4 py-4 sm:px-5'
+  : 'mx-auto max-w-[1180px] min-h-screen flex flex-col px-4 py-4 sm:px-5 sm:py-5'
 /* Top nav keeps the full shell width (breathing, airy). The body of the
    page (everything under the nav) sits in a narrower column — roughly
    Word "Normal" margins (≈1in each side) — so content doesn't feel like
@@ -20,8 +20,8 @@ const mainClass = fullHeight
   ? 'flex-1 min-h-0 flex flex-col w-full max-w-[960px] mx-auto'
   : 'flex-1 flex flex-col w-full max-w-[960px] mx-auto'
 const footerClass = fullHeight
-  ? 'mt-3 pt-2 text-[10px] text-dim flex items-center gap-3 shrink-0 w-full max-w-[960px] mx-auto'
-  : 'mt-8 pt-3 text-[10px] text-dim flex items-center gap-3 w-full max-w-[960px] mx-auto'
+  ? 'mt-3 pt-2 text-[10px] text-dim flex flex-wrap items-center gap-x-3 gap-y-2 shrink-0 w-full max-w-[960px] mx-auto'
+  : 'mt-6 pt-3 text-[10px] text-dim flex flex-wrap items-center gap-x-3 gap-y-2 sm:mt-8 w-full max-w-[960px] mx-auto'
 ---
 
 <!doctype html>
@@ -49,7 +49,7 @@ const footerClass = fullHeight
   </head>
   <body class={`bg-bg text-fg font-mono text-[13px] leading-[1.6] selection:bg-accent/30 antialiased ${fullHeight ? 'overflow-hidden' : ''}`}>
     <div class={shellClass}>
-      <header class="relative z-20 flex flex-wrap items-center gap-x-6 gap-y-2 bg-bg text-[11px] text-muted mb-4 shrink-0">
+      <header class="relative z-20 flex flex-wrap items-center gap-x-3 gap-y-2 bg-bg text-[10px] text-muted mb-3 shrink-0 sm:mb-4 sm:gap-x-6 sm:text-[11px]">
         <a href="/" class="flex items-center gap-2 text-fg hover:text-accent transition-colors tracking-[0.1em] uppercase">
           <RoseWindow size={14} class="text-accent opacity-80" />
           <span>cathedral</span>
@@ -60,7 +60,7 @@ const footerClass = fullHeight
         <a href="/roadmap" class="hover:text-fg transition-colors">roadmap</a>
         <a href="/changelog" class="hover:text-fg transition-colors">changelog</a>
         <a href="https://github.com/bigailabs/cathedral" class="hover:text-fg transition-colors">github</a>
-        <span class="flex-1"></span>
+        <span class="hidden min-[560px]:block flex-1" aria-hidden="true"></span>
         <button
           type="button"
           data-theme-toggle
@@ -82,8 +82,8 @@ const footerClass = fullHeight
         <a href="/origins" class="hover:text-muted transition-colors">origins</a>
         <a href="https://github.com/bigailabs/cathedral/blob/main/docs/policy.md" class="hover:text-muted transition-colors">policy</a>
         <a href="https://polaris.computer" class="hover:text-muted transition-colors">rent compute ↗</a>
-        <span class="flex-1"></span>
-        <span>operated by <a href="https://polaris.computer" class="hover:text-muted transition-colors underline decoration-dim underline-offset-2 decoration-[0.5px]">polaris</a></span>
+        <span class="hidden min-[560px]:block flex-1" aria-hidden="true"></span>
+        <span class="w-full min-[560px]:w-auto">operated by <a href="https://polaris.computer" class="hover:text-muted transition-colors underline decoration-dim underline-offset-2 decoration-[0.5px]">polaris</a></span>
       </footer>
     </div>
     <script is:inline>
