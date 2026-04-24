@@ -531,27 +531,48 @@ try {
        into a narrow strip. */
     .plate.wide img { aspect-ratio: 12 / 7; object-fit: cover; }
 
-    /* Mandela hero — pull quote sits under the plate, same measure as prose. */
+    /* Intro — Mandela quote is the visual anchor (no hero photo). */
+    #intro .intro-body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
     .afro-hero-quote {
-      max-width: min(60ch, 100%);
-      margin: 0 0 28px 0;
-      padding: 0 0 0 16px;
-      border-left: 2px solid var(--border-soft);
+      margin: 0 0 8px 0;
+      padding: 0;
+      border: 0;
+      max-width: min(38ch, 94vw);
       font-family: var(--font-serif, 'Newsreader', ui-serif, Georgia, serif);
-      font-size: clamp(1rem, 1.15vw + 0.85rem, 1.125rem);
-      font-weight: 300;
-      line-height: 1.55;
-      color: var(--muted);
+      font-size: clamp(1.35rem, 3.2vw + 0.6rem, 2.35rem);
+      font-weight: 700;
+      line-height: 1.25;
+      color: var(--fg);
     }
     .afro-hero-quote p { margin: 0; }
     .afro-hero-quote cite {
       display: block;
-      margin-top: 12px;
+      margin-top: 18px;
       font-family: inherit;
       font-size: 11px;
+      font-weight: 400;
       font-style: normal;
-      letter-spacing: 0.06em;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
       color: var(--dim);
+    }
+    #intro .intro-body .lede {
+      margin-top: 28px;
+      margin-left: auto;
+      margin-right: auto;
+      text-align: center;
+      max-width: 36ch;
+    }
+    #intro .intro-body .prose,
+    #intro .intro-body .live-masons {
+      text-align: left;
+      width: 100%;
+      max-width: min(60ch, 100%);
     }
 
     /* A thin banner image for pages that can't afford a full photo. */
@@ -676,24 +697,9 @@ try {
     html[data-afro-journey="locked"] #intro .eyebrow {
       display: none;
     }
-    html[data-afro-journey="locked"] #intro .plate.wide {
-      margin: 0 auto 10px auto;
-      max-width: 640px;
-    }
-    html[data-afro-journey="locked"] #intro .plate.wide img {
-      max-height: 280px;
-      object-fit: cover;
-      filter: saturate(0.82) contrast(0.94) brightness(0.86);
-    }
-    html[data-afro-journey="locked"] #intro .plate.wide .cap {
-      text-align: center;
-      color: var(--muted);
-    }
     html[data-afro-journey="locked"] #intro .afro-hero-quote {
-      margin-left: auto;
-      margin-right: auto;
-      text-align: left;
-      border-left-color: var(--border);
+      font-size: clamp(1.45rem, 4vw + 0.5rem, 2.5rem);
+      max-width: min(40ch, 94vw);
     }
     html[data-afro-journey="locked"] #intro .prose,
     html[data-afro-journey="locked"] #intro .live-masons {
@@ -911,19 +917,7 @@ try {
           <span>sign in with Polaris</span>
         </div>
       </div>
-      <div>
-        <figure class="plate wide">
-          <img
-            id="afro-hero-image"
-            src="/images/nelson-mandela-1994.jpg"
-            alt="Nelson Mandela, Washington, D.C., October 1994"
-            width="1500" height="1940"
-            loading="eager" decoding="async"
-          />
-          <figcaption class="cap" id="afro-hero-caption">
-            Nelson Mandela, 1994 · photo: Kingkongphoto &amp; celebrity-photos.com · CC BY-SA 2.0 · Wikimedia Commons
-          </figcaption>
-        </figure>
+      <div class="intro-body">
         <blockquote class="afro-hero-quote" cite="https://en.wikiquote.org/wiki/Nelson_Mandela">
           <p>
             There is no passion to be found playing small—in settling for a life that is less than the one you are capable of living.
